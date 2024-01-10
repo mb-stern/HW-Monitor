@@ -1,0 +1,21 @@
+{
+    "id": "{67F415E2-C650-3C07-EEFD-CA67F8313B88}",
+    "name": "HW Monitor",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "HW",
+    "url": ""
+	"fields": [
+        {
+            "name": "IPAddress",
+            "displayName": "IP-Adresse",
+            "fieldType": 3, // Textfeld
+            "position": 1
+        },
+        // ... andere Einstellungen ...
+    ]
+}
