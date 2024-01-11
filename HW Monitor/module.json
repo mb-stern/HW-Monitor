@@ -9,12 +9,12 @@
     "implemented": [],
     "prefix": "HW",
     "url": "",
-	"fields": [
+    "fields": [
         {
             "name": "IPAddress",
             "displayName": "IP-Adresse",
             "fieldType": 3,
             "position": 1
-        },
+        }
     ]
 }
