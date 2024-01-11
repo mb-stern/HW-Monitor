@@ -2,13 +2,13 @@
     "id": "{67F415E2-C650-3C07-EEFD-CA67F8313B88}",
     "name": "HW-Monitor",
     "type": 3,
-    "vendor": "",
+    "vendor": "HW-Monitor",
     "aliases": [],
     "parentRequirements": [],
     "childRequirements": [],
     "implemented": [],
     "prefix": "HW",
-    "url": "",
+    "url": "https://github.com/mb-stern/HW-Monitor",
     "fields": [
         {
             "name": "IPAddress",
