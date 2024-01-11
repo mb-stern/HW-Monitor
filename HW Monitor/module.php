@@ -23,7 +23,7 @@ class HWMonitor extends IPSModule
     public function UpdateJsonData()
     {
         // Verwenden Sie die eingegebene IP-Adresse
-        $value = $this->ReadPropertyString("HW-IP");
+        $value = $this->ReadPropertyString("HWM-IP");
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
