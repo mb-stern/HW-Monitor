@@ -40,7 +40,6 @@ class HWMonitor extends IPSModule
         // Verwenden Sie die eingegebene IP-Adresse
         $value = $this->ReadPropertyString("IPAddress");
 
-
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
             'CPU-Temp' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 3, 'Children', 4],
@@ -60,32 +59,16 @@ class HWMonitor extends IPSModule
             // Füge weitere Schlüssel hinzu, falls notwendig
         ];
 
-        // Funktion zum Extrahieren der Werte
-        function extractValues($data, $path) {
-            foreach ($path as $key) {
-                if (isset($data[$key])) {
-                    $data = $data[$key];
-                } else {
-                    return null;
-                }
-            }
-
-            return $data;
-        }
-
-        // ID des übergeordneten Objekts (Root) abrufen
-        $parentID = IPS_GetParent($_IPS['SELF']);
-
         // Loop durch die JSON-Struktur und extrahiere die Werte
         foreach ($jsonStructure as $key => $config) {
             $path = $config['Path'];
             $profile = $config['Profile'];
 
-            $valueData = extractValues($value, $path);
+            $valueData = $this->extractValues($value, $path);
 
             if ($valueData !== null && isset($valueData['Value'], $valueData['Min'], $valueData['Max'])) {
                 // Prüfe, ob das Dummy-Modul bereits existiert
-                $dummyModuleID = @IPS_GetObjectIDByName($key, $parentID);
+                $dummyModuleID = @IPS_GetObjectIDByName($key, $this->InstanceID);
 
                 if ($dummyModuleID === false) {
                     // Dummy-Modul-Instanz erstellen
@@ -95,7 +78,7 @@ class HWMonitor extends IPSModule
                     IPS_SetName($dummyModuleID, $key);
 
                     // Setze das übergeordnete Objekt des Dummy-Moduls
-                    IPS_SetParent($dummyModuleID, $parentID);
+                    IPS_SetParent($dummyModuleID, $this->InstanceID);
                 }
 
                 // Loop durch die Werte und erstelle oder aktualisiere Float-Variablen innerhalb des Dummy-Moduls
@@ -133,5 +116,19 @@ class HWMonitor extends IPSModule
                 echo "Werte konnten nicht extrahiert werden für Schlüssel: $key\n";
             }
         }
+    }
+
+    // Funktion zum Extrahieren der Werte
+    private function extractValues($data, $path)
+    {
+        foreach ($path as $key) {
+            if (isset($data[$key])) {
+                $data = $data[$key];
+            } else {
+                return null;
+            }
+        }
+
+        return $data;
     }
 }
