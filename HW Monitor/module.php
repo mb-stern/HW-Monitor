@@ -1,25 +1,18 @@
 <?php
 
-class HWMonitor extends IPSModule
-{
-    public function Create()
-    {
-        // Diese Methode wird beim Erstellen des Moduls aufgerufen
-        parent::Create();
-        $this->RegisterPropertyString("HWM-IP", "IPAddress");
+class HWMonitor extends IPSModule {
+
+    public function Create(){
+    // Diese Methode wird beim Erstellen des Moduls aufgerufen
+    parent::Create();
+    $this->RegisterPropertyString("HWM-IP", "IPAddress");
     }
 
-    public function ApplyChanges()
-    {
+    public function ApplyChanges(){
         // Diese Methode wird aufgerufen, wenn Änderungen am Modul vorgenommen wurden
         parent::ApplyChanges();
-
     }
-
-    public function GetConfigurationForm()
-
-    }
-
+    
     public function UpdateJsonData()
     {
         // Verwenden Sie die eingegebene IP-Adresse
@@ -104,7 +97,7 @@ class HWMonitor extends IPSModule
     }
 
     // Funktion zum Extrahieren der Werte
-    public function extractValues($data, $path)
+    private function extractValues($data, $path)
     {
         foreach ($path as $key) {
             if (isset($data[$key])) {
