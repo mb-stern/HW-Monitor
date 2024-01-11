@@ -1,6 +1,7 @@
 {
     "elements":
     [
-        { "type": "ValidationTextBox", "name": "HWM_IP", "caption": "IP-Adresse" }
+        { "type": "ValidationTextBox", "name": "HWM_IP", "caption": "IP-Adresse" },
+		{ "type": "ValidationTextBox", "name": "HWM_Port", "caption": "Port" }
     ]
 }

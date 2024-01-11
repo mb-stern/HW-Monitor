@@ -5,7 +5,8 @@ class HWMonitor extends IPSModule {
     public function Create(){
     // Diese Methode wird beim Erstellen des Moduls aufgerufen
     parent::Create();
-    $this->RegisterPropertyString("HWM-IP", "IPAddress");
+    $this->RegisterPropertyString("HWM-IP", "IP-Adresse");
+	$this->RegisterPropertyString("HWM-Port", "Port");
     }
 
     public function ApplyChanges(){
@@ -13,10 +14,12 @@ class HWMonitor extends IPSModule {
         parent::ApplyChanges();
     }
     
-    public function UpdateJsonData()
-    {
-        // Verwenden Sie die eingegebene IP-Adresse
-        $value = $this->ReadPropertyString("HWM-IP");
+    public function UpdateJsonData(){
+		
+    // Verwenden Sie die eingegebene IP-Adresse
+    $ip = $this->ReadPropertyString("HWM-IP");
+	$port = $this->ReadPropertyString("HWM-Port");
+	$content = file_get_contents("http://$ip:$port/data.json");
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
