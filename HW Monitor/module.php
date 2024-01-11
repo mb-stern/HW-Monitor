@@ -6,6 +6,7 @@ class HWMonitor extends IPSModule
     {
         // Diese Methode wird beim Erstellen des Moduls aufgerufen
         parent::Create();
+        $this->RegisterPropertyString("HWM-IP", "IPAddress");
     }
 
     public function ApplyChanges()
@@ -13,10 +14,6 @@ class HWMonitor extends IPSModule
         // Diese Methode wird aufgerufen, wenn Änderungen am Modul vorgenommen wurden
         parent::ApplyChanges();
 
-        // Hier können Sie weitere Konfigurationen vornehmen
-        $this->RegisterPropertyString("HWM-IP", "IPAddress");
-
-        // Weitere Logik mit der IP-Adresse
     }
 
     public function GetConfigurationForm()
