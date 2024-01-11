@@ -1,5 +1,6 @@
 {
-    "elements": [],
-    "actions": [],
-    "status": []
+    "elements":
+    [
+        { "type": "ValidationTextBox", "name": "HWM_IP", "caption": "IP-Adresse" }
+    ]
 }
