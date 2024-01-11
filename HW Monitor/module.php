@@ -1,6 +1,6 @@
 <?php
 
-class HWMonitor extends IPSModule
+class HW-Monitor extends IPSModule
 {
     public function Create()
     {
