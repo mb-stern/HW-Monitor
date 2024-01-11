@@ -2,11 +2,11 @@
     "id": "{A5030980-1466-2A11-E0C5-763CE779D1FD}",
     "name": "HW-Monitor",
     "author": "Stefan Künzli",
-    "url": "",
+    "url": "https://github.com/mb-stern/HW-Monitor",
     "compatibility": {
         "version": "7.0"
     },
     "version": "1.0",
-     "build": 1,
-    "date": 10
+     "build": 0,
+    "date": 0
 }
