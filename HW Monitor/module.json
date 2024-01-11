@@ -13,9 +13,8 @@
         {
             "name": "IPAddress",
             "displayName": "IP-Adresse",
-            "fieldType": 3, // Textfeld
+            "fieldType": 3,
             "position": 1
         },
-        // ... andere Einstellungen ...
     ]
 }
