@@ -14,31 +14,19 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Hier können Sie weitere Konfigurationen vornehmen
-        $this->ReadPropertyString("HW-IP", "IPAddress");
+        $this->RegisterPropertyString("HWM-IP", "IPAddress");
 
         // Weitere Logik mit der IP-Adresse
     }
 
     public function GetConfigurationForm()
-    {
-        // Diese Methode wird aufgerufen, um das Konfigurationsformular zu erstellen
-        $form = json_decode(file_get_contents(__DIR__ . "/form.json"), true);
 
-        // Fügen Sie das Textfeld für die IP-Adresse hinzu
-        $form['elements'][] = [
-            "type" => "ValidationTextBox",
-            "name" => "IPAddress",
-            "caption" => "IP-Adresse",
-            "required" => true
-        ];
-
-        return json_encode($form);
     }
 
     public function UpdateJsonData()
     {
         // Verwenden Sie die eingegebene IP-Adresse
-        $value = $this->ReadPropertyString("HW-IP", "IPAddress");
+        $value = $this->ReadPropertyString("HW-IP");
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
