@@ -119,7 +119,7 @@ class HWMonitor extends IPSModule
     }
 
     // Funktion zum Extrahieren der Werte
-    private function extractValues($data, $path)
+    public function extractValues($data, $path)
     {
         foreach ($path as $key) {
             if (isset($data[$key])) {
