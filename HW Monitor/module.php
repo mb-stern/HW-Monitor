@@ -5,8 +5,8 @@ class HWMonitor extends IPSModule {
     public function Create(){
     // Diese Methode wird beim Erstellen des Moduls aufgerufen
     parent::Create();
-    $this->RegisterPropertyString("HWM-IP", "IP-Adresse");
-	$this->RegisterPropertyString("HWM-Port", "Port");
+    $this->RegisterVariableString("HWM-IP", "IP-Adresse");
+	$this->RegisterVariableString("HWM-Port", "Port");
     }
 
     public function ApplyChanges(){
