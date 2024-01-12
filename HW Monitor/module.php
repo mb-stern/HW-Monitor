@@ -2,51 +2,24 @@
 
 class HWMonitor extends IPSModule {
 
-    /*public function Create(){
+    public function Create(){
     // Diese Methode wird beim Erstellen des Moduls aufgerufen
     parent::Create();
     $this->RegisterPropertyString("HWM-IP", "IP-Adresse");
 	$this->RegisterPropertyString("HWM-Port", "Port");
-    }*/
-
-    public function Create()
-    {
-        // Diese Methode wird beim Erstellen des Moduls aufgerufen
-        parent::Create();
     }
 
-    public function ApplyChanges()
-    {
+    public function ApplyChanges(){
         // Diese Methode wird aufgerufen, wenn Änderungen am Modul vorgenommen wurden
         parent::ApplyChanges();
-
-        // Hier können Sie weitere Konfigurationen vornehmen
-        $ipAddress = $this->ReadPropertyString("IPAddress");
-
-        // Weitere Logik mit der IP-Adresse
-        $this->UpdateJsonData();
     }
-
-    public function GetConfigurationForm()
-    {
-        // Diese Methode wird aufgerufen, um das Konfigurationsformular zu erstellen
-        $form = json_decode(file_get_contents(__DIR__ . "/form.json"), true);
-
-        // Fügen Sie das Textfeld für die IP-Adresse hinzu
-        $form['elements'][] = [
-            "type" => "ValidationTextBox",
-            "name" => "IPAddress",
-            "caption" => "IP-Adresse",
-            "required" => true
-        ];
-
-        return json_encode($form);
-    }
-
-    private function UpdateJsonData()
-    {
-        // Verwenden Sie die eingegebene IP-Adresse
-        $value = $this->ReadPropertyString("IPAddress");
+    
+    public function UpdateJsonData(){
+		
+    // Verwenden Sie die eingegebene IP-Adresse
+    $ip = $this->ReadPropertyString("HWM-IP");
+	$port = $this->ReadPropertyString("HWM-Port");
+	$content = file_get_contents("http://$ip:$port/data.json");
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
