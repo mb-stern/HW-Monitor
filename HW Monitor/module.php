@@ -19,17 +19,7 @@
             parent::Create();
                
             $this->RegisterPropertyString("IPAddress", "192.168.178.76"); 
-            $this->RegisterPropertyInteger("Port", "8085");          
-            $this->RegisterScript("PowerOff", "Power Off", "<? TCL_PowerOff(".$this->InstanceID.");", 0);
-            $this->RegisterScript("VolumeUP", "Volume Up", "<? TCL_VolumeUP(".$this->InstanceID.");", 1);
-            $this->RegisterScript("VolumeDOWN", "Volume Down", "<? TCL_VolumeDown(".$this->InstanceID.");", 2);
-            $this->RegisterScript("Mute", "Mute", "<? TCL_Mute(".$this->InstanceID.");", 3);
-            $this->RegisterScript("ChannelUP", "Channel Up", "<? TCL_ChannelUp(".$this->InstanceID.");", 4);
-            $this->RegisterScript("ChannelDOWN", "Channel Down", "<? TCL_ChannelDown(".$this->InstanceID.");", 5);
-            $this->RegisterScript("ChannelList", "Channel List", "<? TCL_ChannelList(".$this->InstanceID.");", 6);
-            $this->RegisterScript("Up", "Up", "<? TCL_Up(".$this->InstanceID.");", 7);
-            $this->RegisterScript("Down", "Down", "<? TCL_Down(".$this->InstanceID.");", 8);
-            $this->RegisterScript("OK", "OK", "<? TCL_OK(".$this->InstanceID.");", 9);            
+            $this->RegisterPropertyInteger("Port", "8085");                 
         }
         
         /**
@@ -41,198 +31,106 @@
             parent::ApplyChanges();                
         }
         
-        /**
-         * SendKeyCode
-         * @param string $KeyCode
-         */
-        protected function SendKeyCode($KeyCode)
-        {
-            $ch=fsockopen($this->ReadPropertyString('IPAddress'), $this->ReadPropertyInteger('Port'), $errno, $errstr, 1);
-            if($ch)
-            {
-                fwrite($ch, "<?xml version=\"1.0\" encoding=\"utf-8\"?><root><action name=\"setKey\" eventAction=\"TR_DOWN\" keyCode=\"$KeyCode\" /></root>");
-                fclose($ch);
-            }
-        }
+        // JSON von der URL abrufen
+        $content = file_get_contents($this->ReadPropertyString('IPAddress'):$this->ReadPropertyInteger('Port'));
+        
+        // JSON decodieren
+        $value = json_decode($content, true);
+        
+        // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
+    $jsonStructure = [
+    'CPU-Temp' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 3, 'Children', 4],
+                    'Profile' => '~Temperature'],
+    'CPU-Load' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 4, 'Children', 0],
+                    'Profile' => '~Progress'],
+    'Memory-Load' => ['Path' => ['Children', 0, 'Children', 2, 'Children', 0, 'Children', 0],
+                    'Profile' => '~Progress'],
+    'LW-C' => ['Path' => ['Children', 0, 'Children', 6, 'Children', 0, 'Children', 0],
+                    'Profile' => '~Progress'],
+    'LW-D' => ['Path' => ['Children', 0, 'Children', 5, 'Children', 0, 'Children', 0],
+                    'Profile' => '~Progress'],
+    'LW-E' => ['Path' => ['Children', 0, 'Children', 3, 'Children', 0, 'Children', 0],
+                    'Profile' => '~Progress'],
+    'LW-F' => ['Path' => ['Children', 0, 'Children', 7, 'Children', 0, 'Children', 0],
+                    'Profile' => '~Progress'],
+    
+    // Füge weitere Schlüssel hinzu, falls notwendig
+];
 
-        /**
-         * TCL_PowerOff
-         */
-        public function PowerOff()
-        {
-            $this->SendKeyCode("TR_KEY_POWER");
-        }
-
-        /**
-         * TCL_VolumeUp
-         */
-        public function VolumeUp()
-        {
-            $this->SendKeyCode("TR_KEY_VOL_UP");
-        }
- 
-        /**
-         * TCL_VolumeDown
-         */
-        public function VolumeDown()
-        {
-            $this->SendKeyCode("TR_KEY_VOL_DOWN");
-        }
-        
-        /**
-         * TCL_Mute
-         */
-        public function Mute()
-        {
-            $this->SendKeyCode("TR_KEY_MUTE");
-        }
-
-        /**
-         * TCL_ChannelUp
-         */
-        public function ChannelUp()
-        {
-            $this->SendKeyCode("TR_KEY_CH_UP");
-        }
-        
-        /**
-         * TCL_ChannelDown
-         */
-        public function ChannelDown()
-        {
-            $this->SendKeyCode("TR_KEY_CH_DOWN");
-        }  
-        
-        /**
-         * TCL_SendNumber
-         * @param string $Number
-         */
-        public function SendNumber($Number)
-        {
-            $Num_r = str_split($Number);
-            foreach ($Num_r as $Number)
-            {
-                $this->SendKeyCode("TR_KEY_$Number");
-            }
-        }
-
-        /**
-         * TCL_TV
-         */
-        public function TV()
-        {
-            $this->SendKeyCode("TR_KEY_TV");
-        }          
- 
-        /**
-         * TCL_Source
-         */
-        public function Source()
-        {
-            $this->SendKeyCode("TR_KEY_SOURCE");
-        }          
-        
-        /**
-         * TCL_SmartTV
-         */
-        public function SmartTV()
-        {
-            $this->SendKeyCode("TR_KEY_SMARTTV");
-        } 
-        
-        /**
-         * TCL_UP
-         */
-        public function Up()
-        {
-            $this->SendKeyCode("TR_KEY_UP");
-        }  
-        
-        /**
-         * TCL_DOWN
-         */
-        public function Down()
-        {
-            $this->SendKeyCode("TR_KEY_DOWN");
-        }  
-        
-        /**
-         * TCL_Left
-         */
-        public function Left()
-        {
-            $this->SendKeyCode("TR_KEY_LEFT");
-        }  
-        
-        /**
-         * TCL_Right
-         */
-        public function Right()
-        {
-            $this->SendKeyCode("TR_KEY_RIGHT");
-        }  
-        
-        /**
-         * TCL_OK
-         */
-        public function OK()
-        {
-            $this->SendKeyCode("TR_KEY_OK");
-        }
-        
-        /**
-         * TCL_Back
-         */
-        public function Back()
-        {
-            $this->SendKeyCode("TR_KEY_BACK");
-        }
-        
-        /**
-         * TCL_Red
-         */
-        public function Red()
-        {
-            $this->SendKeyCode("TR_KEY_RED");
-        }
-        
-        /**
-         * TCL_Green
-         */
-        public function Green()
-        {
-            $this->SendKeyCode("TR_KEY_GREEN");
-        }
-        
-        /**
-         * TCL_Yellow
-         */
-        public function Yellow()
-        {
-            $this->SendKeyCode("TR_KEY_YELLOW");
-        }
-        
-        /**
-         * TCL_Blue
-         */
-        public function Blue()
-        {
-            $this->SendKeyCode("TR_KEY_BLUE");
-        }
-        
-        /**
-         * TCL_Guide
-         */
-        public function Guide()
-        {
-            $this->SendKeyCode("TR_KEY_GUIDE");
-        }
-        
-        /**
-         * TCL_ChList
-         */
-        public function ChannelList()
-        {
-            $this->SendKeyCode("TR_KEY_LIST");
+// Funktion zum Extrahieren der Werte
+function extractValues($data, $path) {
+    foreach ($path as $key) {
+        if (isset($data[$key])) {
+            $data = $data[$key];
+        } else {
+            return null;
         }
     }
+
+    return $data;
+}
+
+// ID des übergeordneten Objekts (Root) abrufen
+$parentID = IPS_GetParent($_IPS['SELF']);
+
+// Loop durch die JSON-Struktur und extrahiere die Werte
+foreach ($jsonStructure as $key => $config) {
+    $path = $config['Path'];
+    $profile = $config['Profile'];
+
+    $valueData = extractValues($value, $path);
+
+    if ($valueData !== null && isset($valueData['Value'], $valueData['Min'], $valueData['Max'])) {
+        // Prüfe, ob das Dummy-Modul bereits existiert
+        $dummyModuleID = @IPS_GetObjectIDByName($key, $parentID);
+
+        if ($dummyModuleID === false) {
+            // Dummy-Modul-Instanz erstellen
+            $dummyModuleID = IPS_CreateInstance("{485D0419-BE97-4548-AA9C-C083EB82E61E}");  // Dummy Module
+
+            // Setze den Namen des Dummy-Moduls
+            IPS_SetName($dummyModuleID, $key);
+
+            // Setze das übergeordnete Objekt des Dummy-Moduls
+            IPS_SetParent($dummyModuleID, $parentID);
+        }
+
+// Loop durch die Werte und erstelle oder aktualisiere Float-Variablen innerhalb des Dummy-Moduls
+foreach (['Value', 'Min', 'Max'] as $position => $variableName) {
+    // Finde die Variable im Dummy-Modul basierend auf der Position
+    $variableID = IPS_GetObjectIDByIdent("Position" . ($position + 1), $dummyModuleID);
+
+    // Wenn die Variable nicht gefunden wird, versuche, sie zu erstellen
+    if ($variableID === false) {
+        $variableID = IPS_CreateVariable(2);  // Float
+        IPS_SetParent($variableID, $dummyModuleID);
+        IPS_SetName($variableID, $variableName);
+        IPS_SetIdent($variableID, "Position" . ($position + 1));  // Identifikation setzen
+        IPS_SetVariableCustomProfile($variableID, $profile);
+        IPS_SetPosition($variableID, $position + 1); // Positionen beginnen bei 1
+    }
+
+    // Merke die ID der Variable für spätere Aktualisierungen
+    $variableIDMap[$variableName] = $variableID;
+
+    // Setze den Wert der Float-Variable nach expliziter Konvertierung zu Float
+    $floatValue = (float)str_replace([',', '%', '°C'], ['.', '', ''], $valueData[$variableName]);
+
+
+
+    // Debug-Ausgabe für den Wert
+    //echo "Debug: Wert für Variable '{$variableName}': '{$valueData[$variableName]}' (Float: '{$floatValue}', Typ: '" . gettype($floatValue) . "')\n";
+
+    if (!is_nan($floatValue)) {
+        // Aktualisiere den Wert der Float-Variable
+        SetValue($variableIDMap[$variableName], $floatValue);
+    } else {
+     //echo "Fehler: Konnte Wert nicht in Float umwandeln für Variable '{$variableName}' (Wert: '{$valueData[$variableName]}').\n";
+    }
+}
+
+
+    } else {
+        echo "Werte konnten nicht extrahiert werden für Schlüssel: $key\n";
+    }
+}
