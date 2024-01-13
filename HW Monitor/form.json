@@ -1,126 +1,9 @@
 {
-    "elements": [
-        {
-            "type": "ExpansionPanel",
-            "caption": "1",
-            "items": [
-                {
-                    "type": "Configurator",
-                    "caption": "Configurator",
-                    "delete": false,
-                    "sort": {
-                        "column": "name",
-                        "direction": "ascending"
-                    },
-                    "values": [{
-                        "id": 1,
-                        "name": "Category",
-                        "address": ""
-                    },
-                    {
-                        "id": 2,
-                        "parent": 1,
-                        "name": "Shutter Control (Markise)",
-                        "address": "Adress",
-                        "create": {
-                            "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                            "configuration": {
-                                "ShutterType": 1
-                            }
-                        }
-                    }]
-                },
-                {
-                    "type": "Configurator",
-                    "caption": "Configurator",
-                    "delete": false,
-                    "sort": {
-                        "column": "name",
-                        "direction": "ascending"
-                    },
-                    "values": [{
-                        "id": 1,
-                        "name": "Category",
-                        "address": ""
-                    },
-                    {
-                        "id": 2,
-                        "parent": 1,
-                        "name": "Shutter Control (Markise)",
-                        "address": "Adress",
-                        "create": {
-                            "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                            "configuration": {
-                                "ShutterType": 1
-                            }
-                        }
-                    }]
-                }
-            ]
-        },
-        {
-            "type": "ExpansionPanel",
-            "caption": "2",
-            "items": [
-                {
-                    "type": "Configurator",
-                    "caption": "Configurator",
-                    "delete": false,
-                    "sort": {
-                        "column": "name",
-                        "direction": "ascending"
-                    },
-                    "values": [{
-                        "id": 1,
-                        "name": "Category",
-                        "address": ""
-                    },
-                    {
-                        "id": 2,
-                        "parent": 1,
-                        "name": "Shutter Control (Markise)",
-                        "address": "Adress",
-                        "create": {
-                            "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                            "configuration": {
-                                "ShutterType": 1
-                            }
-                        }
-                    }]
-                },
-                {
-                    "type": "Configurator",
-                    "caption": "Configurator",
-                    "delete": false,
-                    "sort": {
-                        "column": "name",
-                        "direction": "ascending"
-                    },
-                    "values": [{
-                        "id": 1,
-                        "name": "Category",
-                        "address": ""
-                    },
-                    {
-                        "id": 2,
-                        "parent": 1,
-                        "name": "Shutter Control (Markise)",
-                        "address": "Adress",
-                        "create": {
-                            "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                            "configuration": {
-                                "ShutterType": 1
-                            }
-                        }
-                    }]
-                }
-            ]
-        }
-    ],
     "actions": [
         {
             "type": "Configurator",
-            "caption": "Configurator",
+            "name": "Configurator",
+            "caption": "Configurator (No delete)",
             "delete": false,
             "sort": {
                 "column": "name",
@@ -146,8 +29,10 @@
         },
         {
             "type": "Configurator",
-            "caption": "Configurator",
-            "delete": false,
+            "name": "ConfiguratorDelete",
+            "caption": "Configurator (Delete)",
+            "delete": true,
+            "rowCount": 3,
             "sort": {
                 "column": "name",
                 "direction": "ascending"
@@ -169,6 +54,11 @@
                     }
                 }
             }]
+        },
+        {
+            "type": "Button",
+            "caption": "Show Configurator Values",
+            "onClick": "var_dump($Configurator);"
         }
     ]
 }
