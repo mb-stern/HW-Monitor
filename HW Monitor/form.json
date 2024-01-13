@@ -1,64 +1,9 @@
 {
-    "actions": [
-        {
-            "type": "Configurator",
-            "name": "Configurator",
-            "caption": "Configurator (No delete)",
-            "delete": false,
-            "sort": {
-                "column": "name",
-                "direction": "ascending"
-            },
-            "values": [{
-                "id": 1,
-                "name": "Category",
-                "address": ""
-            },
-            {
-                "id": 2,
-                "parent": 1,
-                "name": "Shutter Control (Markise)",
-                "address": "Adress",
-                "create": {
-                    "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                    "configuration": {
-                        "ShutterType": 1
-                    }
-                }
-            }]
-        },
-        {
-            "type": "Configurator",
-            "name": "ConfiguratorDelete",
-            "caption": "Configurator (Delete)",
-            "delete": true,
-            "rowCount": 3,
-            "sort": {
-                "column": "name",
-                "direction": "ascending"
-            },
-            "values": [{
-                "id": 1,
-                "name": "Category",
-                "address": ""
-            },
-            {
-                "id": 2,
-                "parent": 1,
-                "name": "Shutter Control (Markise)",
-                "address": "Adress",
-                "create": {
-                    "moduleID": "{542CC907-CA63-4E7A-A8C7-92F74639FA4C}",
-                    "configuration": {
-                        "ShutterType": 1
-                    }
-                }
-            }]
-        },
-        {
-            "type": "Button",
-            "caption": "Show Configurator Values",
-            "onClick": "var_dump($Configurator);"
-        }
-    ]
+	"actions":
+	[
+		{ "type": "Button", "label": "Test Boolean", "onClick": "echo FT_CallBoolean($id, true);" },
+		{ "type": "Button", "label": "Test Integer", "onClick": "FT_CallInteger($id, 42);" },
+		{ "type": "Button", "label": "Test Float", "onClick": "FT_CallFloat($id, 3.14);" },
+		{ "type": "Button", "label": "Test String", "onClick": "FT_CallString($id, \"Test\");" }
+	]
 }
