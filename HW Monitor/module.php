@@ -29,6 +29,10 @@ class HWMonitor extends IPSModule
       
         // JSON von der URL abrufen
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        
+        public function ForwardData($content)
+        {
+        $value = json_decode($content, true);
     }
-
+    }
 }
