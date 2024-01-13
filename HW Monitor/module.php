@@ -38,9 +38,8 @@ class HWMonitor extends IPSModule
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
         $jsonStructure = [
-            'CPU-Temp' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 3, 'Children', 4],
+            /*'CPU-Temp' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 3, 'Children', 4],
                             'Profile' => '~Temperature'],
-                            /*
             'CPU-Load' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 4, 'Children', 0],
                             'Profile' => '~Progress'],
             'Memory-Load' => ['Path' => ['Children', 0, 'Children', 2, 'Children', 0, 'Children', 0],
@@ -50,12 +49,12 @@ class HWMonitor extends IPSModule
             'LW-D' => ['Path' => ['Children', 0, 'Children', 5, 'Children', 0, 'Children', 0],
                             'Profile' => '~Progress'],
             'LW-E' => ['Path' => ['Children', 0, 'Children', 3, 'Children', 0, 'Children', 0],
-                            'Profile' => '~Progress'],
+                            'Profile' => '~Progress'],*/
             'LW-F' => ['Path' => ['Children', 0, 'Children', 7, 'Children', 0, 'Children', 0],
                             'Profile' => '~Progress'],
             // Füge weitere Schlüssel hinzu, falls notwendig
         ];
-*/
+
         // Funktion zum Extrahieren der Werte
         function extractValues($data, $path) {
             foreach ($path as $key) {
