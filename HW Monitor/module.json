@@ -3,7 +3,9 @@
     "name": "HW Monitor",
     "type": 3,
     "vendor": "",
-    "aliases": [],
+    "aliases": 	[	
+		"Hardware Monitor"
+	],
     "parentRequirements": [],
     "childRequirements": [],
     "implemented": [],
