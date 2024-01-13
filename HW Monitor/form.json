@@ -25,7 +25,7 @@
                         "caption": "Embedded Tree",
                         "rowCount": 5,
                         "add": true,
-                        "delete": false,
+                        "delete": true,
                         "columns": [{
                             "label": "Name",
                             "name": "name",
