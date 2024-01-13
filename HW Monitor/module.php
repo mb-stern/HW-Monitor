@@ -18,8 +18,8 @@
             //Never delete this line!
             parent::Create();
                
-            $this->RegisterPropertyString("IPAddress", "192.168.1.100"); 
-            $this->RegisterPropertyInteger("Port", "4123");          
+            $this->RegisterPropertyString("IPAddress", "192.168.178.76"); 
+            $this->RegisterPropertyInteger("Port", "8085");          
             $this->RegisterScript("PowerOff", "Power Off", "<? TCL_PowerOff(".$this->InstanceID.");", 0);
             $this->RegisterScript("VolumeUP", "Volume Up", "<? TCL_VolumeUP(".$this->InstanceID.");", 1);
             $this->RegisterScript("VolumeDOWN", "Volume Down", "<? TCL_VolumeDown(".$this->InstanceID.");", 2);
