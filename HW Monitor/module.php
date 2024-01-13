@@ -1,6 +1,6 @@
 <?php
 
-    class SelectVariableTest extends IPSModule
+    class HWMonitor extends IPSModule
     {
         public function Create()
         {
