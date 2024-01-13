@@ -42,7 +42,7 @@ class HWMonitor extends IPSModule
         $variableIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
 
         $this->RegisterVariableString($variableIdent, $variableName);
-        SetValue($this->GetIDForIdent($variableIdent), $value);
+        SetValue($this->GetIDForIdent($variableIdent), $content);
     }
 
     public function HWM_Update()
