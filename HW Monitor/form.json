@@ -4,6 +4,6 @@
         { "type": "Label", "label": "####### Abfrage Libre Hardware Monitor V1.0 #######" },
         { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Addresse" },
         { "name": "Port", "type": "NumberSpinner", "caption": "Port" },
-        { "name": "ArraySortierWert", "type": "Select", "caption": "Position Istwert"}
+        { "name": "ArraySortierWert", "type": "Select", "caption": "Position Istwert" }
     ] 
 }
