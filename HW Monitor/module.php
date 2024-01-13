@@ -1,29 +1,24 @@
 <?php
+class HWMonitor extends IPSModule {
+    
+    public function Create(){
+        //Never delete this line!
+        parent::Create();        
+    }
 
-	class HWMonitor extends IPSModule
-	{
+    public function Destroy(){
+        //Never delete this line!
+        parent::Destroy();
+    }
 
-		public function CallBoolean(bool $Value)
-		{
-			if($Value) {
-				echo "True";
-			} else {
-				echo "False";
-			}
-		}
-
-		public function CallInteger(int $Value) {
-			echo $Value;
-		}
-
-		public function CallFloat(float $Value) {
-			echo $Value;
-		}
-
-		public function CallString(string $Value) {
-			echo $Value;
-		}
-
-	}
+    public function ApplyChanges(){
+        //Never delete this line!
+        parent::ApplyChanges();
+    }
+        
+    public function UpdateParameter($Field, $Parameter, $Value) {
+        $this->UpdateFormField($Field, $Parameter, $Value);
+    }
+}
 
 ?>
