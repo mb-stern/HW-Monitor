@@ -6,6 +6,7 @@ class HWMonitor extends IPSModule
         //Never delete this line!
         IPS_LogMessage(__CLASS__, $Message);
     }
+    
     public function Create()
     {
         //Never delete this line!
@@ -14,8 +15,11 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyInteger("Intervall", 10);
-        $this->RegisterTimer("HWM_UpdateTimer", 0, 'HWM_Update($_IPS[\'TARGET\']);');
+
+        // Timer registrieren und Intervall setzen
+        $this->RegisterTimer("HWM_UpdateTimer", $this->ReadPropertyInteger("Intervall") * 1000, 'HWM_Update($_IPS[\'TARGET\']);');
     }
+
     public function Destroy()
     {
         $this->UnregisterTimer("HWM_UpdateTimer");
@@ -23,6 +27,7 @@ class HWMonitor extends IPSModule
         //Never delete this line!
         parent::Destroy();
     }
+
     public function ApplyChanges()
     {
         //Never delete this line!
@@ -33,7 +38,16 @@ class HWMonitor extends IPSModule
         $value = json_decode($content, true);
 
         //Variablen anlegen und einstellen
-        $this->RegisterVariableString($value);
+        $variableName = "MyVariable"; // Geben Sie einen geeigneten Namen ein
+        $variableIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
+
+        $this->RegisterVariableString($variableIdent, $variableName);
+        SetValue($this->GetIDForIdent($variableIdent), $value);
     }
 
+    public function HWM_Update()
+    {
+        // Hier können Sie den Code für das Timer-Update hinzufügen
+    }
 }
+?>
