@@ -1,7 +1,19 @@
 {
     "elements":
     [
+        { "type": "Label", "label": "####### Abfrage für IP-Symcon für den Libre Hardware Monitor V1.0 #######" },
         { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Address" },
-        { "name": "Port", "type": "NumberSpinner", "caption": "Port" }
+        { "name": "Port", "type": "NumberSpinner", "caption": "Port" },
+        { "name": "ArraySortierWert", "type": "Select", "caption": "Position Istwert",
+       "options": [
+                    { "label": "Name", "value": "name" },
+                    { "label": "Parent-Name1", "value": "parentname1" },
+                    { "label": "Parent-Name2", "value": "parentname2" },
+                    { "label": "Parent-Name3", "value": "parentname3" },
+                    { "label": "Batterie", "value": "batterie" },
+                    { "label": "Hersteller", "value": "hersteller" },
+                    { "label": "ID", "value": "id" },
+                    { "label": "Letztes Var-Update", "value": "letztesupdts" }
+       ]}
     ] 
 }
