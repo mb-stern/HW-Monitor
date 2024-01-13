@@ -37,7 +37,7 @@ class HWMonitor extends IPSModule
         $value = json_decode($content, true);
 
         // Assoziatives Array für die JSON-Struktur und die gewünschten Schlüssel ('Value', 'Text' und 'Profile')
-        $jsonStructure = [
+        /*$jsonStructure = [
             'CPU-Temp' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 3, 'Children', 4],
                             'Profile' => '~Temperature'],
             'CPU-Load' => ['Path' => ['Children', 0, 'Children', 1, 'Children', 4, 'Children', 0],
@@ -54,7 +54,7 @@ class HWMonitor extends IPSModule
                             'Profile' => '~Progress'],
             // Füge weitere Schlüssel hinzu, falls notwendig
         ];
-
+*/
         // Funktion zum Extrahieren der Werte
         function extractValues($data, $path) {
             foreach ($path as $key) {
