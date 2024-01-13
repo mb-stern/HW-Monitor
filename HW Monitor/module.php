@@ -28,13 +28,12 @@ class HWMonitor extends IPSModule
         //Never delete this line!
         parent::ApplyChanges();
       
-        // JSON von der URL abrufen
+        // JSON von der URL abrufen und entpacken
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-    
         $value = json_decode($content, true);
 
         //Variablen anlegen und einstellen
-        $this->RegisterVariableString($content);
+        $this->RegisterVariableString($value);
     }
 
 }
