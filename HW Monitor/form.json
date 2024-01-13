@@ -2,7 +2,7 @@
     "elements":
     [
         { "type": "Label", "label": "####### JSON Abfrage Libre Hardware Monitor #######" },
-        { "type": "Label", "label": "Bitte vor der Abfrage prüfen, ob der Port in der Firewall des abzufagenden Rechners geöffnet ist" },
+        { "type": "Label", "label": "Vor der Abfrage ist zu prüfen, ob der Port in der Firewall des abzufagenden Rechners geöffnet ist!" },
         { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Address" },
         { "name": "Port", "type": "NumberSpinner", "caption": "Port (Standard ist 8085)" }
     ] 
