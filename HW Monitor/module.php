@@ -84,7 +84,7 @@ class HWMonitor extends IPSModule
 
                 if ($dummyModuleID === false) {
                     // Dummy-Modul-Instanz erstellen
-                    $dummyModuleID = IPS_CreateInstance("{485D0419-BE97-4548-AA9C-C083EB82E61E}");  // Dummy Module
+                    $this->dummyModuleID = IPS_CreateInstance("{485D0419-BE97-4548-AA9C-C083EB82E61E}");  // Dummy Module
 
                     // Setze den Namen des Dummy-Moduls
                     IPS_SetName($dummyModuleID, $key);
