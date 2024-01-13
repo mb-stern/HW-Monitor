@@ -1,7 +1,7 @@
 {
     "elements":
     [
-        { "type": "Label", "label": "####### BatterieMonitor v1.3 (02.01.2016 15.15Uhr) #######" },
+        { "type": "Label", "label": "####### JSON Abfrage Libre Hardware Monitor 1.0 #######" },
         { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Address" },
         { "name": "Port", "type": "NumberSpinner", "caption": "Port" }
     ] 
