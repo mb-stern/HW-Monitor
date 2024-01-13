@@ -90,7 +90,7 @@ class HWMonitor extends IPSModule
                     IPS_SetName($dummyModuleID, $key);
 
                     // Setze das übergeordnete Objekt des Dummy-Moduls
-                    IPS_SetParent($dummyModuleID, $parentID);
+                    //IPS_SetParent($dummyModuleID, $parentID);
                 }
 
                 // Loop durch die Werte und erstelle oder aktualisiere Float-Variablen innerhalb des Dummy-Moduls
