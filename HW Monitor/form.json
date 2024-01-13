@@ -6,7 +6,7 @@
             "caption": "Top Tree",
             "rowCount": 5,
             "add": true,
-            "delete": false,
+            "delete": true,
             "sort": {
                 "column": "name",
                 "direction": "ascending"
