@@ -2,7 +2,7 @@
     "elements":
     [
         { "type": "Label", "label": "####### Abfrage Libre Hardware Monitor V1.0 #######" },
-        { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Addresse des Rechners mit Libre Hardware Monitor" },
+        { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Addresse" },
         { "name": "Port", "type": "NumberSpinner", "caption": "Port, Standard it 8085" },
         { "name": "ArraySortierWert", "type": "Select", "caption": "Position Istwert"}
     ] 
