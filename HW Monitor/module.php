@@ -1,18 +1,11 @@
 <?php
 class HWMonitor extends IPSModule
 {
-    /**
-     * Log Message
-     * @param string $Message
-     */
     protected function Log($Message)
     {
+        //Never delete this line!
         IPS_LogMessage(__CLASS__, $Message);
     }
-
-    /**
-     * Create
-     */
     public function Create()
     {
         //Never delete this line!
@@ -29,10 +22,8 @@ class HWMonitor extends IPSModule
       
         // JSON von der URL abrufen
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        
-        public function ForwardData($content)
-        {
+    
         $value = json_decode($content, true);
     }
-    }
+
 }
