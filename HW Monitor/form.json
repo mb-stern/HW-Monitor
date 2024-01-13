@@ -1,9 +1,8 @@
 {
     "elements":
     [
-        { "type": "Label", "label": "####### Abfrage Libre Hardware Monitor V1.0 #######" },
-        { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Addresse" },
-        { "name": "Port", "type": "NumberSpinner", "caption": "Port" },
-        { "name": "ArraySortierWert", "type": "Select", "caption": "Position Istwert" }
+        { "type": "Label", "label": "####### BatterieMonitor v1.3 (02.01.2016 15.15Uhr) #######" },
+        { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Address" },
+        { "name": "Port", "type": "NumberSpinner", "caption": "Port" }
     ] 
 }
