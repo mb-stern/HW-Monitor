@@ -1,132 +1,78 @@
 {
     "elements": [
         {
-            "type": "SelectVariable",
-            "name": "SelectIntegerFloat",
-            "caption": "Variable Integer/Float",
-            "validVariableTypes": [1, 2]
-        },
-        {
-            "type": "SelectObject",
-            "name": "Object",
-            "caption": "Property Object"
-        },
-        {
-            "type": "Button",
-            "caption": "Set Property",
-            "onClick": "IPS_SetProperty($id, 'SelectIntegerFloat', $Object); IPS_ApplyChanges($id);"
-        },
-        {
-            "type": "Button",
-            "caption": "Set random id",
-            "onClick": "IPS_SetProperty($id, 'SelectIntegerFloat', rand(10000, 99999)); IPS_ApplyChanges($id);"
-        },
-        {
-            "type": "SelectVariable",
-            "name": "SelectDynamic",
-            "caption": "Dynamic"
-        }
-    ],
-    "actions": [
-        {
-            "type": "ExpansionPanel",
-            "caption": "Dynamic",
-            "items": [
-                {
-                    "type": "CheckBox",
-                    "name": "bool",
-                    "caption": "Boolean",
-                    "onChange": "STSVT_UpdateTypes($id, [$bool, $int, $float, $string]);"
-                },
-                {
-                    "type": "CheckBox",
-                    "name": "int",
-                    "caption": "Integer",
-                    "onChange": "STSVT_UpdateTypes($id, [$bool, $int, $float, $string]);"
-                },
-                {
-                    "type": "CheckBox",
-                    "name": "float",
-                    "caption": "Float",
-                    "onChange": "STSVT_UpdateTypes($id, [$bool, $int, $float, $string]);"
-                },
-                {
-                    "type": "CheckBox",
-                    "name": "string",
-                    "caption": "String",
-                    "onChange": "STSVT_UpdateTypes($id, [$bool, $int, $float, $string]);"
-                },
-                {
-                    "type": "Select",
-                    "name": "logging",
-                    "caption": "requiredLogging",
-                    "options": [
-                        {"caption": "ignore", "value": 0},
-                        {"caption": "logged", "value": 1},
-                        {"caption": "not logged", "value": 2},
-                        {"caption": "gauge", "value": 3},
-                        {"caption": "counter", "value": 4}
-                    ],
-                    "onChange": "STSVT_ChangeLogging($id, $logging);"
-                },
-                {
-                    "type": "Select",
-                    "name": "action",
-                    "caption": "requiredAction",
-                    "options": [
-                        {"caption": "ignore", "value": 0},
-                        {"caption": "action", "value": 1},
-                        {"caption": "no action", "value": 2}
-                    ],
-                    "onChange": "STSVT_ChangeAction($id, $action);"
+            "type": "Tree",
+            "name": "TreeData",
+            "caption": "Top Tree",
+            "rowCount": 5,
+            "add": true,
+            "delete": false,
+            "sort": {
+                "column": "name",
+                "direction": "ascending"
+            },
+            "columns": [{
+                    "label": "Name",
+                    "name": "name",
+                    "width": "auto",
+                    "add": "Initial Name"
+                }, {
+                    "label": "Tree",
+                    "name": "tree",
+                    "width": "400px",
+                    "edit": {
+                        "type": "Tree",
+                        "caption": "Embedded Tree",
+                        "rowCount": 5,
+                        "add": true,
+                        "delete": false,
+                        "columns": [{
+                            "label": "Name",
+                            "name": "name",
+                            "width": "auto",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        }]
+                    },
+                    "add": [{
+                        "id": 1,
+                        "name": "Initial Embedded Name"
+                    }]
                 }
-            ]
+            ],
+            "values": [{
+                "id": 1,
+                "name": "Category",
+                "tree": [{
+                    "id": 1,
+                    "name": "Inner Parent"
+                },
+                {
+                    "id": 2,
+                    "parent": 1,
+                    "name": "Inner Child"
+                }]
+            },
+            {
+                "id": 2,
+                "parent": 1,
+                "name": "Child",
+                "tree": [{
+                    "id": 1,
+                    "name": "Inner Parent"
+                },
+                {
+                    "id": 2,
+                    "parent": 1,
+                    "name": "Inner Child"
+                }]
+            }]
         },
         {
-            "type": "SelectVariable",
-            "caption": "Variable Default"
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Integer/Float",
-            "validVariableTypes": [1, 2]
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Action",
-            "requiredAction": 1
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable No Action",
-            "requiredAction": 2
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Logged",
-            "requiredLogging": 1
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Not Logged",
-            "requiredLogging": 2
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Gauge",
-            "requiredLogging": 3
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "Variable Counter",
-            "requiredLogging": 4
-        },
-        {
-            "type": "SelectVariable",
-            "caption": "All",
-            "requiredLogging": 3,
-            "validVariableTypes": [1, 2],
-            "requiredAction": 1
+            "type": "Button",
+            "caption": "Show Tree Values",
+            "onClick": "var_dump($TreeData);"
         }
     ]
 }
