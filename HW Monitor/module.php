@@ -63,19 +63,17 @@ class HWMonitor extends IPSModule
 
         // Direkt nach der ID im ContentArray suchen
         foreach ($contentArray as $item) {
-            // JSON-String des aktuellen Elements erhalten
-            $jsonString = json_encode($item);
+            if (isset($item['id']) && $item['id'] === $gesuchteId) {
+                // Die gefundene ID und andere Werte ausgeben
+                $gefundeneId = (float)$item['id'];
+                $gefundenerText = $item['Text'];
+                $gefundenesMin = $item['Min'];
+                $gefundenerValue = $item['Value'];
+                $gefundenesMax = $item['Max'];
 
-            // Präfix "id" mit Anführungszeichen hinzufügen
-            $gesuchtesPräfix = '"id":' . $gesuchteId;
+                echo "Gefundene ID: $gefundeneId, Text: $gefundenerText, Min: $gefundenesMin, Value: $gefundenerValue, Max: $gefundenesMax\n";
 
-            // Überprüfen, ob das Präfix im JSON-String gefunden wird
-            if (strpos($jsonString, $gesuchtesPräfix) !== false) {
-                // Die gefundene ID ausgeben (als float)
-                $gefundeneId = (float)$gesuchteId;
-                echo "Gefundene ID: $gefundeneId\n";
-
-                // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
+                // Hier kannst du die Variablen erstellen oder die gefundenen Werte anderweitig verwenden
                 // Zum Beispiel:
                 $variableIdent = "Variable_" . $gefundeneId;
                 $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
