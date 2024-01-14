@@ -41,15 +41,17 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListeArray = json_decode($idListeString, true);
 
-        //Variablen anlegen und einstellen
+        //Variablen anlegen und einstellen für die Contentausgabe
         $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
         $JSONIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
-        $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
-        $IDsIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
-
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
+        
+        //Variablen anlegen und einstellen für die ID-Ausgabe
+        $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
+        $IDsIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
         $this->RegisterVariableString($IDsIdent, $IDs);
         $formattedString = $this->formatArrayToString($idListeArray);
         SetValue($this->GetIDForIdent($IDsIdent), $formattedString);
+    }
 }
