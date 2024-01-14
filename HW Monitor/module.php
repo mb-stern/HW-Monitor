@@ -57,29 +57,29 @@ class HWMonitor extends IPSModule
             die('Fehler beim Dekodieren des JSON-Inhalts');
         }
 
-        //Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+     // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
 
         // Direkt nach der ID im ContentArray suchen
         foreach ($contentArray as $item) {
-            // Überprüfen, ob die 'id' in den Schlüsseln des aktuellen Elements vorhanden ist
-            if (isset($item['id'])) {
-                // Den Index des Präfixes "id" finden
-                $prefixIndex = array_search('id', array_keys($item));
+            // JSON-String des aktuellen Elements erhalten
+            $jsonString = json_encode($item);
 
-                // Überprüfen, ob das Präfix gefunden wurde und der Wert der ID korrekt ist
-                if ($prefixIndex !== false && $item[array_keys($item)[$prefixIndex]] === $gesuchteId) {
-                    // Die gefundene ID ausgeben (als float)
-                    $gefundeneId = (float)$gesuchteId;
-                    echo "Gefundene ID: $gefundeneId\n";
+            // Präfix "id" mit Anführungszeichen hinzufügen
+            $gesuchtesPräfix = '"id":' . $gesuchteId;
 
-                    // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
-                    // Zum Beispiel:
-                    $variableIdent = "Variable_" . $gefundeneId;
-                    $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-                    SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
-                }
+            // Überprüfen, ob das Präfix im JSON-String gefunden wird
+            if (strpos($jsonString, $gesuchtesPräfix) !== false) {
+                // Die gefundene ID ausgeben (als float)
+                $gefundeneId = (float)$gesuchteId;
+                echo "Gefundene ID: $gefundeneId\n";
+
+                // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
+                // Zum Beispiel:
+                $variableIdent = "Variable_" . $gefundeneId;
+                $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
+                SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
             }
         }
     }
