@@ -36,7 +36,8 @@
                     "caption": "ID des Wertes",
                     "width": "150",
                     "add": 0,
-                    "edit": {
+                    "edit": 
+                    {
                         "type": "NumberSpinner"
                     }
                 }
