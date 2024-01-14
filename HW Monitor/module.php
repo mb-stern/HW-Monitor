@@ -59,7 +59,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 }
 
 // Überprüfen, ob das erwartete Schlüssel "items" im Array vorhanden ist
-if (!isset($contentArray['items'])) {
+if (!isset($contentArray['id'])) {
     die('Der erwartete Schlüssel "items" ist im JSON-Inhalt nicht vorhanden');
 }
 
