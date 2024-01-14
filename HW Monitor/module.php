@@ -59,7 +59,9 @@ class HWMonitor extends IPSModule
 
  // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
 foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
+    //$gesuchteId = $idItem['id'];
+
+    $gesuchteId = '"id":0';
 
     // Direkt nach der ID im ContentArray suchen
     foreach ($contentArray as $item) {
@@ -67,7 +69,7 @@ foreach ($idListe as $idItem) {
             // Die gefundene ID ausgeben (als float)
             $gefundeneId = (float)$item['id'];
             echo "Gefundene ID: $gefundeneId\n";
-
+    
             // Hier können Sie die Variable erstellen oder den gefundenen Wert anderweitig verwenden
             // Zum Beispiel:
             $variableIdent = "Variable_" . $gefundeneId;
