@@ -57,29 +57,29 @@ class HWMonitor extends IPSModule
             die('Fehler beim Dekodieren des JSON-Inhalts');
         }
 
-        // Durch die ID-Liste iterieren und nach spezifischer ID im Inhalt suchen
+        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
 
             // Nach spezifischer ID im ContentArray suchen
             $gefundeneItem = null;
             foreach ($contentArray as $item) {
-                if (isset($item['id']) && $item['id'] === $gesuchteId) {
+                if (isset($item['id']) && $item['id'] == $gesuchteId) {
                     $gefundeneItem = $item;
                     break;
                 }
             }
 
-            // Wenn die ID gefunden wurde
             if ($gefundeneItem !== null) {
                 // Die gefundene ID ausgeben (als float)
                 $gefundeneId = (float)$gefundeneItem['id'];
                 echo "Gefundene ID: $gefundeneId\n";
-
-                // Hier die Variable erstellen und den gefundenen Wert speichern
+    
+                // Hier können Sie die Variable erstellen oder den gefundenen Wert anderweitig verwenden
+                // Zum Beispiel:
                 $variableIdent = "Variable_" . $gefundeneId;
                 $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($variableIdent), (float)$gefundeneItem['Value']);
+                SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
             }
         }
     }
