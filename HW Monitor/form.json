@@ -1,51 +1,64 @@
 {
-    "elements":
-    [
-        { "type": "ExpansionPanel",
-            "caption": "Info zum Modul",
-            "items": 
-            [
-                {
-                    "type": "Label",
-                    "label": "Dieses Modul ermöglicht, auf den Libre Hardware Monitor zuzugreifen."
-                },
-                {
-                    "type": "Label",
-                    "label": "Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
-                }
-            ]
-        },
-        { "name": "IPAddress", "type": "ValidationTextBox", "caption": "IP-Address" },
-        { "name": "Port", "type": "NumberSpinner", "caption": "Port (Standard ist 8085)" },
-        { "type": "IntervalBox", "name": "Intervall", "caption": "Sekunden" },
-        {
+    "elements": [
+      {
+        "type": "ExpansionPanel",
+        "caption": "Info zum Modul",
+        "items": [
+          {
             "type": "Label",
-            "label": "Überwachte IDs"
-        },
-        {
-            "type": "List",
-            "name": "IDListe",
-            "caption": "Überwachte ID's",
-            "rowCount": 5,
-            "add": true,
-            "delete": true,
-            "columns": 
-            [
-                {
-                    "name": "ID",
-                    "caption": "ID des Wertes",
-                    "width": "150",
-                    "add": 0,
-                    "edit": 
-                    {
-                        "type": "NumberSpinner"
-                    }
-                }
-            ]
-        }
+            "label": "Dieses Modul ermöglicht, auf den Libre Hardware Monitor zuzugreifen."
+          },
+          {
+            "type": "Label",
+            "label": "Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
+          }
+        ]
+      },
+      {
+        "name": "IPAddress",
+        "type": "ValidationTextBox",
+        "caption": "IP-Address"
+      },
+      {
+        "name": "Port",
+        "type": "NumberSpinner",
+        "caption": "Port (Standard ist 8085)"
+      },
+      {
+        "type": "IntervalBox",
+        "name": "Intervall",
+        "caption": "Sekunden"
+      },
+      {
+        "type": "Label",
+        "label": "Überwachte IDs"
+      },
+      {
+        "type": "List",
+        "name": "IDListe",
+        "caption": "Überwachte ID's",
+        "rowCount": 5,
+        "add": true,
+        "delete": true,
+        "columns": [
+          {
+            "name": "ID",
+            "caption": "ID des Wertes",
+            "width": "150",
+            "add": 0,
+            "edit": {
+              "type": "NumberSpinner"
+            }
+          }
+        ]
+      }
     ],
-    "actions":
-    [
-    { "type": "Button", "label": "Update", "onClick": "HWM_Update($id);" }
+    "actions": [
+      {
+        "type": "Button",
+        "label": "Update",
+        "onClick": "HWM_Update($id);"
+      }
     ]
-}
+  }
+  
