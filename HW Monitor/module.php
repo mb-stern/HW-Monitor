@@ -39,22 +39,10 @@ class HWMonitor extends IPSModule
 
         // JSON-Array aus der Property 'IDListe' holen
         $idListeString = $this->ReadPropertyString('IDListe');
-        $formattedString = $this->formatArrayToString(json_decode($idListeString, true));
-
-        //Variablen anlegen und einstellen für die Contentausgabe
-        $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "JSONIdent"; // Geben Sie eine geeignete Identifikation ein
-        $this->RegisterVariableString($JSONIdent, $JSON);
-        SetValue($this->GetIDForIdent($JSONIdent), $content);
-        
-        //Variablen anlegen und einstellen für die ID-Ausgabe zur Überprüfung
-        $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
-        $IDsIdent = "IDsIdent"; // Geben Sie eine geeignete Identifikation ein
-        $this->RegisterVariableString($IDsIdent, $IDs);
-        SetValue($this->GetIDForIdent($IDsIdent), $formattedString);
+        $idListeArray = json_decode($idListeString, true);
 
         // Werte aus dem JSON basierend auf den ausgewählten IDs abrufen
-        $selectedValues = $this->getValuesOnSameLevel($value, $formattedString);
+        $selectedValues = $this->getValuesBasedOnIDs($value, $idListeArray);
 
         // Hier können Sie die abgerufenen Werte weiterverarbeiten oder loggen
         $this->Log('Abgerufene Werte: ' . print_r($selectedValues, true));
@@ -63,51 +51,28 @@ class HWMonitor extends IPSModule
         $this->createOrUpdateVariables($selectedValues);
     }
 
-    // Funktion zum Formatieren des JSON-Arrays in einen String
-    private function formatArrayToString($array)
+    // Funktion zum Abrufen ausgewählter Werte basierend auf den IDs
+    private function getValuesBasedOnIDs($jsonArray, $selectedIDs)
     {
-        $formattedString = '';
+        $this->Log('Selected IDs: ' . print_r($selectedIDs, true));
 
-        if (is_array($array)) {
-            foreach ($array as $item) {
-                if (is_array($item)) {
-                    foreach ($item as $key => $value) {
-                        $formattedString .= "$value, ";
-                    }
-                }
-            }
-        }
-
-        // Entfernen Sie das letzte Komma und Leerzeichen
-        $formattedString = rtrim($formattedString, ', ');
-
-        return $formattedString;
-    }
-
-    // Funktion zum Abrufen aller Werte auf derselben Ebene basierend auf den IDs im $formattedString
-    private function getValuesOnSameLevel($jsonArray, $formattedString)
-    {
-        $selectedIDs = json_decode($formattedString, true);
-
-        $valuesOnSameLevel = [];
+        $selectedValues = [];
 
         foreach ($selectedIDs as $selectedID) {
             // Überprüfen Sie, ob die ausgewählte ID im JSON vorhanden ist
             if (isset($jsonArray[$selectedID])) {
-                // Hinzufügen aller Werte auf derselben Ebene zur Liste
-                foreach ($jsonArray[$selectedID] as $key => $value) {
-                    $valuesOnSameLevel[] = [
-                        'ID' => $key,
-                        'Text' => $key, // Anpassen, wenn ein bestimmtes Textattribut vorhanden ist
-                        'Value' => $value,
-                        'Min' => null, // Anpassen, wenn Min/Max-Werte verfügbar sind
-                        'Max' => null,
-                    ];
-                }
+                // Hinzufügen der Werte zur Liste
+                $selectedValues[] = [
+                    'ID' => $selectedID,
+                    'Text' => $jsonArray[$selectedID]['Text'], // Anpassen, wenn ein bestimmtes Textattribut vorhanden ist
+                    'Value' => $jsonArray[$selectedID]['Value'],
+                    'Min' => $jsonArray[$selectedID]['Min'],
+                    'Max' => $jsonArray[$selectedID]['Max'],
+                ];
             }
         }
 
-        return $valuesOnSameLevel;
+        return $selectedValues;
     }
 
     // Funktion zum Erstellen oder Aktualisieren von Float-Variablen
@@ -124,8 +89,7 @@ class HWMonitor extends IPSModule
 
             // Profileigenschaften setzen (z.B., Min und Max)
             IPS_SetVariableProfileText($profileName, '', ' ' . $value['Text']);
-            IPS_SetVariableProfileValues($profileName, $value['Min'], $value['Max'], 0.1); // Passen Sie Schritt und Dez
-            // Passen Sie Schritt und Dezimalstellen nach Bedarf an
+            IPS_SetVariableProfileValues($profileName, $value['Min'], $value['Max'], 0.1); // Passen Sie Schritt und Dezimalstellen nach Bedarf an
 
             // Verknüpfung des Variablenprofils mit der erstellten Float-Variable
             IPS_SetVariableCustomProfile($variableID, $profileName);
