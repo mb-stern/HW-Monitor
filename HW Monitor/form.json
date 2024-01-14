@@ -32,32 +32,25 @@
       {
         "type": "List",
         "name": "IDListe",
-        "caption": "Profiles to monitor - Default for empty batteries",
+        "caption": "Überwachte ID's",
         "rowCount": 5,
         "add": true,
         "delete": true,
-        "columns": [
+        "columns": 
+        [
             {
-                "caption": "Profile Name",
-                "name": "ProfileName",
+                "name": "ID",
+                "caption": "ID des Wertes",
                 "width": "150",
                 "add": 0,
-                "edit": {
-                    "type": "ValidationTextBox"
-                }
-            },
-            {
-                "caption": "Profile Value",
-                "name": "ProfileValue",
-                "width": "150",
-                "add": 0,
-                "edit": {
-                    "type": "ValidationTextBox"
+                "edit": 
+                {
+                    "type": "NumberSpinner"
                 }
             }
         ]
     }
-    ],
+],
     "actions": [
       {
         "type": "Button",
