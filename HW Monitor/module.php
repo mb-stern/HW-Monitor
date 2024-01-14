@@ -90,7 +90,7 @@ function searchById($array, $id) {
 }
 
 // Gewünschte "id" festlegen
-$desiredId = 5;
+$desiredId = '"id":0';
 
 // Suche nach der gewünschten "id" im JSON-Baum
 $result = searchById($value, $desiredId);
