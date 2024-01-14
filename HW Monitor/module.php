@@ -43,7 +43,7 @@ class HWMonitor extends IPSModule
         //$this->RegisterVariableString($variableIdent, $variableName);
         //SetValue($this->GetIDForIdent($variableIdent), $content);
 
-        
-        SetValue($this->RegisterVariableString($variableName), $content);
+        $variableID = $this->RegisterVariableString($variableName, $variableName);
+        SetValue($variableID, $content);
     }
 }
