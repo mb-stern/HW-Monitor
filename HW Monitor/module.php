@@ -67,8 +67,15 @@ foreach ($idListe as $idItem) {
             // Die gefundene ID ausgeben (als float)
             $gefundeneId = (float)$item['id'];
             echo "Gefundene ID: $gefundeneId\n";
+
+            // Hier können Sie die Variable erstellen oder den gefundenen Wert anderweitig verwenden
+            // Zum Beispiel:
+            $variableIdent = "Variable_" . $gefundeneId;
+            $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
+            SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
         }
     }
 }
+
 }
 }
