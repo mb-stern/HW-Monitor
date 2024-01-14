@@ -39,12 +39,8 @@ class HWMonitor extends IPSModule
         //Testbereich Variablen anlegen und einstellen
         $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
         $JSONIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
-        //$IDs = "ID-Liste"; // Geben Sie einen geeigneten Namen ein
-        //$IDsIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
 
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
-        //$this->RegisterVariableString($IDsIdent, $IDs);
-        //SetValue($this->GetIDForIdent($IDsIdent), $content);
     }
 }
