@@ -36,11 +36,14 @@ class HWMonitor extends IPSModule
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $value = json_decode($content, true);
 
-        //Testbereich Variablen anlegen und einstellen
-        $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
+        //Variablen anlegen und einstellen
+        $variableName = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
+        $variableIdent = "MyVariableIdent"; // Geben Sie eine geeignete Identifikation ein
 
-        $this->RegisterVariableString($JSONIdent, $JSON);
-        SetValue($this->GetIDForIdent($JSONIdent), $content);
+        $this->RegisterVariableString($variableIdent, $variableName);
+        SetValue($this->GetIDForIdent($variableIdent), $content);
+
+        //$variableID = $this->RegisterVariableString($variableName, $variableName);
+        //SetValue($variableID, $content);
     }
 }
