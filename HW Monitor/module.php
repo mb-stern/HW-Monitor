@@ -61,7 +61,7 @@ class HWMonitor extends IPSModule
 foreach ($idListe as $idItem) {
     //$gesuchteId = $idItem['id'];
 
-    $gesuchteId = '"id":0';
+    $gesuchteId = '"id":40';
 
     // Direkt nach der ID im ContentArray suchen
     foreach ($contentArray as $item) {
