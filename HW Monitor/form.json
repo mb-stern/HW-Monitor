@@ -40,7 +40,7 @@
                 {
                     "caption": "Children",
                     "name": "Children",
-                    "width": "50",
+                    "width": "100",
                     "add": 0,
                     "edit": {
                         "type": "ValidationTextBox"
@@ -49,7 +49,7 @@
                 {
                     "caption": "Nummer",
                     "name": "Nummer",
-                    "width": "15",
+                    "width": "100",
                     "add": 0,
                     "edit": {
                         "type": "ValidationTextBox"
