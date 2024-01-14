@@ -15,8 +15,8 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyInteger("Intervall", 10);
-        $this->RegisterPropertyString("IDListe", '[{"ID"}]');
-        //$this->RegisterPropertyString("IDListe", '');
+        //$this->RegisterPropertyString("IDListe", '[{"ID"}]');
+        $this->RegisterPropertyString("IDListe", '');
         $this->RegisterTimer("HWM_UpdateTimer", $this->ReadPropertyInteger("Intervall") * 1000, 'HWM_Update($_IPS[\'TARGET\']);');
     }
 
