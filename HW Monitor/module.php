@@ -58,30 +58,27 @@ class HWMonitor extends IPSModule
         }
 
         // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
+foreach ($idListe as $idItem) {
+    $gesuchteId = $idItem['id'];
 
-            // Nach spezifischer ID im ContentArray suchen
-            $gefundeneItem = null;
-            foreach ($contentArray as $item) {
-                if (isset($item['id']) && $item['id'] == $gesuchteId) {
-                    $gefundeneItem = $item;
-                    break;
-                }
-            }
-
-            if ($gefundeneItem !== null) {
-                // Die gefundene ID ausgeben (als float)
-                $gefundeneId = (float)$gefundeneItem['id'];
-                echo "Gefundene ID: $gefundeneId\n";
-    
-                // Hier können Sie die Variable erstellen oder den gefundenen Wert anderweitig verwenden
-                // Zum Beispiel:
-                $variableIdent = "Variable_" . $gefundeneId;
-                $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
-            }
+    // Nach spezifischer ID im ContentArray suchen
+    $gefundeneItem = null;
+    foreach ($contentArray as $item) {
+        if (isset($item['id']) && $item['id'] == $gesuchteId) {
+            $gefundeneItem = $item;
+            break;
         }
+    }
+
+    if ($gefundeneItem !== null) {
+        // Die gefundene ID ausgeben (als float)
+        $gefundeneId = (float)$gefundeneItem['id'];
+        echo "Gefundene ID: $gefundeneId\n";
+    } else {
+        echo "ID nicht gefunden: $gesuchteId\n";
+    }
+}
+
     }
 }
 ?>
