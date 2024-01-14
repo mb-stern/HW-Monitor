@@ -54,4 +54,24 @@ class HWMonitor extends IPSModule
         $formattedString = $this->formatArrayToString($idListeArray);
         SetValue($this->GetIDForIdent($IDsIdent), $formattedString);
     }
+        // Funktion zum Formatieren des JSON-Arrays in einen String
+private function formatArrayToString($array)
+{
+    $formattedString = '';
+
+    if (is_array($array)) {
+        foreach ($array as $item) {
+            if (is_array($item)) {
+                foreach ($item as $key => $value) {
+                    $formattedString .= "$key: $value, ";
+                }
+            }
+        }
+    }
+
+    // Entfernen Sie das letzte Komma und Leerzeichen
+    $formattedString = rtrim($formattedString, ', ');
+
+    return $formattedString;
 }
+    }
