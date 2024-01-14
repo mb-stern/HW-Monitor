@@ -31,8 +31,8 @@
       },
       {
         "type": "List",
-        "name": "IDListe",
-        "caption": "Überwachte IDs",
+        "name": "Profiles2Monitor",
+        "caption": "Profiles to monitor - Default for empty batteries",
         "rowCount": 5,
         "add": true,
         "delete": true,
