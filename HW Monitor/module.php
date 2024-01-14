@@ -67,7 +67,7 @@ if (!isset($contentArray['id'])) {
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
 
-    foreach ($contentArray['items'] as $item) {
+    foreach ($contentArray['id'] as $item) {
         if ($item['id'] === $gesuchteId) {
             // Die gefundene ID ausgeben (als float)
             $gefundeneId = (float)$item['id'];
