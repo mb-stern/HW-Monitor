@@ -83,7 +83,7 @@ class HWMonitor extends IPSModule
     // Funktion zum Suchen der ID in den Children
     private function findIdInChildren($item, $gesuchteId)
     {
-        if ($item['id'] == $gesuchteId) {
+        if (isset($item['id']) && $item['id'] == $gesuchteId) {
             return $item;
         }
 
