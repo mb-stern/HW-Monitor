@@ -72,5 +72,36 @@ class HWMonitor extends IPSModule
     $formattedString = rtrim($formattedString, ', ');
 
     return $formattedString;
+
+    // Funktion zum Durchsuchen des Baums nach der gewünschten "id"
+function searchById($array, $id) {
+    foreach ($array as $item) {
+        if ($item['id'] == $id) {
+            return $item;
+        }
+        if (!empty($item['Children'])) {
+            $result = searchById($item['Children'], $id);
+            if ($result) {
+                return $result;
+            }
+        }
+    }
+    return null;
+}
+
+// Gewünschte "id" festlegen
+$desiredId = 5;
+
+// Suche nach der gewünschten "id" im JSON-Baum
+$result = searchById($data, $desiredId);
+
+// Ausgabe der gefundenen Daten
+if ($result) {
+    echo "Gefundene Daten für id $desiredId:\n";
+    print_r($result);
+} else {
+    echo "Die id $desiredId wurde nicht gefunden.\n";
+}
+
 }
 }
