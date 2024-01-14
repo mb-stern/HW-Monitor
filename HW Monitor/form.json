@@ -11,14 +11,6 @@
                 {
                     "type": "Label",
                     "label": "Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
-                },
-                {
-                    "type": "Label",
-                    "label": "To get notified of events it is possible to display a HTML box for the webfront or send out email/app notifications."
-                },
-                {
-                    "type": "Label",
-                    "label": "The default values check for empty batteries - if you want to check for something else, simply delete the default values and replace them."
                 }
             ]
         },
@@ -38,7 +30,6 @@
             "delete": true,
             "columns": [
                 {
-                    "type": "NumberSpinner",
                     "name": "ID",
                     "caption": "ID des Wertes",
                     "width": "150",
