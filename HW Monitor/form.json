@@ -32,7 +32,7 @@
       {
         "type": "List",
         "name": "IDListe",
-        "caption": "Überwachte ID's",
+        "caption": "Überwachte IDs",
         "rowCount": 5,
         "add": true,
         "delete": true,
