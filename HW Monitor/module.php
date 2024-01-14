@@ -73,7 +73,7 @@ class HWMonitor extends IPSModule
 
     return $formattedString;
 
-    // Funktion zum Durchsuchen des Baums nach der gewünschten "id"
+// Funktion zum Durchsuchen des Baums nach der gewünschten "id"
 function searchById($array, $id) {
     foreach ($array as $item) {
         if ($item['id'] == $id) {
@@ -93,15 +93,32 @@ function searchById($array, $id) {
 $desiredId = 5;
 
 // Suche nach der gewünschten "id" im JSON-Baum
-$result = searchById($data, $desiredId);
+$result = searchById($value, $desiredId);
 
 // Ausgabe der gefundenen Daten
 if ($result) {
     echo "Gefundene Daten für id $desiredId:\n";
     print_r($result);
+
+    // Variablennamen erstellen
+    $variableName = 'Temperature_' . str_replace(' ', '_', $result['Text']);
+
+    // Überprüfen, ob die Variable bereits existiert, andernfalls erstellen
+    if (!IPS_VariableExists($variableName)) {
+        $variableID = IPS_CreateVariable(2); // Float-Variablentyp
+        IPS_SetName($variableID, $variableName);
+        IPS_SetParent($variableID, 0 /* ID des Objektbaums, in dem die Variable erstellt werden soll */);
+    } else {
+        $variableID = IPS_GetVariableIDByName($variableName, 0 /* ID des Objektbaums */);
+    }
+
+    // Wert der Variable setzen
+    $value = floatval(str_replace(' °C', '', $result['Value'])); // Annahme: Wert ist in der Form "xx.x °C"
+    SetValue($variableID, $value);
+
+    echo "Float-Variable $variableName mit Wert $value erstellt/aktualisiert.\n";
 } else {
     echo "Die id $desiredId wurde nicht gefunden.\n";
 }
-
 }
 }
