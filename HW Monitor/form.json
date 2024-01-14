@@ -39,7 +39,7 @@
         "columns": 
         [
             {
-                "name": "ID",
+                "name": "id",
                 "caption": "ID des Wertes",
                 "width": "150",
                 "add": 0,
