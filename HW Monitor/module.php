@@ -63,15 +63,14 @@ class HWMonitor extends IPSModule
         foreach ($array as $item) {
             if (is_array($item)) {
                 foreach ($item as $key => $value) {
-                    $formattedString .= "$key: $value, ";
+                    $formattedString .= "$value, ";
                 }
             }
         }
     }
 
     // Entfernen Sie das letzte Komma und Leerzeichen
-    //$formattedString = rtrim($formattedString, ', ');
-    $formattedString = str_replace([',', 'ID:'], ['', '']);
+    $formattedString = rtrim($formattedString, ', ');
 
     return $formattedString;
 }
