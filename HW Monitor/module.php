@@ -35,11 +35,11 @@ class HWMonitor extends IPSModule
       
         // JSON von der URL abrufen und entpacken
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        $value = json_decode($content, true);
+        $contentArray = json_decode($content, true);
 
         // JSON-Array aus der Property 'IDListe' holen
         $idListeString = $this->ReadPropertyString('IDListe');
-        $idListeArray = json_decode($idListeString, true);
+        $idListe = json_decode($idListeString, true);
 
         //Variablen anlegen und einstellen für die Contentausgabe
         $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
@@ -47,11 +47,24 @@ class HWMonitor extends IPSModule
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
         
-        //Variablen anlegen und einstellen für die ID-Ausgabe zur überprüfung
+        //Variablen anlegen und einstellen für die ID-Ausgabe
         $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
         $IDsIdent = "IDsIdent"; // Geben Sie eine geeignete Identifikation ein
         $this->RegisterVariableString($IDsIdent, $IDs);
         SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
 
+        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+foreach ($idListe as $idItem) {
+    $gesuchteId = $idItem['id'];
+
+    foreach ($contentArray['items'] as $item) {
+        if ($item['id'] === $gesuchteId) {
+            // Die gefundene ID ausgeben (als float)
+            $gefundeneId = (float)$item['id'];
+            echo "Gefundene ID: $gefundeneId\n";
+            break;
+        }
+    }
+}
     }
 }
