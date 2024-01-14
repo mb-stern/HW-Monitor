@@ -33,34 +33,41 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
       
         // JSON von der URL abrufen und entpacken
-$content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-$contentArray = json_decode($content, true);
+        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $contentArray = json_decode($content, true);
 
-// Überprüfen, ob die JSON-Dekodierung erfolgreich war
-if ($contentArray === null) {
-    die('Fehler beim Dekodieren des JSON-Inhalts');
-}
+        // JSON-Array aus der Property 'IDListe' holen
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-// JSON-Array aus der Property 'IDListe' holen
-$idListeString = $this->ReadPropertyString('IDListe');
-$idListe = json_decode($idListeString, true);
+        // Variablen anlegen und einstellen für die Contentausgabe
+        $JSON = "JSON_Content"; // Geben Sie einen geeigneten Namen ein
+        $JSONIdent = "JSON_Content_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $this->RegisterVariableString($JSONIdent, $JSON);
+        SetValue($this->GetIDForIdent($JSONIdent), $content);
+        
+        // Variablen anlegen und einstellen für die ID-Ausgabe
+        $IDs = "Registrierte_IDs"; // Geben Sie einen geeigneten Namen ein
+        $IDsIdent = "Registrierte_IDs_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $this->RegisterVariableString($IDsIdent, $IDs);
+        SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
 
-// Überprüfen, ob die ID-Liste erfolgreich dekodiert wurde
-if ($idListe === null) {
-    die('Fehler beim Dekodieren der ID-Liste');
-}
+        // Überprüfen, ob die JSON-Dekodierung erfolgreich war
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            die('Fehler beim Dekodieren des JSON-Inhalts');
+        }
 
-// Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
+        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+        foreach ($idListe as $idItem) {
+        $gesuchteId = $idItem['id'];
 
-    // Direkt nach der ID im ContentArray suchen
-    foreach ($contentArray as $item) {
+        // Direkt nach der ID im ContentArray suchen
+        foreach ($contentArray as $item) {
         if (isset($item['id']) && $item['id'] === $gesuchteId) {
             // Die gefundene ID ausgeben (als float)
             $gefundeneId = (float)$item['id'];
             echo "Gefundene ID: $gefundeneId\n";
-
+    
             // Hier können Sie die Variable erstellen oder den gefundenen Wert anderweitig verwenden
             // Zum Beispiel:
             $variableIdent = "Variable_" . $gefundeneId;
@@ -69,7 +76,6 @@ foreach ($idListe as $idItem) {
         }
     }
 }
-
 
 }
 }
