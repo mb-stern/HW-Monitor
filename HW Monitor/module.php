@@ -70,7 +70,8 @@ class HWMonitor extends IPSModule
     }
 
     // Entfernen Sie das letzte Komma und Leerzeichen
-    $formattedString = rtrim($formattedString, ', ');
+    //$formattedString = rtrim($formattedString, ', ');
+    $formattedString = str_replace([',', 'ID:'], ['', '']);
 
     return $formattedString;
 }
