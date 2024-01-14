@@ -32,7 +32,7 @@
         {
             "type": "List",
             "name": "Profiles2Monitor",
-            "caption": "Überwachte Pfade",
+            "caption": "Überwachte ID's",
             "rowCount": 5,
             "add": true,
             "delete": true,
@@ -44,7 +44,7 @@
                     "width": "150",
                     "add": 0,
                     "edit": {
-                        "type": "ValidationTextBox"
+                        "type": "NumberSpinner"
                     }
                     }
             ]
