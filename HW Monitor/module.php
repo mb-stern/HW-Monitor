@@ -3,13 +3,13 @@ class HWMonitor extends IPSModule
 {
     protected function Log($Message)
     {
-        //Never delete this line!
+        // Never delete this line!
         IPS_LogMessage(__CLASS__, $Message);
     }
     
     public function Create()
     {
-        //Never delete this line!
+        // Never delete this line!
         parent::Create();
 
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
@@ -23,13 +23,13 @@ class HWMonitor extends IPSModule
     {
         $this->UnregisterTimer("HWM_UpdateTimer");
         
-        //Never delete this line!
+        // Never delete this line!
         parent::Destroy();
     }
 
     public function ApplyChanges()
     {
-        //Never delete this line!
+        // Never delete this line!
         parent::ApplyChanges();
       
         // JSON von der URL abrufen und entpacken
@@ -41,15 +41,15 @@ class HWMonitor extends IPSModule
         $idListe = json_decode($idListeString, true);
 
         // Variablen anlegen und einstellen für die Contentausgabe
-        $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "JSONIdent"; // Geben Sie eine geeignete Identifikation ein
-        $this->MaintainVariable($JSONIdent, $JSON, 3, "~String", 10, true);
+        $JSON = "JSON_Content"; // Geben Sie einen geeigneten Namen ein
+        $JSONIdent = "JSON_Content_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
         
         // Variablen anlegen und einstellen für die ID-Ausgabe
-        $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
-        $IDsIdent = "IDsIdent"; // Geben Sie eine geeignete Identifikation ein
-        $this->MaintainVariable($IDsIdent, $IDs, 3, "~String", 20, true);
+        $IDs = "Registrierte_IDs"; // Geben Sie einen geeigneten Namen ein
+        $IDsIdent = "Registrierte_IDs_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $this->RegisterVariableString($IDsIdent, $IDs);
         SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
 
         // Überprüfen, ob die JSON-Dekodierung erfolgreich war
