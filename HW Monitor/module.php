@@ -39,7 +39,7 @@ class HWMonitor extends IPSModule
 
         // JSON-Array aus der Property 'IDListe' holen
         $idListeString = $this->ReadPropertyString('IDListe');
-        $idListeArray = json_decode($idListeString, true);
+        $formattedString = $this->formatArrayToString(json_decode($idListeString, true));
 
         //Variablen anlegen und einstellen für die Contentausgabe
         $JSON = "JSON-Content"; // Geben Sie einen geeigneten Namen ein
@@ -47,15 +47,14 @@ class HWMonitor extends IPSModule
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
         
-        //Variablen anlegen und einstellen für die ID-Ausgabe zur überprüfung
+        //Variablen anlegen und einstellen für die ID-Ausgabe zur Überprüfung
         $IDs = "Registrierte IDs"; // Geben Sie einen geeigneten Namen ein
         $IDsIdent = "IDsIdent"; // Geben Sie eine geeignete Identifikation ein
         $this->RegisterVariableString($IDsIdent, $IDs);
-        $formattedString = $this->formatArrayToString($idListeArray);
         SetValue($this->GetIDForIdent($IDsIdent), $formattedString);
-        
+
         // Werte aus dem JSON basierend auf den ausgewählten IDs abrufen
-        $selectedValues = $this->getSelectedValues($value, $idListeArray);
+        $selectedValues = $this->getValuesOnSameLevel($value, $formattedString);
 
         // Hier können Sie die abgerufenen Werte weiterverarbeiten oder loggen
         $this->Log('Abgerufene Werte: ' . print_r($selectedValues, true));
@@ -85,26 +84,30 @@ class HWMonitor extends IPSModule
         return $formattedString;
     }
 
-    // Funktion zum Abrufen ausgewählter Werte basierend auf den IDs
-    private function getSelectedValues($jsonArray, $selectedIDs)
+    // Funktion zum Abrufen aller Werte auf derselben Ebene basierend auf den IDs im $formattedString
+    private function getValuesOnSameLevel($jsonArray, $formattedString)
     {
-        $selectedValues = [];
+        $selectedIDs = json_decode($formattedString, true);
+
+        $valuesOnSameLevel = [];
 
         foreach ($selectedIDs as $selectedID) {
             // Überprüfen Sie, ob die ausgewählte ID im JSON vorhanden ist
-            if (isset($jsonArray[$selectedID['ID']])) {
-                // Hinzufügen der Werte zur Liste
-                $selectedValues[] = [
-                    'ID' => $jsonArray[$selectedID['ID']]['ID'],
-                    'Text' => $jsonArray[$selectedID['ID']]['Text'],
-                    'Value' => $jsonArray[$selectedID['ID']]['Value'],
-                    'Min' => $jsonArray[$selectedID['ID']]['Min'],
-                    'Max' => $jsonArray[$selectedID['ID']]['Max'],
-                ];
+            if (isset($jsonArray[$selectedID])) {
+                // Hinzufügen aller Werte auf derselben Ebene zur Liste
+                foreach ($jsonArray[$selectedID] as $key => $value) {
+                    $valuesOnSameLevel[] = [
+                        'ID' => $key,
+                        'Text' => $key, // Anpassen, wenn ein bestimmtes Textattribut vorhanden ist
+                        'Value' => $value,
+                        'Min' => null, // Anpassen, wenn Min/Max-Werte verfügbar sind
+                        'Max' => null,
+                    ];
+                }
             }
         }
 
-        return $selectedValues;
+        return $valuesOnSameLevel;
     }
 
     // Funktion zum Erstellen oder Aktualisieren von Float-Variablen
@@ -121,7 +124,8 @@ class HWMonitor extends IPSModule
 
             // Profileigenschaften setzen (z.B., Min und Max)
             IPS_SetVariableProfileText($profileName, '', ' ' . $value['Text']);
-            IPS_SetVariableProfileValues($profileName, $value['Min'], $value['Max'], 0.1); // Passen Sie Schritt und Dezimalstellen nach Bedarf an
+            IPS_SetVariableProfileValues($profileName, $value['Min'], $value['Max'], 0.1); // Passen Sie Schritt und Dez
+            // Passen Sie Schritt und Dezimalstellen nach Bedarf an
 
             // Verknüpfung des Variablenprofils mit der erstellten Float-Variable
             IPS_SetVariableCustomProfile($variableID, $profileName);
