@@ -41,7 +41,8 @@
                     "type": "NumberSpinner",
                     "name": "ID",
                     "caption": "ID des Wertes",
-                    "width": "150"
+                    "width": "150",
+                    "add": 0
                     }
             ]
         }
