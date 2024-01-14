@@ -16,7 +16,6 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyInteger("Intervall", 10);
         $this->RegisterPropertyString("IDListe", '[]');
-        //$this->RegisterPropertyString("IDListe", '');
         $this->RegisterTimer("HWM_UpdateTimer", $this->ReadPropertyInteger("Intervall") * 1000, 'HWM_Update($_IPS[\'TARGET\']);');
     }
 
@@ -54,27 +53,23 @@ class HWMonitor extends IPSModule
         SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
 
         // Überprüfen, ob die JSON-Dekodierung erfolgreich war
-if (json_last_error() !== JSON_ERROR_NONE) {
-    die('Fehler beim Dekodieren des JSON-Inhalts');
-}
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            die('Fehler beim Dekodieren des JSON-Inhalts');
+        }
 
-// Überprüfen, ob das erwartete Schlüssel "items" im Array vorhanden ist
-if (!isset($contentArray['id'])) {
-    die('Der erwartete Schlüssel "items" ist im JSON-Inhalt nicht vorhanden');
-}
+        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-// Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
-
-    foreach ($contentArray['id'] as $item) {
-        if ($item['id'] === $gesuchteId) {
-            // Die gefundene ID ausgeben (als float)
-            $gefundeneId = (float)$item['id'];
-            echo "Gefundene ID: $gefundeneId\n";
-            break;
+            foreach ($contentArray as $item) {
+                if (isset($item['id']) && $item['id'] === $gesuchteId) {
+                    // Die gefundene ID ausgeben (als float)
+                    $gefundeneId = (float)$item['id'];
+                    echo "Gefundene ID: $gefundeneId\n";
+                    break;
+                }
+            }
         }
     }
 }
-}
-}
+?>
