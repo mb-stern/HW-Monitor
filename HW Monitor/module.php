@@ -61,52 +61,58 @@ class HWMonitor extends IPSModule
         SetValue($this->GetIDForIdent($IDsIdent), $formattedString);
     
         // Werte aus dem JSON basierend auf den ausgewählten IDs abrufen
-        $selectedValues = $this->getSelectedValues($value, $idListeArray);
-    
-        // Hier können Sie die abgerufenen Werte weiterverarbeiten oder loggen
-        $this->Log('Abgerufene Werte: ' . print_r($selectedValues, true));
-    }
-    
-    // Funktion zum Formatieren des JSON-Arrays in einen String
-    private function formatArrayToString($array)
-    {
-        $formattedString = '';
-    
-        if (is_array($array)) {
-            foreach ($array as $item) {
-                if (is_array($item)) {
-                    foreach ($item as $key => $value) {
-                        $formattedString .= "$value, ";
-                    }
-                }
-            }
+    $selectedValues = $this->getSelectedValues($value, $idListeArray);
+
+    // Hier können Sie die abgerufenen Werte weiterverarbeiten oder loggen
+    $this->Log('Abgerufene Werte: ' . print_r($selectedValues, true));
+
+    // Variablen für die abgerufenen Werte erstellen oder aktualisieren
+    $this->createOrUpdateVariables($selectedValues);
+}
+
+// Funktion zum Abrufen ausgewählter Werte basierend auf den IDs
+private function getSelectedValues($jsonArray, $selectedIDs)
+{
+    $selectedValues = [];
+
+    foreach ($selectedIDs as $selectedID) {
+        // Überprüfen Sie, ob die ausgewählte ID im JSON vorhanden ist
+        if (isset($jsonArray[$selectedID['ID']])) {
+            // Hinzufügen der Werte zur Liste
+            $selectedValues[] = [
+                'ID' => $jsonArray[$selectedID['ID']]['ID'],
+                'Text' => $jsonArray[$selectedID['ID']]['Text'],
+                'Value' => $jsonArray[$selectedID['ID']]['Value'],
+                'Min' => $jsonArray[$selectedID['ID']]['Min'],
+                'Max' => $jsonArray[$selectedID['ID']]['Max'],
+            ];
         }
-    
-        // Entfernen Sie das letzte Komma und Leerzeichen
-        $formattedString = rtrim($formattedString, ', ');
-    
-        return $formattedString;
     }
-    
-    // Funktion zum Abrufen ausgewählter Werte basierend auf den IDs
-    private function getSelectedValues($jsonArray, $selectedIDs)
-    {
-        $selectedValues = [];
-    
-        foreach ($selectedIDs as $selectedID) {
-            // Überprüfen Sie, ob die ausgewählte ID im JSON vorhanden ist
-            if (isset($jsonArray[$selectedID['ID']])) {
-                // Hinzufügen der Werte zur Liste
-                $selectedValues[] = [
-                    'ID' => $jsonArray[$selectedID['ID']]['ID'],
-                    'Text' => $jsonArray[$selectedID['ID']]['Text'],
-                    'Value' => $jsonArray[$selectedID['ID']]['Value'],
-                    'Min' => $jsonArray[$selectedID['ID']]['Min'],
-                    'Max' => $jsonArray[$selectedID['ID']]['Max'],
-                ];
-            }
+
+    return $selectedValues;
+}
+
+// Funktion zum Erstellen oder Aktualisieren von Float-Variablen
+private function createOrUpdateVariables($selectedValues)
+{
+    foreach ($selectedValues as $value) {
+        $variableID = $this->RegisterVariableFloat($value['Text'], $value['Text']);
+
+        // Profil erstellen oder abrufen
+        $profileName = 'HWM_Profile_' . $value['ID'];
+        if (!IPS_VariableProfileExists($profileName)) {
+            IPS_CreateVariableProfile($profileName, 2 /* Float */);
         }
-    
-        return $selectedValues;
+
+        // Profileigenschaften setzen (z.B., Min und Max)
+        IPS_SetVariableProfileText($profileName, '', ' ' . $value['Text']);
+        IPS_SetVariableProfileValues($profileName, $value['Min'], $value['Max'], 0.1); // Passen Sie Schritt und Dezimalstellen nach Bedarf an
+
+        // Verknüpfung des Variablenprofils mit der erstellten Float-Variable
+        IPS_SetVariableCustomProfile($variableID, $profileName);
+
+        // Wert in die Variable setzen
+        SetValueFloat($variableID, $value['Value']);
     }
+}
 }
