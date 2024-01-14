@@ -62,7 +62,7 @@ class HWMonitor extends IPSModule
         foreach ($array as $item) {
             if (is_array($item)) {
                 foreach ($item as $key => $value) {
-                    $formattedString .= "$value, ";
+                    $formattedString .= "$value,";
                 }
             }
         }
