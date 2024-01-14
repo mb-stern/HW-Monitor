@@ -27,7 +27,7 @@
         { "type": "IntervalBox", "name": "Intervall", "caption": "Sekunden" },
         {
             "type": "Label",
-            "label": "ID des Wertes"
+            "label": "Überwachte IDs"
         },
         {
             "type": "List",
