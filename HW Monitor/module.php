@@ -57,18 +57,18 @@ class HWMonitor extends IPSModule
             die('Fehler beim Dekodieren des JSON-Inhalts');
         }
 
-        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-foreach ($idListe as $idItem) 
-{
+ // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
 
     // Direkt nach der ID im ContentArray suchen
-    if (isset($contentArray['id']) && $contentArray['id'] === $gesuchteId) 
-    {
-        // Die gefundene ID ausgeben (als float)
-        $gefundeneId = (float)$contentArray['id'];
-        echo "Gefundene ID: $gefundeneId\n";
+    foreach ($contentArray as $item) {
+        if (isset($item['id']) && $item['id'] === $gesuchteId) {
+            // Die gefundene ID ausgeben (als float)
+            $gefundeneId = (float)$item['id'];
+            echo "Gefundene ID: $gefundeneId\n";
+        }
     }
- }
-    }
+}
+}
 }
