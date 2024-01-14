@@ -60,14 +60,16 @@ class HWMonitor extends IPSModule
  // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
+    $gesuchterText = $idItem['Text'];
 
-    // Direkt nach der ID im ContentArray suchen
+    // Direkt nach der ID und dem Text im ContentArray suchen
     foreach ($contentArray as $item) {
-        if (is_array($item) && isset($item['id'])) {
+        if (is_array($item) && isset($item['id'], $item['Text'])) {
             $jsonString = json_encode($item);
             $gesuchtesPräfix = '"id":' . $gesuchteId;
+            $gesuchterText = $idItem['Text'];
 
-            if (strpos($jsonString, $gesuchtesPräfix) !== false) {
+            if (strpos($jsonString, $gesuchtesPräfix) !== false && strpos($jsonString, $gesuchterText) !== false) {
                 // Die gefundene ID ausgeben (als float)
                 $gefundeneId = (float) $gesuchteId;
                 echo "Gefundene ID: $gefundeneId\n";
