@@ -32,27 +32,16 @@
         {
             "type": "List",
             "name": "Profiles2Monitor",
-            "caption": "Profiles to monitor - Default for empty batteries",
+            "caption": "Überwachte Pfade",
             "rowCount": 5,
             "add": true,
             "delete": true,
             "columns": [
                 {
-                    "caption": "Children",
-                    "name": "Children",
-                    "width": "100",
-                    "add": 0,
-                    "edit": {
-                        "type": "ValidationTextBox"
-                    }
-                },
-                {
-                    "caption": "Nummer",
-                    "name": "Nummer",
-                    "width": "100",
-                    "add": 0,
-                    "edit": {
-                        "type": "ValidationTextBox"
+                    "type": "NumberSpinner",
+                    "name": "ID",
+                    "caption": "ID des Wertes",
+                    "width": "150"
                     }
                 }
             ]
