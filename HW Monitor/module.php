@@ -40,66 +40,62 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Variablen anlegen und einstellen für die Contentausgabe
-        $JSON = "JSON_Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "JSON_Content_Ident"; // Geben Sie eine geeignete Identifikation ein
-        $this->RegisterVariableString($JSONIdent, $JSON);
-        SetValue($this->GetIDForIdent($JSONIdent), $content);
-
-        // Variablen anlegen und einstellen für die ID-Ausgabe
-        $IDs = "Registrierte_IDs"; // Geben Sie einen geeigneten Namen ein
-        $IDsIdent = "Registrierte_IDs_Ident"; // Geben Sie eine geeignete Identifikation ein
-        $this->RegisterVariableString($IDsIdent, $IDs);
-        SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
-
         // Überprüfen, ob die JSON-Dekodierung erfolgreich war
         if (json_last_error() !== JSON_ERROR_NONE) {
             die('Fehler beim Dekodieren des JSON-Inhalts');
         }
 
- // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
-    $gesuchterText = $idItem['Text'];
+        // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-    // Direkt nach der ID und dem Text im ContentArray suchen
-    foreach ($contentArray as $item) {
-        if (is_array($item) && isset($item['id'], $item['Text'])) {
-            $jsonString = json_encode($item);
-            $gesuchtesPräfix = '"id":' . $gesuchteId;
-            $gesuchterText = $idItem['Text'];
+            // Direkt nach der ID im ContentArray suchen
+            foreach ($contentArray as $item) {
+                // Funktion zum Suchen der ID in den Children
+                $foundItem = $this->findIdInChildren($item, $gesuchteId);
 
-            if (strpos($jsonString, $gesuchtesPräfix) !== false && strpos($jsonString, $gesuchterText) !== false) {
-                // Die gefundene ID ausgeben (als float)
-                $gefundeneId = (float) $gesuchteId;
-                echo "Gefundene ID: $gefundeneId\n";
+                if ($foundItem !== null) {
+                    // Die gefundene ID ausgeben (als float)
+                    $gefundeneId = (float)$gesuchteId;
+                    echo "Gefundene ID: $gefundeneId\n";
 
-                // Hier die Variable für 'Text' als String erstellen
-                $textValue = $item['Text'];
-                $textVariableIdent = "Text_Variable_" . $gefundeneId;
-                $this->RegisterVariableString($textVariableIdent, "Text Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($textVariableIdent), $textValue);
+                    // Hier können Sie die Variable für 'Text' erstellen oder den gefundenen Wert anderweitig verwenden
+                    // Zum Beispiel:
+                    $variableIdent = "Variable_" . $gefundeneId;
+                    $this->RegisterVariableString($variableIdent, "Variable für ID $gefundeneId");
+                    SetValue($this->GetIDForIdent($variableIdent), $foundItem['Text']);
 
-                // Hier die Variable für 'Min' als String erstellen
-                $minValue = $item['Min'];
-                $minVariableIdent = "Min_Variable_" . $gefundeneId;
-                $this->RegisterVariableString($minVariableIdent, "Min Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($minVariableIdent), $minValue);
+                    // Hier können Sie auch die Variablen für 'Min', 'Max', 'Value' erstellen
+                    // Zum Beispiel:
+                    $this->RegisterVariableString($variableIdent . "_Min", "Min für ID $gefundeneId");
+                    SetValue($this->GetIDForIdent($variableIdent . "_Min"), $foundItem['Min']);
 
-                // Hier die Variable für 'Max' als String erstellen
-                $maxValue = $item['Max'];
-                $maxVariableIdent = "Max_Variable_" . $gefundeneId;
-                $this->RegisterVariableString($maxVariableIdent, "Max Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($maxVariableIdent), $maxValue);
+                    $this->RegisterVariableString($variableIdent . "_Max", "Max für ID $gefundeneId");
+                    SetValue($this->GetIDForIdent($variableIdent . "_Max"), $foundItem['Max']);
 
-                // Hier die Variable für 'Value' als String erstellen
-                $valueValue = $item['Value'];
-                $valueVariableIdent = "Value_Variable_" . $gefundeneId;
-                $this->RegisterVariableString($valueVariableIdent, "Value Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($valueVariableIdent), $valueValue);
+                    $this->RegisterVariableString($variableIdent . "_Value", "Value für ID $gefundeneId");
+                    SetValue($this->GetIDForIdent($variableIdent . "_Value"), $foundItem['Value']);
+                }
             }
         }
     }
-}
+
+    // Funktion zum Suchen der ID in den Children
+    private function findIdInChildren($item, $gesuchteId)
+    {
+        if ($item['id'] == $gesuchteId) {
+            return $item;
+        }
+
+        if (isset($item['Children']) && is_array($item['Children'])) {
+            foreach ($item['Children'] as $child) {
+                $found = $this->findIdInChildren($child, $gesuchteId);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 }
