@@ -81,7 +81,7 @@ foreach ($idListe as $idItem) {
                 $this->Log('Warnung: "Max" ist nicht definiert für ID ' . $gefundeneId);
             }
 
-            if (isset($item['Value'])) {
+            if (isset($item['"Value":'])) {
                 $valueValue = (float)$item['Value'];
             } else {
                 $valueValue = 0.0; // oder einen anderen Standardwert
