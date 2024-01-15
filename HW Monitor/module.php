@@ -82,7 +82,7 @@ foreach ($idListe as $idItem) {
             }
 
             if (isset($item['"Value":'])) {
-                $valueValue = (float)$item['Value'];
+                $valueValue = (float)$item['"Value":'];
             } else {
                 $valueValue = 0.0; // oder einen anderen Standardwert
                 $this->Log('Warnung: "Value" ist nicht definiert für ID ' . $gefundeneId);
