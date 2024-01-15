@@ -43,56 +43,48 @@ class HWMonitor extends IPSModule
         }
 
         // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
-
-    // Direkt nach der ID im ContentArray suchen
-    foreach ($contentArray as $item) {
-        // JSON-String des aktuellen Elements erhalten
-        $jsonString = json_encode($item);
-
-        // Präfix "id" mit Anführungszeichen hinzufügen
-        $gesuchtesPräfix = '"id":' . $gesuchteId;
-
-        // Überprüfen, ob das Präfix im JSON-String gefunden wird
-        if (strpos($jsonString, $gesuchtesPräfix) !== false) {
-            // Die gefundenen Werte ausgeben
-            $gefundeneId = (float)$gesuchteId;
-
-            // Überprüfen, ob die Schlüssel vorhanden sind
-            if (isset($item['Text'])) {
-                $textValue = $item['Text'];
-            } else {
-                $textValue = 'Nicht definiert';
-                $this->Log('Warnung: "Text" ist nicht definiert für ID ' . $gefundeneId);
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
+        
+            // Direkt nach der ID im ContentArray suchen
+            foreach ($contentArray as $item) {
+                // JSON-String des aktuellen Elements erhalten
+                $jsonString = json_encode($item);
+        
+                // Präfix "id" mit Anführungszeichen hinzufügen
+                $gesuchtesPräfix = '"id":' . $gesuchteId;
+        
+                // Überprüfen, ob das Präfix im JSON-String gefunden wird
+                if (strpos($jsonString, $gesuchtesPräfix) !== false) {
+                    // Die gefundenen Werte ausgeben
+                    $gefundeneId = (float)$gesuchteId;
+                    $textValue = $item['Text'];
+                    $minValue = (float)$item['Min'];
+                    $maxValue = (float)$item['Max'];
+                    $valueValue = (float)$item['Value'];
+        
+                    // Variablen erstellen und Werte setzen
+                    $idVariableIdent = "Variable_ID_" . $gefundeneId;
+                    $textVariableIdent = "Variable_Text_" . $gefundeneId;
+                    $minVariableIdent = "Variable_Min_" . $gefundeneId;
+                    $maxVariableIdent = "Variable_Max_" . $gefundeneId;
+                    $valueVariableIdent = "Variable_Value_" . $gefundeneId;
+        
+                    $this->RegisterVariableFloat($idVariableIdent, "ID für $gefundeneId");
+                    $this->RegisterVariableString($textVariableIdent, "Text für $gefundeneId");
+                    $this->RegisterVariableFloat($minVariableIdent, "Min für $gefundeneId");
+                    $this->RegisterVariableFloat($maxVariableIdent, "Max für $gefundeneId");
+                    $this->RegisterVariableFloat($valueVariableIdent, "Value für $gefundeneId");
+        
+                    SetValue($this->GetIDForIdent($idVariableIdent), $gefundeneId);
+                    SetValue($this->GetIDForIdent($textVariableIdent), $textValue);
+                    SetValue($this->GetIDForIdent($minVariableIdent), $minValue);
+                    SetValue($this->GetIDForIdent($maxVariableIdent), $maxValue);
+                    SetValue($this->GetIDForIdent($valueVariableIdent), $valueValue);
+                }
             }
-
-            if (isset($item['Min'])) {
-                $minValue = (float)$item['Min'];
-            } else {
-                $minValue = 0.0; // oder einen anderen Standardwert
-                $this->Log('Warnung: "Min" ist nicht definiert für ID ' . $gefundeneId);
-            }
-
-            if (isset($item['Max'])) {
-                $maxValue = (float)$item['Max'];
-            } else {
-                $maxValue = 0.0; // oder einen anderen Standardwert
-                $this->Log('Warnung: "Max" ist nicht definiert für ID ' . $gefundeneId);
-            }
-
-            if (isset($item['"Value":'])) {
-                $valueValue = (float)$item['"Value":'];
-            } else {
-                $valueValue = 0.0; // oder einen anderen Standardwert
-                $this->Log('Warnung: "Value" ist nicht definiert für ID ' . $gefundeneId);
-            }
-
-            // Variablen erstellen und Werte setzen
-            // ...
         }
-    }
-}
+        
 
     }
 }
