@@ -33,11 +33,8 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Variablen anlegen und einstellen für die Contentausgabe
-        $JSON = "JSON_Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "JSON_Content_Ident"; // Geben Sie eine geeignete Identifikation ein
-        $this->RegisterVariableString($JSONIdent, $JSON);
-        SetValue($this->GetIDForIdent($JSONIdent), $content);
+        // JSON-Array erstellen
+        $contentArray = json_decode($content, true);
 
         // Überprüfen, ob die JSON-Dekodierung erfolgreich war
         if (json_last_error() !== JSON_ERROR_NONE) {
