@@ -58,7 +58,7 @@ class HWMonitor extends IPSModule
                 if (strpos($jsonString, $gesuchtesPräfix) !== false) {
                     // Die gefundenen Werte ausgeben
                     $gefundeneId = (float)$gesuchteId;
-                    $textValue = $item['"Text":'];
+                    $textValue = $item['Text:'];
                     $minValue = (float)$item['"Min":'];
                     $maxValue = (float)$item['"Max":'];
                     $valueValue = (float)$item['"Value":'];
