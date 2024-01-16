@@ -72,12 +72,29 @@ class HWMonitor extends IPSModule
             // Iterieren Sie über alle Schlüssel-Wert-Paare auf derselben Ebene wie "id"
             foreach ($item as $key => $value) {
                 $variableIdent = "Variable_" . $gefundeneId . "_" . $key;
-                $this->RegisterVariableString($variableIdent, "Variable für ID $gefundeneId - $key");
-                SetValue($this->GetIDForIdent($variableIdent), $value);
+            
+                // Feststellen, welchen Typ die Variable haben soll
+                if (is_numeric($value)) {
+                    $variableType = VARIABLETYPE_FLOAT;
+                } else {
+                    $variableType = VARIABLETYPE_STRING;
+                }
+            
+                // Variable nur erstellen, wenn sie noch nicht existiert
+                if (!$this->GetIDForIdent($variableIdent)) {
+                    $this->RegisterVariable($variableIdent, "Variable für ID $gefundeneId - $key", $variableType);
+                }
+            
+                // Wert setzen, abhängig vom Typ
+                if ($variableType === VARIABLETYPE_FLOAT) {
+                    SetValue($this->GetIDForIdent($variableIdent), (float)$value);
+                } else {
+                    SetValue($this->GetIDForIdent($variableIdent), (string)$value);
+                }
             }
         }
     }
-}
+}           
 }
 }
 }
