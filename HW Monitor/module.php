@@ -49,57 +49,24 @@ class HWMonitor extends IPSModule
         }
 
      // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-    foreach ($idListe as $idItem) {
+     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
-
+    
         // Direkt nach der ID im ContentArray suchen
-        foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
-
-    // Direkt nach der ID im ContentArray suchen
-    foreach ($contentArray as $item) {
-        // JSON-String des aktuellen Elements erhalten
-        $jsonString = json_encode($item);
-
-        // Präfix "id" mit Anführungszeichen hinzufügen
-        $gesuchtesPräfix = '"id":' . $gesuchteId;
-
-        // Überprüfen, ob das Präfix im JSON-String gefunden wird
-        if (strpos($jsonString, $gesuchtesPräfix) !== false) {
-            // Die gefundenen Werte ausgeben
-            $gefundeneId = (float)$gesuchteId;
-
-            // Iterieren Sie über alle Schlüssel-Wert-Paare auf derselben Ebene wie "id"
-            foreach ($item as $key => $value) {
-                $variableIdent = "Variable_" . $gefundeneId . "_" . $key;
-            
-                // Feststellen, welchen Typ die Variable haben soll
-                if (is_numeric($value)) {
-                    $variableType = VARIABLETYPE_FLOAT;
-                } else {
-                    $variableType = VARIABLETYPE_STRING;
-                }
-            
-                // Variable nur erstellen, wenn sie noch nicht existiert
-                $variableID = @$this->GetIDForIdent($variableIdent);
-                if (!$variableID) {
-                    $variableID = IPS_CreateVariable($variableType);
-                    IPS_SetParent($variableID, $this->InstanceID);
-                    IPS_SetIdent($variableID, $variableIdent);
-                    IPS_SetName($variableID, "Variable für ID $gefundeneId - $key");
-                }
-            
-                // Wert setzen, abhängig vom Typ
-                if ($variableType === VARIABLETYPE_FLOAT) {
-                    SetValue($variableID, (float)$value);
-                } else {
-                    SetValue($variableID, (string)$value);
+        foreach ($contentArray as $item) {
+            if ($item['id'] == $gesuchteId) {
+                foreach ($item as $key => $value) {
+                    // Überprüfen, ob der Schlüssel nicht 'id' ist (um Doppelungen zu vermeiden)
+                    if ($key != 'id') {
+                        // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
+                        // Zum Beispiel:
+                        $variableIdent = "Variable_" . $gesuchteId . "_" . $key;
+                        $this->RegisterVariableString($variableIdent, "Variable für ID $gesuchteId - $key");
+                        SetValue($this->GetIDForIdent($variableIdent), $value);
+                    }
                 }
             }
-            
         }
     }
-}           
-}
 }
 }
