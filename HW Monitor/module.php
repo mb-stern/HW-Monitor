@@ -53,26 +53,31 @@ class HWMonitor extends IPSModule
         $gesuchteId = $idItem['id'];
 
         // Direkt nach der ID im ContentArray suchen
-        foreach ($contentArray as $item) {
-            // JSON-String des aktuellen Elements erhalten
-            $jsonString = json_encode($item);
+        foreach ($idListe as $idItem) {
+    $gesuchteId = $idItem['id'];
 
-            // Präfix "id" mit Anführungszeichen hinzufügen
-            $gesuchtesPräfix = '"id":' . $gesuchteId;
+    // Direkt nach der ID im ContentArray suchen
+    foreach ($contentArray as $item) {
+        // JSON-String des aktuellen Elements erhalten
+        $jsonString = json_encode($item);
 
-            // Überprüfen, ob das Präfix im JSON-String gefunden wird
-            if (strpos($jsonString, $gesuchtesPräfix) !== false) {
-                // Die gefundene ID ausgeben (als float)
-                $gefundeneId = (float)$gesuchteId;
-                echo "Gefundene ID: $gefundeneId\n";
+        // Präfix "id" mit Anführungszeichen hinzufügen
+        $gesuchtesPräfix = '"id":' . $gesuchteId;
 
-                // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
-                // Zum Beispiel:
-                $variableIdent = "Variable_" . $gefundeneId;
-                $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
+        // Überprüfen, ob das Präfix im JSON-String gefunden wird
+        if (strpos($jsonString, $gesuchtesPräfix) !== false) {
+            // Die gefundenen Werte ausgeben
+            $gefundeneId = (float)$gesuchteId;
+
+            // Iterieren Sie über alle Schlüssel-Wert-Paare auf derselben Ebene wie "id"
+            foreach ($item as $key => $value) {
+                $variableIdent = "Variable_" . $gefundeneId . "_" . $key;
+                $this->RegisterVariableString($variableIdent, "Variable für ID $gefundeneId - $key");
+                SetValue($this->GetIDForIdent($variableIdent), $value);
             }
         }
     }
+}
+}
 }
 }
