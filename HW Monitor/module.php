@@ -81,17 +81,22 @@ class HWMonitor extends IPSModule
                 }
             
                 // Variable nur erstellen, wenn sie noch nicht existiert
-                if (!$this->GetIDForIdent($variableIdent)) {
-                    $this->RegisterVariable($variableIdent, "Variable für ID $gefundeneId - $key", $variableType);
+                $variableID = @$this->GetIDForIdent($variableIdent);
+                if (!$variableID) {
+                    $variableID = IPS_CreateVariable($variableType);
+                    IPS_SetParent($variableID, $this->InstanceID);
+                    IPS_SetIdent($variableID, $variableIdent);
+                    IPS_SetName($variableID, "Variable für ID $gefundeneId - $key");
                 }
             
                 // Wert setzen, abhängig vom Typ
                 if ($variableType === VARIABLETYPE_FLOAT) {
-                    SetValue($this->GetIDForIdent($variableIdent), (float)$value);
+                    SetValue($variableID, (float)$value);
                 } else {
-                    SetValue($this->GetIDForIdent($variableIdent), (string)$value);
+                    SetValue($variableID, (string)$value);
                 }
             }
+            
         }
     }
 }           
