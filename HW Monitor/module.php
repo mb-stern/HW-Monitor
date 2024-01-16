@@ -46,10 +46,22 @@ class HWMonitor extends IPSModule
 
         // Fortsetzung des Codes...
         foreach ($idListe as $idItem) {
+            // Überprüfen, ob 'id' als Schlüssel im Array $idItem vorhanden ist
+            if (!array_key_exists('id', $idItem)) {
+                $this->Log('Ungültiges ID-Item ohne "id" gefunden');
+                continue;
+            }
+        
             $gesuchteId = $idItem['id'];
-
+        
             // Direkt nach der ID im ContentArray suchen
             foreach ($contentArray as $item) {
+                // Überprüfen, ob 'id' als Schlüssel im Array $item vorhanden ist
+                if (!array_key_exists('id', $item)) {
+                    $this->Log('Ungültiges Content-Item ohne "id" gefunden');
+                    continue;
+                }
+        
                 if ($item['id'] == $gesuchteId) {
                     foreach ($item as $key => $value) {
                         // Überprüfen, ob der Schlüssel nicht 'id' ist (um Doppelungen zu vermeiden)
@@ -63,7 +75,7 @@ class HWMonitor extends IPSModule
                     }
                 }
             }
+
         }
     }
 }
-?>
