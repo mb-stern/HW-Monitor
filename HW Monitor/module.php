@@ -53,7 +53,7 @@ class HWMonitor extends IPSModule
 
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
-            $this->searchJsonValue($contentArray, 'id', $foundIds);
+            $foundIds[] = $gesuchteId;
         }
 
         // Variablen anlegen und einstellen für die gefundenen IDs
@@ -61,20 +61,17 @@ class HWMonitor extends IPSModule
             $variableIdent = "Variable_" . $gefundeneId;
             $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
             SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
-        }
 
-        // Suche nach "Value" für die gefundenen IDs
-        $foundValues = [];
-
-        foreach ($foundIds as $gefundeneId) {
+            // Suche nach "Value" für die gefundenen IDs
+            $foundValues = [];
             $this->searchJsonValue($contentArray, 'Value', $foundValues);
-        }
 
-        // Variablen anlegen und einstellen für die gefundenen Werte
-        foreach ($foundValues as $gefundenerWert) {
-            $variableIdent = "Variable_" . md5($gefundenerWert);
-            $this->RegisterVariableString($variableIdent, "Variable für Wert $gefundenerWert");
-            SetValue($this->GetIDForIdent($variableIdent), $gefundenerWert);
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            foreach ($foundValues as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . md5($gefundenerWert);
+                $this->RegisterVariableString($variableIdentValue, "Variable für Wert $gefundenerWert");
+                SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
+            }
         }
     }
 }
