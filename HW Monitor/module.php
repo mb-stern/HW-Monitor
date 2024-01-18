@@ -6,6 +6,20 @@ class HWMonitor extends IPSModule
         IPS_LogMessage(__CLASS__, $Message);
     }
 
+    protected function searchValueForId($jsonArray, $searchId, &$foundValue)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === 'id' && $value === $searchId) {
+                // Die gesuchte ID wurde gefunden, jetzt den zugehörigen "Value" suchen
+                $this->searchJsonValue($jsonArray, 'Value', $foundValue);
+                break; // Wir haben die ID gefunden, daher können wir die Suche beenden
+            } elseif (is_array($value)) {
+                // Rekursiv in den verschachtelten Arrays suchen
+                $this->searchValueForId($value, $searchId, $foundValue);
+            }
+        }
+    }
+
     protected function searchJsonValue($jsonArray, $searchKey, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
@@ -54,22 +68,20 @@ class HWMonitor extends IPSModule
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
             $foundIds[] = $gesuchteId;
-        }
 
-        // Variablen anlegen und einstellen für die gefundenen IDs
-        foreach ($foundIds as $gefundeneId) {
-            $variableIdent = "Variable_" . $gefundeneId;
-            $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-            SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
+            // Variablen anlegen und einstellen für die gefundenen IDs
+            $variableIdent = "Variable_" . $gesuchteId;
+            $this->RegisterVariableFloat($variableIdent, "Variable für ID $gesuchteId");
+            SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
 
             // Suche nach "Value" für die gefundenen IDs
-            $foundValues = [];
-            $this->searchJsonValue($contentArray, 'Value', $foundValues);
+            $foundValue = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValue);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
-            foreach ($foundValues as $gefundenerWert) {
+            foreach ($foundValue as $gefundenerWert) {
                 $variableIdentValue = "Variable_" . md5($gefundenerWert);
-                $this->RegisterVariableString($variableIdentValue, "Variable für Wert $gefundenerWert");
+                $this->RegisterVariableString($variableIdentValue, "Variable für Wert zur ID $gesuchteId");
                 SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
             }
         }
