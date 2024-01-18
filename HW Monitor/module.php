@@ -59,41 +59,58 @@ class HWMonitor extends IPSModule
         $gesuchteId = $idItem['id'];
     
         // Direkt nach der ID im ContentArray suchen
-        foreach ($contentArray as $item) {
-            // Überprüfen, ob $item ein Array ist und ob 'id' als Schlüssel vorhanden ist
-            if (!is_array($item) || !array_key_exists('id', $item)) {
-                $this->Log('Ungültiges Content-Item oder "id" nicht gefunden');
+        foreach ($idListe as $idItem) {
+            // Überprüfen, ob $idItem ein Array ist und ob 'id' als Schlüssel vorhanden ist
+            if (!is_array($idItem) || !array_key_exists('id', $idItem)) {
+                $this->Log('Ungültiges ID-Item oder "id" nicht gefunden');
                 continue;
             }
-    
-            if ($item['id'] == $gesuchteId) {
-                // Hier werden die gewünschten Werte für jede gefundene ID aus dem JSON-Content extrahiert
-                $minValue = isset($item['Min']) ? $item['Min'] : '';
-                $maxValue = isset($item['Max']) ? $item['Max'] : '';
-                $valueValue = isset($item['Value']) ? $item['Value'] : '';
-                $textValue = isset($item['Text']) ? $item['Text'] : '';
-    
-                // Hier kannst du die Variablen erstellen oder die Werte anderweitig verwenden
-                // Zum Beispiel:
-                $minIdent = "Min_" . $gesuchteId;
-                $maxIdent = "Max_" . $gesuchteId;
-                $valueIdent = "Value_" . $gesuchteId;
-                $textIdent = "Text_" . $gesuchteId;
-    
-                $this->RegisterVariableString($minIdent, "Min für ID $gesuchteId");
-                $this->RegisterVariableString($maxIdent, "Max für ID $gesuchteId");
-                $this->RegisterVariableString($valueIdent, "Value für ID $gesuchteId");
-                $this->RegisterVariableString($textIdent, "Text für ID $gesuchteId");
-    
-                SetValue($this->GetIDForIdent($minIdent), $minValue);
-                SetValue($this->GetIDForIdent($maxIdent), $maxValue);
-                SetValue($this->GetIDForIdent($valueIdent), $valueValue);
-                SetValue($this->GetIDForIdent($textIdent), $textValue);
-    
-                // Weitere Aktionen je nach Bedarf...
+        
+            $gesuchteId = $idItem['id'];
+        
+            // Direkt nach der ID im ContentArray suchen
+            foreach ($contentArray as $item) {
+                // Überprüfen, ob $item ein Array ist
+                if (!is_array($item)) {
+                    $this->Log('Ungültiges Content-Item: Nicht-Array gefunden');
+                    continue;
+                }
+        
+                // Überprüfen, ob 'id' als Schlüssel im Array $item vorhanden ist
+                if (!array_key_exists('id', $item)) {
+                    $this->Log('Ungültiges Content-Item: "id" nicht gefunden');
+                    continue;
+                }
+        
+                if ($item['id'] == $gesuchteId) {
+                    // Hier werden die gewünschten Werte für jede gefundene ID aus dem JSON-Content extrahiert
+                    $minValue = isset($item['Min']) ? $item['Min'] : '';
+                    $maxValue = isset($item['Max']) ? $item['Max'] : '';
+                    $valueValue = isset($item['Value']) ? $item['Value'] : '';
+                    $textValue = isset($item['Text']) ? $item['Text'] : '';
+        
+                    // Hier kannst du die Variablen erstellen oder die Werte anderweitig verwenden
+                    // Zum Beispiel:
+                    $minIdent = "Min_" . $gesuchteId;
+                    $maxIdent = "Max_" . $gesuchteId;
+                    $valueIdent = "Value_" . $gesuchteId;
+                    $textIdent = "Text_" . $gesuchteId;
+        
+                    $this->RegisterVariableString($minIdent, "Min für ID $gesuchteId");
+                    $this->RegisterVariableString($maxIdent, "Max für ID $gesuchteId");
+                    $this->RegisterVariableString($valueIdent, "Value für ID $gesuchteId");
+                    $this->RegisterVariableString($textIdent, "Text für ID $gesuchteId");
+        
+                    SetValue($this->GetIDForIdent($minIdent), $minValue);
+                    SetValue($this->GetIDForIdent($maxIdent), $maxValue);
+                    SetValue($this->GetIDForIdent($valueIdent), $valueValue);
+                    SetValue($this->GetIDForIdent($textIdent), $textValue);
+        
+                    // Weitere Aktionen je nach Bedarf...
+                }
             }
         }
-    }
+    }       
     
 }
 }
