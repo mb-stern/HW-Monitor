@@ -7,16 +7,19 @@ class HWMonitor extends IPSModule
         IPS_LogMessage(__CLASS__, $Message);
     }
 
-    protected function searchValueForId($jsonArray, $searchId, &$foundValue)
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
-                // Die gesuchte ID wurde gefunden, jetzt den zugehörigen "Value" suchen
-                $this->searchJsonValue($jsonArray, 'Value', $foundValue);
+                // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
+                $this->searchJsonValue($jsonArray, 'Value', $foundValues['Value']);
+                $this->searchJsonValue($jsonArray, 'Min', $foundValues['Min']);
+                $this->searchJsonValue($jsonArray, 'Max', $foundValues['Max']);
+                $this->searchJsonValue($jsonArray, 'Text', $foundValues['Text']);
                 break; // Wir haben die ID gefunden, daher können wir die Suche beenden
             } elseif (is_array($value)) {
                 // Rekursiv in den verschachtelten Arrays suchen
-                $this->searchValueForId($value, $searchId, $foundValue);
+                $this->searchValuesForId($value, $searchId, $foundValues);
             }
         }
     }
@@ -62,15 +65,15 @@ class HWMonitor extends IPSModule
             SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
             $counter++;
 
-            // Suche nach "Value" für die gefundenen IDs
-            $foundValue = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValue);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
-            foreach ($foundValue as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $counter;
-                $this->RegisterVariableString($variableIdentValue, "Value", "", $counter);
-                SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
+            foreach ($foundValues as $key => $value) {
+                $variableIdentValue = "Variable_" . $counter . "_$key";
+                $this->RegisterVariableString($variableIdentValue, ucfirst($key), "", $counter);
+                SetValue($this->GetIDForIdent($variableIdentValue), $value);
                 $counter++;
             }
         }
