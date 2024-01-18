@@ -57,24 +57,35 @@ class HWMonitor extends IPSModule
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
 
-        // Variablen anlegen und einstellen für die ID- und Value-Ausgabe
-        $IDValue = "Registrierte_IDs_und_Values";
-        $IDValueIdent = "Registrierte_IDs_und_Values_Ident";
-        $this->RegisterVariableString($IDValueIdent, $IDValue);
-
-        // Suche nach "id" in der ID-Liste
-        $foundIdsValues = [];
-
+        // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
+
+            // Variablen anlegen und einstellen für die ID
+            $variableIdent = "Variable_" . $gesuchteId;
+            $variableIdExists = @IPS_GetObjectIDByIdent($variableIdent, $this->InstanceID);
+
+            if ($variableIdExists === false) {
+                $this->RegisterVariableFloat($variableIdent, "ID");
+                SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
+            }
+
+            // Suche nach "Value" für die gefundenen IDs
             $foundValue = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValue);
-            $foundIdsValues[$gesuchteId] = $foundValue;
-        }
 
-        // Formatieren und setzen der ID- und Value-Variable
-        $formattedIdsValues = json_encode($foundIdsValues, JSON_PRETTY_PRINT);
-        SetValue($this->GetIDForIdent($IDValueIdent), $formattedIdsValues);
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            foreach ($foundValue as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . $gesuchteId . "_Value";
+                $variableIdValueExists = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+
+                if ($variableIdValueExists === false) {
+                    $this->RegisterVariableString($variableIdentValue, "Value");
+                }
+
+                SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
+            }
+        }
     }
 }
 
