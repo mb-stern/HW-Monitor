@@ -57,18 +57,21 @@ class HWMonitor extends IPSModule
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
 
+        // Variablen anlegen und einstellen für die ID- und Value-Ausgabe
+        $IDValue = "Registrierte_IDs_und_Values";
+        $IDValueIdent = "Registrierte_IDs_und_Values_Ident";
+        $this->RegisterVariableString($IDValueIdent, $IDValue);
+
         // Schleife für die ID-Liste
+        $counter = 1;
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
 
             // Variablen anlegen und einstellen für die ID
-            $variableIdent = "Variable_" . $gesuchteId;
-            $variableIdExists = @IPS_GetObjectIDByIdent($variableIdent, $this->InstanceID);
-
-            if ($variableIdExists === false) {
-                $this->RegisterVariableFloat($variableIdent, "ID");
-                SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
-            }
+            $variableIdent = "Variable_" . $counter;
+            $this->RegisterVariableFloat($variableIdent, "ID");
+            SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
+            $counter++;
 
             // Suche nach "Value" für die gefundenen IDs
             $foundValue = [];
@@ -76,14 +79,10 @@ class HWMonitor extends IPSModule
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             foreach ($foundValue as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $gesuchteId . "_Value";
-                $variableIdValueExists = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-
-                if ($variableIdValueExists === false) {
-                    $this->RegisterVariableString($variableIdentValue, "Value");
-                }
-
+                $variableIdentValue = "Variable_" . $counter;
+                $this->RegisterVariableString($variableIdentValue, "Value");
                 SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
+                $counter++;
             }
         }
     }
