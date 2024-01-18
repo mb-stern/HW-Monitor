@@ -78,7 +78,7 @@ class HWMonitor extends IPSModule
 
             if ($variableIdExists === false) {
                 // Die Variable für die ID existiert noch nicht, daher erstellen
-                $this->RegisterVariableFloat($variableIdent, "Variable für ID $gesuchteId");
+                $this->RegisterVariableFloat($variableIdent, "ID");
                 SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
             }
 
@@ -93,7 +93,7 @@ class HWMonitor extends IPSModule
 
                 if ($variableIdValueExists === false) {
                     // Die Variable für den "Value" existiert noch nicht, daher erstellen
-                    $this->RegisterVariableString($variableIdentValue, "Variable für Wert zur ID $gesuchteId");
+                    $this->RegisterVariableString($variableIdentValue, "Value");
                 }
 
                 SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
