@@ -56,17 +56,17 @@ class HWMonitor extends IPSModule
                 $this->Log('Ungültiges ID-Item oder "id" nicht gefunden');
                 continue;
             }
-
+        
             $gesuchteId = $idItem['id'];
-
+        
             // Direkt nach der ID im ContentArray suchen
             foreach ($contentArray as $item) {
-                // Überprüfen, ob $item ein Array ist und ob 'id' als Schlüssel vorhanden ist
-                if (!is_array($item) || !array_key_exists('id', $item)) {
-                    $this->Log('Ungültiges Content-Item oder "id" nicht gefunden');
+                // Überprüfen, ob $item ein Array ist
+                if (!is_array($item)) {
+                    $this->Log('Ungültiges Content-Item: Nicht-Array gefunden');
                     continue;
                 }
-
+        
                 if ($item['id'] == $gesuchteId) {
                     foreach ($item as $key => $value) {
                         // Überprüfen, ob der Schlüssel nicht 'id' ist (um Doppelungen zu vermeiden)
@@ -81,6 +81,7 @@ class HWMonitor extends IPSModule
                 }
             }
         }
+        
     }
 }
 ?>
