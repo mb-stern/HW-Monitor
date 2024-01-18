@@ -57,48 +57,24 @@ class HWMonitor extends IPSModule
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
 
-        // Variablen anlegen und einstellen für die ID-Ausgabe
-        $IDs = "Registrierte_IDs";
-        $IDsIdent = "Registrierte_IDs_Ident";
-        $this->RegisterVariableString($IDsIdent, $IDs);
-        SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
+        // Variablen anlegen und einstellen für die ID- und Value-Ausgabe
+        $IDValue = "Registrierte_IDs_und_Values";
+        $IDValueIdent = "Registrierte_IDs_und_Values_Ident";
+        $this->RegisterVariableString($IDValueIdent, $IDValue);
 
         // Suche nach "id" in der ID-Liste
-        $foundIds = [];
+        $foundIdsValues = [];
 
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
-            $foundIds[] = $gesuchteId;
-        }
-
-        // Variablen anlegen und einstellen für die gefundenen IDs
-        foreach ($foundIds as $gesuchteId) {
-            $variableIdent = "Variable_" . $gesuchteId;
-            $variableIdExists = @IPS_GetObjectIDByIdent($variableIdent, $this->InstanceID);
-
-            if ($variableIdExists === false) {
-                // Die Variable für die ID existiert noch nicht, daher erstellen
-                $this->RegisterVariableFloat($variableIdent, "ID");
-                SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
-            }
-
-            // Suche nach "Value" für die gefundenen IDs
             $foundValue = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValue);
-
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            foreach ($foundValue as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $gesuchteId . "_Value";
-                $variableIdValueExists = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-
-                if ($variableIdValueExists === false) {
-                    // Die Variable für den "Value" existiert noch nicht, daher erstellen
-                    $this->RegisterVariableString($variableIdentValue, "Value");
-                }
-
-                SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
-            }
+            $foundIdsValues[$gesuchteId] = $foundValue;
         }
+
+        // Formatieren und setzen der ID- und Value-Variable
+        $formattedIdsValues = json_encode($foundIdsValues, JSON_PRETTY_PRINT);
+        SetValue($this->GetIDForIdent($IDValueIdent), $formattedIdsValues);
     }
 }
 
