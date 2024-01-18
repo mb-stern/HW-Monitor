@@ -67,6 +67,12 @@ class HWMonitor extends IPSModule
                     continue;
                 }
         
+                // Überprüfen, ob 'id' als Schlüssel im Array $item vorhanden ist
+                if (!array_key_exists('id', $item)) {
+                    $this->Log('Ungültiges Content-Item: "id" nicht gefunden');
+                    continue;
+                }
+        
                 if ($item['id'] == $gesuchteId) {
                     foreach ($item as $key => $value) {
                         // Überprüfen, ob der Schlüssel nicht 'id' ist (um Doppelungen zu vermeiden)
@@ -74,13 +80,18 @@ class HWMonitor extends IPSModule
                             // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
                             // Zum Beispiel:
                             $variableIdent = "Variable_" . $gesuchteId . "_" . $key;
+                            
+                            // Hier wird der Wert in einen String konvertiert, um den Typenfehler zu vermeiden
+                            $stringValue = (string)$value;
+        
                             $this->RegisterVariableString($variableIdent, "Variable für ID $gesuchteId - $key");
-                            SetValue($this->GetIDForIdent($variableIdent), $value);
+                            SetValue($this->GetIDForIdent($variableIdent), $stringValue);
                         }
                     }
                 }
             }
         }
+        
         
     }
 }
