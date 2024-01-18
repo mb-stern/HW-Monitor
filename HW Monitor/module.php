@@ -6,43 +6,27 @@ class HWMonitor extends IPSModule
         IPS_LogMessage(__CLASS__, $Message);
     }
 
-    protected function searchValueForId($jsonArray, $searchId, &$foundValue)
+    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
-                // Die gesuchte ID wurde gefunden, jetzt den zugehörigen "Value" suchen
-                $this->searchJsonValue($jsonArray, 'Value', $foundValue);
+                // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
                 break; // Wir haben die ID gefunden, daher können wir die Suche beenden
             } elseif (is_array($value)) {
                 // Rekursiv in den verschachtelten Arrays suchen
-                $this->searchValueForId($value, $searchId, $foundValue);
+                $this->searchValueForId($value, $searchId, $foundValues);
             }
         }
     }
 
-    protected function searchJsonValue($jsonArray, $searchKey, &$foundValues)
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
-            if ($key === $searchKey) {
-                $foundValues[] = $value;
-            } elseif (is_array($value)) {
-                $this->searchJsonValue($value, $searchKey, $foundValues);
-            }
-        }
-    }
-
-    protected function searchValuesForId($jsonArray, $searchId, &$foundValues, $searchKeys)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if ($key === 'id' && $value === $searchId) {
-                // Die gesuchte ID wurde gefunden, jetzt die Werte für die angegebenen Schlüssel suchen
-                foreach ($searchKeys as $searchKey) {
-                    $this->searchJsonValue($jsonArray, $searchKey, $foundValues[$searchKey]);
-                }
-                break; // Wir haben die ID gefunden, daher können wir die Suche beenden
-            } elseif (is_array($value)) {
-                // Rekursiv in den verschachtelten Arrays suchen
-                $this->searchValuesForId($value, $searchId, $foundValues, $searchKeys);
+            if (is_array($value)) {
+                $this->searchValuesForId($value, $searchId, $foundValues);
+            } else {
+                $foundValues[$key][] = $value;
             }
         }
     }
@@ -79,16 +63,20 @@ class HWMonitor extends IPSModule
 
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
-            $searchKeys = ['Value', 'Min', 'Max', 'Text'];
-            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues, $searchKeys);
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
-            foreach ($searchKeys as $searchKey) {
-                foreach ($foundValues[$searchKey] as $gefundenerWert) {
+            foreach ($foundValues as $searchKey => $values) {
+                foreach ($values as $gefundenerWert) {
                     $variableIdentValue = "Variable_" . $counter . "_$searchKey";
                     $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
-                    $this->RegisterVariable($variableIdentValue, ucfirst($searchKey), $variableType, "", $counter);
+                    // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
+                    if ($variableType == VARIABLETYPE_FLOAT) {
+                        $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $counter);
+                    } else {
+                        $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $counter);
+                    }
 
                     // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                     $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
