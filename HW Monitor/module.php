@@ -1,5 +1,4 @@
 <?php
-
 class HWMonitor extends IPSModule
 {
     protected function Log($Message)
@@ -32,6 +31,22 @@ class HWMonitor extends IPSModule
         }
     }
 
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues, $searchKeys)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === 'id' && $value === $searchId) {
+                // Die gesuchte ID wurde gefunden, jetzt die Werte für die angegebenen Schlüssel suchen
+                foreach ($searchKeys as $searchKey) {
+                    $this->searchJsonValue($jsonArray, $searchKey, $foundValues[$searchKey]);
+                }
+                break; // Wir haben die ID gefunden, daher können wir die Suche beenden
+            } elseif (is_array($value)) {
+                // Rekursiv in den verschachtelten Arrays suchen
+                $this->searchValuesForId($value, $searchId, $foundValues, $searchKeys);
+            }
+        }
+    }
+
     public function Create()
     {
         parent::Create();
@@ -42,47 +57,46 @@ class HWMonitor extends IPSModule
     }
 
     public function ApplyChanges()
-{
-    parent::ApplyChanges();
+    {
+        parent::ApplyChanges();
 
-    $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-    $contentArray = json_decode($content, true);
+        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $contentArray = json_decode($content, true);
 
-    $idListeString = $this->ReadPropertyString('IDListe');
-    $idListe = json_decode($idListeString, true);
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-    // Schleife für die ID-Liste
-    $counter = 1;
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+        // Schleife für die ID-Liste
+        $counter = 1;
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-        // Variablen anlegen und einstellen für die ID
-        $variableIdent = "Variable_" . $counter;
-        $this->RegisterVariableFloat($variableIdent, "ID", "", $counter);
-        SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
-        $counter++;
+            // Variablen anlegen und einstellen für die ID
+            $variableIdent = "Variable_" . $counter;
+            $this->RegisterVariableFloat($variableIdent, "ID", "", $counter);
+            SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
+            $counter++;
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $searchKeys = ["Value", "Min", "Max", "Text"];
-        $this->searchValuesForId($contentArray, $gesuchteId, $foundValues, $searchKeys);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $searchKeys = ['Value', 'Min', 'Max', 'Text'];
+            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues, $searchKeys);
 
-        // Variablen anlegen und einstellen für die gefundenen Werte
-        foreach ($searchKeys as $searchKey) {
-            foreach ($foundValues[$searchKey] as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $counter . "_$searchKey";
-                $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            foreach ($searchKeys as $searchKey) {
+                foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                    $variableIdentValue = "Variable_" . $counter . "_$searchKey";
+                    $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
-                $this->RegisterVariable($variableIdentValue, ucfirst($searchKey), $variableType, "", $counter);
+                    $this->RegisterVariable($variableIdentValue, ucfirst($searchKey), $variableType, "", $counter);
 
-                // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
+                    // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+                    $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
 
-                SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
-                $counter++;
+                    SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
+                    $counter++;
+                }
             }
         }
     }
 }
-}
-?>
