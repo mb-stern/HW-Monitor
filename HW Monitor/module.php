@@ -60,7 +60,7 @@ class HWMonitor extends IPSModule
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
             // Sortiere die gefundenen Werte nach gewünschter Reihenfolge
-            $desiredOrder = ['Text', 'Value', 'Min', 'Max'];
+            $desiredOrder = ['Text', 'Id', 'Value', 'Min', 'Max'];
             $sortedValues = [];
             foreach ($desiredOrder as $orderKey) {
                 if (isset($foundValues[$orderKey])) {
@@ -72,7 +72,7 @@ class HWMonitor extends IPSModule
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             foreach ($sortedValues as $searchKey => $values) {
-                if (in_array($searchKey, ['Text', 'Value', 'Min', 'Max'])) {
+                if (in_array($searchKey, ['Text', 'Id', 'Value', 'Min', 'Max'])) {
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                         $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
