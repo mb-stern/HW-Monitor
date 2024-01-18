@@ -74,7 +74,7 @@ class HWMonitor extends IPSModule
         // Variablen anlegen und einstellen für die gefundenen IDs
         foreach ($foundIds as $gesuchteId) {
             $variableIdent = "Variable_" . $gesuchteId;
-            $variableIdExists = $this->GetIDForIdent($variableIdent);
+            $variableIdExists = @IPS_GetObjectIDByIdent($variableIdent, $this->InstanceID);
 
             if ($variableIdExists === false) {
                 // Die Variable für die ID existiert noch nicht, daher erstellen
@@ -89,7 +89,7 @@ class HWMonitor extends IPSModule
             // Variablen anlegen und einstellen für die gefundenen Werte
             foreach ($foundValue as $gefundenerWert) {
                 $variableIdentValue = "Variable_" . $gesuchteId . "_Value";
-                $variableIdValueExists = $this->GetIDForIdent($variableIdentValue);
+                $variableIdValueExists = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
 
                 if ($variableIdValueExists === false) {
                     // Die Variable für den "Value" existiert noch nicht, daher erstellen
@@ -101,4 +101,5 @@ class HWMonitor extends IPSModule
         }
     }
 }
+
 ?>
