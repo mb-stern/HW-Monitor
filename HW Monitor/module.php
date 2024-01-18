@@ -12,10 +12,9 @@ class HWMonitor extends IPSModule
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
                 // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
-                $this->searchJsonValue($jsonArray, 'Value', $foundValues['Value']);
-                $this->searchJsonValue($jsonArray, 'Min', $foundValues['Min']);
-                $this->searchJsonValue($jsonArray, 'Max', $foundValues['Max']);
-                $this->searchJsonValue($jsonArray, 'Text', $foundValues['Text']);
+                foreach (['Value', 'Min', 'Max', 'Text'] as $searchKey) {
+                    $this->searchJsonValue($jsonArray, $searchKey, $foundValues[$searchKey]);
+                }
                 break; // Wir haben die ID gefunden, daher können wir die Suche beenden
             } elseif (is_array($value)) {
                 // Rekursiv in den verschachtelten Arrays suchen
