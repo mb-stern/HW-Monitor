@@ -1,44 +1,7 @@
 <?php
 class HWMonitor extends IPSModule
 {
-    protected function Log($Message)
-    {
-        IPS_LogMessage(__CLASS__, $Message);
-    }
-
-    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if ($key === 'id' && $value === $searchId) {
-                // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
-                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
-                break; // Wir haben die ID gefunden, daher können wir die Suche beenden
-            } elseif (is_array($value)) {
-                // Rekursiv in den verschachtelten Arrays suchen
-                $this->searchValueForId($value, $searchId, $foundValues);
-            }
-        }
-    }
-
-    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if (is_array($value)) {
-                $this->searchValuesForId($value, $searchId, $foundValues);
-            } else {
-                $foundValues[$key][] = $value;
-            }
-        }
-    }
-
-    public function Create()
-    {
-        parent::Create();
-
-        $this->RegisterPropertyString("IPAddress", "192.168.178.76");
-        $this->RegisterPropertyInteger("Port", 8085);
-        $this->RegisterPropertyString("IDListe", '[]');
-    }
+    // ... (vorheriger Code)
 
     public function ApplyChanges()
     {
@@ -98,21 +61,25 @@ class HWMonitor extends IPSModule
         $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
         foreach ($existingVariables as $existingVariable) {
             $variableInfo = IPS_GetVariable($existingVariable);
-            $variableIdent = $variableInfo['VariableIdent'];
 
-            // Prüfe, ob die Variable in der IDListe vorhanden ist
-            $found = false;
-            foreach ($idListe as $idItem) {
-                $gesuchteId = $idItem['id'];
-                if (strpos($variableIdent, "Variable_" . $gesuchteId) !== false) {
-                    $found = true;
-                    break;
+            // Änderung: Prüfe, ob "VariableIdent" vorhanden ist, bevor es verwendet wird
+            if (isset($variableInfo['VariableIdent'])) {
+                $variableIdent = $variableInfo['VariableIdent'];
+
+                // Prüfe, ob die Variable in der IDListe vorhanden ist
+                $found = false;
+                foreach ($idListe as $idItem) {
+                    $gesuchteId = $idItem['id'];
+                    if (strpos($variableIdent, "Variable_" . $gesuchteId) !== false) {
+                        $found = true;
+                        break;
+                    }
                 }
-            }
 
-            // Lösche die Variable, wenn sie nicht in der IDListe gefunden wurde
-            if (!$found) {
-                IPS_DeleteVariable($existingVariable);
+                // Lösche die Variable, wenn sie nicht in der IDListe gefunden wurde
+                if (!$found) {
+                    IPS_DeleteVariable($existingVariable);
+                }
             }
         }
     }
