@@ -7,18 +7,18 @@ class HWMonitor extends IPSModule
         IPS_LogMessage(__CLASS__, $Message);
     }
 
-    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues, $searchKeys)
     {
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
                 // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
-                foreach (['Value', 'Min', 'Max', 'Text'] as $searchKey) {
+                foreach ($searchKeys as $searchKey) {
                     $this->searchJsonValue($jsonArray, $searchKey, $foundValues[$searchKey]);
                 }
                 break; // Wir haben die ID gefunden, daher können wir die Suche beenden
             } elseif (is_array($value)) {
                 // Rekursiv in den verschachtelten Arrays suchen
-                $this->searchValuesForId($value, $searchId, $foundValues);
+                $this->searchValuesForId($value, $searchId, $foundValues, $searchKeys);
             }
         }
     }
@@ -66,22 +66,22 @@ class HWMonitor extends IPSModule
 
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
-            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
+            $searchKeys = ['Value', 'Min', 'Max', 'Text'];
+            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues, $searchKeys);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
-           // Variablen anlegen und einstellen für die gefundenen Werte
-foreach ($foundValues as $key => $value) {
-    $variableIdentValue = "Variable_" . $counter . "_$key";
-    $variableType = $key === 'Value' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT; // Hier anpassen, falls nötig
+            foreach ($foundValues as $key => $value) {
+                $variableIdentValue = "Variable_" . $counter . "_$key";
+                $variableType = $key === 'Value' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
-    $this->RegisterVariable($variableIdentValue, ucfirst($key), $variableType, "", $counter);
-    
-    // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-    $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$value : (float)$value;
+                $this->RegisterVariable($variableIdentValue, ucfirst($key), $variableType, "", $counter);
 
-    SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
-    $counter++;
-}
+                // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+                $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$value : (float)$value;
+
+                SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
+                $counter++;
+            }
         }
     }
 }
