@@ -69,7 +69,7 @@ class HWMonitor extends IPSModule
 
             // Variablen anlegen und einstellen für die ID
             $variableIdent = "Variable_" . $counter;
-            $this->RegisterVariableFloat($variableIdent, "ID");
+            $this->RegisterVariableFloat($variableIdent, "ID", "", $counter);
             SetValue($this->GetIDForIdent($variableIdent), $gesuchteId);
             $counter++;
 
@@ -80,7 +80,7 @@ class HWMonitor extends IPSModule
             // Variablen anlegen und einstellen für die gefundenen Werte
             foreach ($foundValue as $gefundenerWert) {
                 $variableIdentValue = "Variable_" . $counter;
-                $this->RegisterVariableString($variableIdentValue, "Value");
+                $this->RegisterVariableString($variableIdentValue, "Value", "", $counter);
                 SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
                 $counter++;
             }
