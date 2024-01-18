@@ -64,7 +64,7 @@ class HWMonitor extends IPSModule
 
         // Suche nach Werten für die gefundenen IDs
         $foundValues = [];
-        $searchKeys = ['Value', 'Min', 'Max', 'Text'];
+        $searchKeys = ["Value", "Min", "Max", "Text"];
         $this->searchValuesForId($contentArray, $gesuchteId, $foundValues, $searchKeys);
 
         // Variablen anlegen und einstellen für die gefundenen Werte
