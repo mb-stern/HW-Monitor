@@ -69,12 +69,19 @@ class HWMonitor extends IPSModule
             $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
-            foreach ($foundValues as $key => $value) {
-                $variableIdentValue = "Variable_" . $counter . "_$key";
-                $this->RegisterVariableString($variableIdentValue, ucfirst($key), "", $counter);
-                SetValue($this->GetIDForIdent($variableIdentValue), $value);
-                $counter++;
-            }
+           // Variablen anlegen und einstellen für die gefundenen Werte
+foreach ($foundValues as $key => $value) {
+    $variableIdentValue = "Variable_" . $counter . "_$key";
+    $variableType = $key === 'Value' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT; // Hier anpassen, falls nötig
+
+    $this->RegisterVariable($variableIdentValue, ucfirst($key), $variableType, "", $counter);
+    
+    // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+    $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$value : (float)$value;
+
+    SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
+    $counter++;
+}
         }
     }
 }
