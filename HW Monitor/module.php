@@ -3,76 +3,70 @@ class HWMonitor extends IPSModule
 {
     protected function Log($Message)
     {
-        // Never delete this line!
         IPS_LogMessage(__CLASS__, $Message);
     }
-    
+
+    protected function searchJsonValue($jsonArray, $searchKey, &$foundValues)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === $searchKey) {
+                $foundValues[] = $value;
+            } elseif (is_array($value)) {
+                $this->searchJsonValue($value, $searchKey, $foundValues);
+            }
+        }
+    }
+
     public function Create()
     {
-        // Never delete this line!
         parent::Create();
 
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
-        //$this->RegisterPropertyInteger("Intervall", 10);
-        //$this->RegisterTimer("HWM_UpdateTimer", $this->ReadPropertyInteger("Intervall") * 1000, 'HWM_Update($_IPS[\'TARGET\']);');
     }
-        public function ApplyChanges()
+
+    public function ApplyChanges()
     {
-        // Never delete this line!
         parent::ApplyChanges();
-      
-        // JSON von der URL abrufen und entpacken
+
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
 
-        // JSON-Array aus der Property 'IDListe' holen
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
         // Variablen anlegen und einstellen für die Contentausgabe
-        $JSON = "JSON_Content"; // Geben Sie einen geeigneten Namen ein
-        $JSONIdent = "JSON_Content_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $JSON = "JSON_Content";
+        $JSONIdent = "JSON_Content_Ident";
         $this->RegisterVariableString($JSONIdent, $JSON);
         SetValue($this->GetIDForIdent($JSONIdent), $content);
-        
+
         // Variablen anlegen und einstellen für die ID-Ausgabe
-        $IDs = "Registrierte_IDs"; // Geben Sie einen geeigneten Namen ein
-        $IDsIdent = "Registrierte_IDs_Ident"; // Geben Sie eine geeignete Identifikation ein
+        $IDs = "Registrierte_IDs";
+        $IDsIdent = "Registrierte_IDs_Ident";
         $this->RegisterVariableString($IDsIdent, $IDs);
         SetValue($this->GetIDForIdent($IDsIdent), $idListeString);
 
-        // Überprüfen, ob die JSON-Dekodierung erfolgreich war
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            die('Fehler beim Dekodieren des JSON-Inhalts');
+        // Suche nach "id" und "Value"
+        $foundIds = [];
+        $foundValues = [];
+
+        $this->searchJsonValue($contentArray, 'id', $foundIds);
+        $this->searchJsonValue($contentArray, 'Value', $foundValues);
+
+        // Variablen anlegen und einstellen für die gefundene ID
+        foreach ($foundIds as $gefundeneId) {
+            $variableIdent = "Variable_" . $gefundeneId;
+            $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
+            SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
         }
 
-     // Durch die ID-Liste iterieren und passende IDs im Inhalt finden
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
-
-        // Direkt nach der ID im ContentArray suchen
-        foreach ($contentArray as $item) {
-            // JSON-String des aktuellen Elements erhalten
-            $jsonString = json_encode($item);
-
-            // Präfix "id" mit Anführungszeichen hinzufügen
-            $gesuchtesPräfix = '"id":' . $gesuchteId;
-
-            // Überprüfen, ob das Präfix im JSON-String gefunden wird
-            if (strpos($jsonString, $gesuchtesPräfix) !== false) {
-                // Die gefundene ID ausgeben (als float)
-                $gefundeneId = (float)$gesuchteId;
-                echo "Gefundene ID: $gefundeneId\n";
-
-                // Hier kannst du die Variable erstellen oder den gefundenen Wert anderweitig verwenden
-                // Zum Beispiel:
-                $variableIdent = "Variable_" . $gefundeneId;
-                $this->RegisterVariableFloat($variableIdent, "Variable für ID $gefundeneId");
-                SetValue($this->GetIDForIdent($variableIdent), $gefundeneId);
-            }
+        // Variablen anlegen und einstellen für den gefundenen Wert
+        foreach ($foundValues as $gefundenerWert) {
+            $variableIdent = "Variable_" . md5($gefundenerWert);
+            $this->RegisterVariableString($variableIdent, "Variable für Wert $gefundenerWert");
+            SetValue($this->GetIDForIdent($variableIdent), $gefundenerWert);
         }
     }
-}
 }
