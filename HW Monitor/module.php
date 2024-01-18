@@ -93,5 +93,27 @@ class HWMonitor extends IPSModule
                 }
             }
         }
+
+        // Lösche nicht mehr benötigte Variablen
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        foreach ($existingVariables as $existingVariable) {
+            $variableInfo = IPS_GetVariable($existingVariable);
+            $variableIdent = $variableInfo['VariableIdent'];
+
+            // Prüfe, ob die Variable in der IDListe vorhanden ist
+            $found = false;
+            foreach ($idListe as $idItem) {
+                $gesuchteId = $idItem['id'];
+                if (strpos($variableIdent, "Variable_" . $gesuchteId) !== false) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            // Lösche die Variable, wenn sie nicht in der IDListe gefunden wurde
+            if (!$found) {
+                IPS_DeleteVariable($existingVariable);
+            }
+        }
     }
 }
