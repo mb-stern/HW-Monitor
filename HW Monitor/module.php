@@ -80,8 +80,14 @@ class HWMonitor extends IPSModule
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             foreach ($foundValue as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . md5($gefundenerWert);
-                $this->RegisterVariableString($variableIdentValue, "Variable für Wert zur ID $gesuchteId");
+                $variableIdentValue = "Variable_" . $gesuchteId . "_Value";
+                $variableIdValueExists = $this->GetIDForIdent($variableIdentValue);
+
+                if ($variableIdValueExists === false) {
+                    // Die Variable für den "Value" existiert noch nicht, daher erstellen
+                    $this->RegisterVariableString($variableIdentValue, "Variable für Wert zur ID $gesuchteId");
+                }
+
                 SetValue($this->GetIDForIdent($variableIdentValue), $gefundenerWert);
             }
         }
