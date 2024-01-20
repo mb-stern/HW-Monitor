@@ -68,7 +68,7 @@ class HWMonitor extends IPSModule
         // Variablen anlegen und einstellen für die gefundenen Werte
         foreach ($foundValues as $searchKey => $values) {
             foreach ($values as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $counter . "_$searchKey";
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$searchKey";
                 $variableType = $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
                 // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
