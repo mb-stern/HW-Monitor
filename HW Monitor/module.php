@@ -40,15 +40,9 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IDListe", '[]');
         $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
-      // Log-Ausgabe
-      $this->Log("Create called");
-
-      // Timer für Aktualisierung registrieren
-      $result = $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
-      
-      // Log-Ausgabe für das Ergebnis der Timer-Registrierung
-      $this->Log("Timer registration result: " . ($result ? "Success" : "Failed"));
-  }
+        // Timer für Aktualisierung registrieren
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer_Callback');
+    }
 
     public function ApplyChanges()
     {
@@ -126,7 +120,11 @@ class HWMonitor extends IPSModule
 
     // Funktion für den Timer
     public function UpdateTimer_Callback()
-    {
-        $this->Update();
-    }
+{
+    // Log-Ausgabe, um zu überprüfen, ob die Funktion aufgerufen wird
+    $this->Log("UpdateTimer_Callback called");
+
+    // Hier kommt der eigentliche Code der Funktion
+    $this->Update();
+}
 }
