@@ -40,7 +40,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IDListe", '[]');
 
         // Timer alle 60 Sekunden starten
-        $this->SetTimerInterval(60 * 1000, "Intervall");
+        $this->SetTimerInterval(60 * 1000, "UpdateValues");
     }
 
     public function ApplyChanges()
