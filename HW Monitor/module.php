@@ -32,19 +32,17 @@ class HWMonitor extends IPSModule
     }
 
     public function Create()
-{
-    parent::Create();
+    {
+        parent::Create();
 
-    $this->RegisterPropertyString("IPAddress", "192.168.178.76");
-    $this->RegisterPropertyInteger("Port", 8085);
-    $this->RegisterPropertyString("IDListe", '[]');
-    $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
+        $this->RegisterPropertyString("IPAddress", "192.168.178.76");
+        $this->RegisterPropertyInteger("Port", 8085);
+        $this->RegisterPropertyString("IDListe", '[]');
+        $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
-    // Timer für Aktualisierung registrieren
-    $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer_Callback');
-    IPS_LogMessage(__CLASS__, 'Timer registered'); // Füge diese Zeile hinzu
-}
-
+        // Timer für Aktualisierung registrieren
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
+    }
 
     public function ApplyChanges()
     {
@@ -56,7 +54,11 @@ class HWMonitor extends IPSModule
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
     }
-
+    // Funktion für den Timer
+    public function UpdateTimer_Callback()
+    {
+        $this->Update();
+    }
     public function Update()
     {
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
@@ -119,12 +121,4 @@ class HWMonitor extends IPSModule
             }
         }
     }
-
-    // Funktion für den Timer
-    public function HW_UpdateTimer_Callback()
-{
-    IPS_LogMessage(__CLASS__, 'Timer callback triggered'); // Füge diese Zeile hinzu
-    $this->Update();
 }
-
-    }
