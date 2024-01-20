@@ -40,13 +40,20 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
 
-        // Timer mit einer Standard-Intervallzeit von 5 Minuten erstellen (300 Sekunden)
-        $this->RegisterTimer("UpdateDataTimer", 300, 'Intervall($_IPS["TARGET"]);');
+        // IntervalBox für das Timer-Intervall
+        $this->RegisterPropertyInteger("Intervall", 300); // Standardwert: 300 Sekunden (5 Minuten)
+
+        // Timer mit einer Standard-Intervallzeit erstellen
+        $this->RegisterTimer("UpdateDataTimer", 0, 'HWM_UpdateData($_IPS["TARGET"]);');
     }
 
     public function ApplyChanges()
     {
         parent::ApplyChanges();
+
+        // Timer-Intervall aus der Eigenschaft lesen und setzen
+        $intervall = $this->ReadPropertyInteger("Intervall");
+        $this->SetTimerInterval("UpdateDataTimer", $intervall * 1000); // In Millisekunden umrechnen
 
         $this->UpdateData(); // Führe die Initialisierung beim Anlegen des Moduls aus
     }
@@ -116,20 +123,21 @@ class HWMonitor extends IPSModule
             }
         }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
+                // Lösche nicht mehr benötigte Variablen
+                foreach ($existingVariableIDs as $variableToRemove) {
+                    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+                    if ($variableIDToRemove !== false) {
+                        IPS_DeleteVariable($variableIDToRemove);
+                    }
+                }
+        
+                $this->Log("Data updated successfully.");
+            }
+        
+            public function UpdateDataTimer()
+            {
+                // Methode, die vom Timer ausgelöst wird
+                $this->UpdateData();
             }
         }
-
-        $this->Log("Data updated successfully.");
-    }
-
-    public function UpdateDataTimer()
-    {
-        // Methode, die vom Timer ausgelöst wird
-        $this->UpdateData();
-    }
-}
+        
