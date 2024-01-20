@@ -38,19 +38,11 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
-        $this->updateTimer = $this->RegisterTimer("UpdateDataTimer", 300000, 'HW_UpdateData($_IPS["TARGET"]);');
     }
 
     public function ApplyChanges()
     {
         parent::ApplyChanges();
-
-        $this->HW_UpdateData(); // Führt das Update einmalig beim Anlegen der Instanz aus
-    }
-
-    public function HW_UpdateData()
-    {
-        $this->Log("UpdateData Timer Triggered"); // Optional: Log-Nachricht für Debugging-Zwecke
 
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
@@ -120,4 +112,3 @@ class HWMonitor extends IPSModule
         }
     }
 }
-?>
