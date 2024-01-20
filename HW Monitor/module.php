@@ -67,7 +67,7 @@ class HWMonitor extends IPSModule
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0; // Zähler für jede 'id' zurücksetzen
             foreach ($foundValues as $searchKey => $values) {
-                if (in_array($searchKey, ['id', 'Text', 'Min', 'Max', 'Value'])) {
+                if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
