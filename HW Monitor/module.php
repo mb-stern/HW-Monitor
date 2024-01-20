@@ -130,4 +130,24 @@ class HWMonitor extends IPSModule
             $this->UpdateTimer_Callback();
         }
     }
+
+    private function SetScriptTimer($intervalInSeconds)
+    {
+        $scriptId = $this->IPS_GetScriptIDByName("YourScriptName"); // Ersetze "YourScriptName" durch den tatsächlichen Namen deines Skripts
+        if ($scriptId !== false) {
+            IPS_SetScriptTimer($scriptId, $intervalInSeconds);
+        } else {
+            $this->Log("Skript nicht gefunden!");
+        }
+    }
+
+    private function ClearScriptTimer()
+    {
+        $scriptId = $this->IPS_GetScriptIDByName("YourScriptName"); // Ersetze "YourScriptName" durch den tatsächlichen Namen deines Skripts
+        if ($scriptId !== false) {
+            IPS_SetScriptTimer($scriptId, 0);
+        } else {
+            $this->Log("Skript nicht gefunden!");
+        }
+    }
 }
