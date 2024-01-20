@@ -68,20 +68,20 @@ class HWMonitor extends IPSModule
         // Variablen anlegen und einstellen für die gefundenen Werte
         foreach ($foundValues as $searchKey => $values) {
             foreach ($values as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$searchKey";
-                $variableType = $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
-
+                $variableIdentValue = "Variable_" . $counter . "_$searchKey";
+                $variablePosition = $gesuchteId * 10;
+    
                 // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
                 if ($variableType == VARIABLETYPE_FLOAT) {
-                    $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $counter);
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 } else {
-                    $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $counter);
+                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 }
-
+    
                 // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                 $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
+    
+                SetValue($variableID, $convertedValue);
                 $counter++;
             }
         }
