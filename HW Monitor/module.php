@@ -72,18 +72,13 @@ foreach ($idListe as $idItem) {
         if (in_array($searchKey, ['Id', 'Text', 'Min', 'Max', 'Value'])) {
             foreach ($values as $gefundenerWert) {
                 $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
 
                 // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
                 if ($searchKey === 'Text') {
-                    $variableID = @$this->GetIDForIdent($variableIdentValue);
-                    if ($variableID === false) {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
-                    }
+                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 } else {
-                    $variableID = @$this->GetIDForIdent($variableIdentValue);
-                    if ($variableID === false) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
-                    }
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 }
 
                 // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
@@ -97,5 +92,4 @@ foreach ($idListe as $idItem) {
 }
 
     }
-}
 }
