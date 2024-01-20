@@ -50,6 +50,13 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
+        // Alle vorhandenen Variablen speichern
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariableIDs = [];
+        foreach ($existingVariables as $existingVariableID) {
+            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+        }
+
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
@@ -78,6 +85,12 @@ class HWMonitor extends IPSModule
 
                             // Konfiguration nur bei Neuerstellung
                             // Hier könnten zusätzliche Konfigurationen erfolgen
+                        } else {
+                            // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
+                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                            if ($keyIndex !== false) {
+                                unset($existingVariableIDs[$keyIndex]);
+                            }
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
@@ -87,6 +100,14 @@ class HWMonitor extends IPSModule
                         $counter++;
                     }
                 }
+            }
+        }
+
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
             }
         }
     }
