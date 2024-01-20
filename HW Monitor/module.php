@@ -38,10 +38,10 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IPAddress", "192.168.178.76");
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
-        $this->RegisterPropertyInteger("UpdateInterval", 300);
+        $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
         // Timer für Aktualisierung registrieren
-        $this->RegisterTimer("UpdateInterval" * 1000, 'UpdateTimer_Callback');
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer_Callback');
     }
 
     public function ApplyChanges()
@@ -49,7 +49,7 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
-        $this->SetTimerInterval("UpdateInterval" * 1000);
+        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
