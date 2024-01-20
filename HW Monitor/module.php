@@ -55,13 +55,6 @@ class HWMonitor extends IPSModule
         $this->Update();
     }
 
-    public function RequestAction($ident, $value)
-{
-    if ($ident == 'UpdateTimer') {
-        $this->UpdateTimer_Callback();
-    }
-}
-
     public function Update()
     {
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
@@ -129,5 +122,12 @@ class HWMonitor extends IPSModule
     public function UpdateTimer_Callback()
     {
         $this->Update();
+    }
+
+    public function RequestAction($ident, $value)
+    {
+        if ($ident == 'UpdateTimer') {
+            $this->UpdateTimer_Callback();
+        }
     }
 }
