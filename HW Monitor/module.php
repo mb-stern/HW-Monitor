@@ -121,6 +121,7 @@ class HWMonitor extends IPSModule
     // Funktion für den Timer
     public function UpdateTimer_Callback()
     {
+        $this->Log("Timer wurde ausgelöst. Update wird durchgeführt.");
         $this->Update();
     }
 }
