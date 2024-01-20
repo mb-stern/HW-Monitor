@@ -50,13 +50,6 @@
             }
         ]
     }
-],
-    "actions": [
-      {
-        "type": "Button",
-        "label": "Update",
-        "onClick": "HWM_Update($id);"
-      }
-    ]
+]
   }
   
