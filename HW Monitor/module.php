@@ -45,6 +45,9 @@ class HWMonitor extends IPSModule
 
         // Timer mit einer Standard-Intervallzeit erstellen
         $this->RegisterTimer("UpdateDataTimer", 0, 'HWM_UpdateData($_IPS["TARGET"]);');
+
+        // Daten beim Anlegen des Moduls sofort aktualisieren
+        $this->UpdateData();
     }
 
     public function ApplyChanges()
@@ -104,48 +107,48 @@ class HWMonitor extends IPSModule
                         // Überprüfen, ob die Variable bereits existiert
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
-                            // Variable existiert noch nicht, also erstellen
-                            if ($searchKey === 'Text') {
-                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            } else {
-                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                                        // Variable existiert noch nicht, also erstellen
+                                                        if ($searchKey === 'Text') {
+                                                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                                        } else {
+                                                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                                        }
+                            
+                                                        // Konfiguration nur bei Neuerstellung
+                                                        // Hier könnten zusätzliche Konfigurationen erfolgen
+                                                    } else {
+                                                        // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
+                                                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                                                        if ($keyIndex !== false) {
+                                                            unset($existingVariableIDs[$keyIndex]);
+                                                        }
+                                                    }
+                            
+                                                    // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+                                                    $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                            
+                                                    SetValue($variableID, $convertedValue);
+                                                    $counter++;
+                                                }
+                                            }
+                                        }
+                                    }
+                            
+                                    // Lösche nicht mehr benötigte Variablen
+                                    foreach ($existingVariableIDs as $variableToRemove) {
+                                        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+                                        if ($variableIDToRemove !== false) {
+                                            IPS_DeleteVariable($variableIDToRemove);
+                                        }
+                                    }
+                            
+                                    $this->Log("Data updated successfully.");
+                                }
+                            
+                                public function UpdateDataTimer()
+                                {
+                                    // Methode, die vom Timer ausgelöst wird
+                                    $this->UpdateData();
+                                }
                             }
-
-                            // Konfiguration nur bei Neuerstellung
-                            // Hier könnten zusätzliche Konfigurationen erfolgen
-                        } else {
-                            // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
-                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                            if ($keyIndex !== false) {
-                                unset($existingVariableIDs[$keyIndex]);
-                            }
-                        }
-
-                        // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                        SetValue($variableID, $convertedValue);
-                        $counter++;
-                    }
-                }
-            }
-        }
-
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
-            }
-        }
-
-        $this->Log("Data updated successfully.");
-    }
-
-    public function UpdateDataTimer()
-    {
-        // Methode, die vom Timer ausgelöst wird
-        $this->UpdateData();
-    }
-}
-
+                            
