@@ -39,7 +39,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
         $this->RegisterPropertyInteger("UpdateInterval", 60); // Standard-Update-Intervall von 60 Sekunden
-        IPS_SetTimerInterval($this->InstanceID, "UpdateValues", $this->ReadPropertyInteger('UpdateInterval') * 1000);
+        IPS_RunScriptSchedule($this->RegisterScript('UpdateValues', 'echo "UpdateValues";', ['IPAddress' => $this->ReadPropertyString('IPAddress'), 'Port' => $this->ReadPropertyInteger('Port'), 'IDListe' => $this->ReadPropertyString('IDListe')]), $this->ReadPropertyInteger('UpdateInterval') * 60);
 
 
     }
