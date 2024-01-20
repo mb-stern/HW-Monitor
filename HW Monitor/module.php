@@ -116,38 +116,14 @@ class HWMonitor extends IPSModule
                 IPS_DeleteVariable($variableIDToRemove);
             }
         }
+
+        // Setze Timer für nächste Aktualisierung
+        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
     }
 
     // Funktion für den Timer
     public function UpdateTimer_Callback()
     {
         $this->Update();
-    }
-
-    public function RequestAction($ident, $value)
-    {
-        if ($ident == 'UpdateTimer') {
-            $this->UpdateTimer_Callback();
-        }
-    }
-
-    private function SetScriptTimer($intervalInSeconds)
-    {
-        $scriptId = $this->IPS_GetScriptIDByName("YourScriptName"); // Ersetze "YourScriptName" durch den tatsächlichen Namen deines Skripts
-        if ($scriptId !== false) {
-            IPS_SetScriptTimer($scriptId, $intervalInSeconds);
-        } else {
-            $this->Log("Skript nicht gefunden!");
-        }
-    }
-
-    private function ClearScriptTimer()
-    {
-        $scriptId = $this->IPS_GetScriptIDByName("YourScriptName"); // Ersetze "YourScriptName" durch den tatsächlichen Namen deines Skripts
-        if ($scriptId !== false) {
-            IPS_SetScriptTimer($scriptId, 0);
-        } else {
-            $this->Log("Skript nicht gefunden!");
-        }
     }
 }
