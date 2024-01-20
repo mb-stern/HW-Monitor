@@ -120,7 +120,7 @@ class HWMonitor extends IPSModule
     }
 
     // Funktion für den Timer
-    public function UpdateTimer()
+    public function HM_Update()
     {
         $this->Update();
     }
