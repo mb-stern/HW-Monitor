@@ -46,13 +46,9 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
+        // Timer-Intervall setzen
         $this->SetTimerInterval("MeinTimer", $this->ReadPropertyInteger("Intervall") * 1000);
 
-        $this->MeinTimerEvent();
-    }
-
-    public function MeinTimerEvent()
-    {
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
 
@@ -119,5 +115,10 @@ class HWMonitor extends IPSModule
                 IPS_DeleteVariable($variableIDToRemove);
             }
         }
+    }
+
+    public function MeinTimerEvent()
+    {
+        $this->ApplyChanges();
     }
 }
