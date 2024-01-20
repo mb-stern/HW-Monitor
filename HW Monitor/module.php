@@ -69,7 +69,7 @@ class HWMonitor extends IPSModule
         foreach ($foundValues as $searchKey => $values) {
             foreach ($values as $gefundenerWert) {
                 $variableIdentValue = "Variable_" . $counter . "_$searchKey";
-                $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
+                $variableType = $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
                 // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
                 if ($variableType == VARIABLETYPE_FLOAT) {
