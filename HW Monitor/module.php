@@ -85,4 +85,13 @@ class HWMonitor extends IPSModule
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                        $convertedValue = ($searchKey === 'Text') ? (str
+                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                        SetValue($variableID, $convertedValue);
+                        $counter++;
+                    }
+                }
+            }
+        }
+    }
+}
