@@ -11,7 +11,7 @@ class HWMonitor extends IPSModule
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
                 // Die gesuchte ID wurde gefunden, jetzt die zugehörigen Werte suchen
-                $this->collectValuesForId($jsonArray, $searchId, $foundValues);
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
                 break; // Wir haben die ID gefunden, daher können wir die Suche beenden
             } elseif (is_array($value)) {
                 // Rekursiv in den verschachtelten Arrays suchen
@@ -20,12 +20,11 @@ class HWMonitor extends IPSModule
         }
     }
 
-    protected function collectValuesForId($jsonArray, $searchId, &$foundValues)
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
             if (is_array($value)) {
-                // Rekursiv in den verschachtelten Arrays suchen
-                $this->collectValuesForId($value, $searchId, $foundValues);
+                $this->searchValuesForId($value, $searchId, $foundValues);
             } else {
                 $foundValues[$key][] = $value;
             }
@@ -50,6 +49,13 @@ class HWMonitor extends IPSModule
 
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
+
+        // Alle vorhandenen Variablen speichern
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariableIDs = [];
+        foreach ($existingVariables as $existingVariableID) {
+            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+        }
 
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
