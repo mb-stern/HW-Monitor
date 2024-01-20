@@ -57,30 +57,30 @@ class HWMonitor extends IPSModule
         }
 
         // Schleife für die ID-Liste
-        $counter = 1;
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
-
+        
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
+        
             // Variablen anlegen und einstellen für die gefundenen Werte
+            $counter = 0; // Zähler für jede 'id' zurücksetzen
             foreach ($foundValues as $searchKey => $values) {
                 foreach ($values as $gefundenerWert) {
-                    $variableIdentValue = "Variable_" . $counter . "_$searchKey";
-                    $variablePosition = $gesuchteId * 10;
-
+                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                    $variablePosition = $gesuchteId * 10 + $counter;
+        
                     // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
                     if ($searchKey === 'Text') {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     } else {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
-
+        
                     // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                     $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
+        
                     SetValue($variableID, $convertedValue);
                     $counter++;
                 }
