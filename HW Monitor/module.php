@@ -78,7 +78,7 @@ class HWMonitor extends IPSModule
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
                             // Variable existiert noch nicht, also erstellen
-                            $variableID = IPS_CreateVariable(0 /* Typ: Integer */, $this->InstanceID, $variablePosition, 0);
+                            $variableID = IPS_CreateVariable(0 /* Typ: Integer */, $variableIdentValue, 0);
                             IPS_SetName($variableID, $variableIdentValue);
                             IPS_SetIdent($variableID, $variableIdentValue);
                             IPS_SetVariableCustomProfile($variableID, "~TextBox");
