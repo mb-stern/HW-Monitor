@@ -116,9 +116,6 @@ class HWMonitor extends IPSModule
                 IPS_DeleteVariable($variableIDToRemove);
             }
         }
-
-        // Setze Timer für nächste Aktualisierung
-        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
     }
 
     // Funktion für den Timer
