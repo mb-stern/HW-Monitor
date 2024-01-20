@@ -129,4 +129,3 @@ class HWMonitor extends IPSModule
         $this->Update();
     }
 }
-?>
