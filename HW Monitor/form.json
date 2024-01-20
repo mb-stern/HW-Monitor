@@ -26,7 +26,7 @@
       },
       {
         "type": "IntervalBox",
-        "name": "Intervall",
+        "name": "UpdateInterval",
         "caption": "Sekunden"
       },
       {
