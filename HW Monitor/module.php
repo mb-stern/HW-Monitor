@@ -83,7 +83,10 @@ class HWMonitor extends IPSModule
                             IPS_SetIdent($variableID, $variableIdentValue);
                             IPS_SetPosition($variableID, $variablePosition);
                             IPS_SetName($variableID, $variableIdentValue);
-                            IPS_SetVariableCustomProfile($variableID, "~TextBox");
+
+                            // Überprüfen, ob der Profiltyp gesetzt ist, andernfalls Standardprofil verwenden
+                            $profileType = ($searchKey === 'Text') ? "~TextBox" : "";
+                            IPS_SetVariableCustomProfile($variableID, $profileType);
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
