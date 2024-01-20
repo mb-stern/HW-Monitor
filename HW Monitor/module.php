@@ -55,7 +55,15 @@ class HWMonitor extends IPSModule
         $intervall = $this->ReadPropertyInteger("Intervall");
         $this->SetTimerInterval("UpdateDataTimer", $intervall * 1000); // In Millisekunden umrechnen
 
-        $this->UpdateData(); // Führe die Initialisierung beim Anlegen des Moduls aus
+        // Überprüfen, ob der Timer bereits aktiviert ist
+        $timerActive = $this->GetTimerInterval("UpdateDataTimer") > 0;
+
+        if (!$timerActive) {
+            $this->Log("Data update timer is not active. Starting timer.");
+            $this->UpdateData(); // Führe die Initialisierung beim Anlegen des Moduls aus
+        } else {
+            $this->Log("Data update timer is already active.");
+        }
     }
 
     public function UpdateData()
@@ -85,59 +93,59 @@ class HWMonitor extends IPSModule
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            /// Variablen anlegen und einstellen für die gefundenen Werte
-foreach ($foundValues as $searchKey => $values) {
-    if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
-        $counter = 0; // Zähler für jede 'id' zurücksetzen
-        foreach ($values as $gefundenerWert) {
-            $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-            $variablePosition = $gesuchteId * 10 + $counter;
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            $counter = 0; // Zähler für jede 'id' zurücksetzen
+            foreach ($foundValues as $searchKey => $values) {
+                if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
+                    foreach ($values as $gefundenerWert) {
+                        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                        $variablePosition = $gesuchteId * 10 + $counter;
 
-            // Überprüfen, ob die Variable bereits existiert
-            $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-            if ($variableID === false) {
-                // Variable existiert noch nicht, also erstellen
-                if ($searchKey === 'Text') {
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } else {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                }
+                        // Überprüfen, ob die Variable bereits existiert
+                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                        if ($variableID === false) {
+                            // Variable existiert noch nicht, also erstellen
+                            if ($searchKey === 'Text') {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            } else {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            }
 
-                // Konfiguration nur bei Neuerstellung
-                // Hier könnten zusätzliche Konfigurationen erfolgen
-            } else {
-                // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
-                $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                if ($keyIndex !== false) {
-                    unset($existingVariableIDs[$keyIndex]);
-                }
-            }
+                            // Konfiguration nur bei Neuerstellung
+                            // Hier könnten zusätzliche Konfigurationen erfolgen
+                        } else {
+                            // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
+                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                            if ($keyIndex !== false) {
+                                unset($existingVariableIDs[$keyIndex]);
+                            }
+                        }
 
-            // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-            $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                        // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
-            SetValue($variableID, $convertedValue);
-            $counter++;
-        }
-    }
-}
-        }
-
-                // Lösche nicht mehr benötigte Variablen
-                foreach ($existingVariableIDs as $variableToRemove) {
-                    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-                    if ($variableIDToRemove !== false) {
-                        IPS_DeleteVariable($variableIDToRemove);
+                        SetValue($variableID, $convertedValue);
+                        $counter++;
                     }
                 }
-        
-                $this->Log("Data updated successfully.");
-            }
-        
-            public function UpdateDataTimer()
-            {
-                // Methode, die vom Timer ausgelöst wird
-                $this->UpdateData();
             }
         }
-        
+
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
+            }
+        }
+
+        $this->Log("Data updated successfully.");
+    }
+
+    public function UpdateDataTimer()
+    {
+        // Methode, die vom Timer ausgelöst wird
+        $this->UpdateData();
+    }
+}
+
