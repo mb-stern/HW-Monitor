@@ -41,7 +41,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyString("IDListe", '[]');
 
         // Timer mit einer Standard-Intervallzeit von 5 Minuten erstellen (300 Sekunden)
-        $this->RegisterTimer("UpdateDataTimer", 300, 'HWM_UpdateData($_IPS["TARGET"]);');
+        $this->RegisterTimer("Intervall", 300, 'HWM_UpdateData($_IPS["TARGET"]);');
     }
 
     public function ApplyChanges()
