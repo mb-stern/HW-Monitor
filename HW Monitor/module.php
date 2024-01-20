@@ -82,17 +82,22 @@ class HWMonitor extends IPSModule
                         $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                         $variableType = $searchKey === 'Value' || $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
 
-                        // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                        if ($variableType == VARIABLETYPE_FLOAT) {
-                            $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + mt_rand(1, 9999));
-                        } else {
-                            $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + mt_rand(1, 9999));
+                        $variableID = $this->GetIDForIdent($variableIdentValue);
+
+                        // Überprüfen, ob die Variable bereits existiert
+                        if (!$variableID) {
+                            // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
+                            if ($variableType == VARIABLETYPE_FLOAT) {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", 0);
+                            } else {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", 0);
+                            }
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                         $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
 
-                        SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
+                        SetValue($variableID, $convertedValue);
                     }
                 }
             }
