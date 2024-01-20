@@ -50,12 +50,6 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Alle vorhandenen Variablen löschen
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        foreach ($existingVariables as $existingVariableID) {
-            IPS_DeleteVariable($existingVariableID);
-        }
-
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
@@ -72,18 +66,24 @@ class HWMonitor extends IPSModule
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
 
-                        // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                        if ($searchKey === 'Text') {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } else {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        // Überprüfen, ob die Variable bereits existiert
+                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                        if ($variableID === false) {
+                            // Variable existiert noch nicht, also erstellen
+                            if ($searchKey === 'Text') {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            } else {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            }
+
+                            // Konfiguration nur bei Neuerstellung
+                            // Hier könnten zusätzliche Konfigurationen erfolgen
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                         $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                         SetValue($variableID, $convertedValue);
-                        IPS_SetIdent($variableID, $variableIdentValue); // Setze den Ident-Wert
                         $counter++;
                     }
                 }
