@@ -1,5 +1,4 @@
 <?php
-
 class HWMonitor extends IPSModule
 {
     protected function Log($Message)
@@ -40,115 +39,78 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
 
-        // IntervalBox für das Timer-Intervall
-        $this->RegisterPropertyInteger("Intervall", 300); // Standardwert: 300 Sekunden (5 Minuten)
-
-        // Timer mit einer Standard-Intervallzeit erstellen
-        $this->RegisterTimer("UpdateDataTimer", 0, 'HWM_UpdateData($_IPS["TARGET"]);');
-
-        // Daten beim Anlegen des Moduls sofort aktualisieren
-        $this->UpdateData();
+        // Timer alle 60 Sekunden starten
+        $this->SetTimerInterval(60 * 1000, "Intervall");
     }
 
     public function ApplyChanges()
     {
         parent::ApplyChanges();
 
-        // Timer-Intervall aus der Eigenschaft lesen und setzen
-        $intervall = $this->ReadPropertyInteger("Intervall");
-        $this->SetTimerInterval("UpdateDataTimer", $intervall * 1000); // In Millisekunden umrechnen
-
-        // Überprüfen, ob der Timer bereits aktiviert ist
-        $timerActive = $this->GetTimerInterval("UpdateDataTimer") > 0;
-
-        if (!$timerActive) {
-            $this->Log("Data update timer is not active. Starting timer.");
-            $this->UpdateData(); // Führe die Initialisierung beim Anlegen des Moduls aus
-        } else {
-            $this->Log("Data update timer is already active.");
-        }
+        $this->RefreshValues(); // Initialisiere Werte bei Änderungen
     }
 
-    public function UpdateData()
+    public function UpdateValues()
     {
-        // Diese Methode wird vom Timer aufgerufen und kann für die Aktualisierung der Daten verwendet werden
-        $this->Log("Updating data...");
+        // Funktion zum Aktualisieren der Werte aufrufen
+        $this->RefreshValues();
+    }
 
-        // Daten abrufen
+    private function RefreshValues()
+    {
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
 
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Alle vorhandenen Variablen speichern
         $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
         $existingVariableIDs = [];
         foreach ($existingVariables as $existingVariableID) {
             $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
         }
 
-        // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
-
-            // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            $counter = 0; // Zähler für jede 'id' zurücksetzen
+            $counter = 0;
             foreach ($foundValues as $searchKey => $values) {
                 if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
 
-                        // Überprüfen, ob die Variable bereits existiert
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
-                                                        // Variable existiert noch nicht, also erstellen
-                                                        if ($searchKey === 'Text') {
-                                                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                                                        } else {
-                                                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                                                        }
-                            
-                                                        // Konfiguration nur bei Neuerstellung
-                                                        // Hier könnten zusätzliche Konfigurationen erfolgen
-                                                    } else {
-                                                        // Variable existiert bereits, entferne sie aus der Liste der vorhandenen Variablen
-                                                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                                                        if ($keyIndex !== false) {
-                                                            unset($existingVariableIDs[$keyIndex]);
-                                                        }
-                                                    }
-                            
-                                                    // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                                                    $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-                            
-                                                    SetValue($variableID, $convertedValue);
-                                                    $counter++;
-                                                }
-                                            }
-                                        }
-                                    }
-                            
-                                    // Lösche nicht mehr benötigte Variablen
-                                    foreach ($existingVariableIDs as $variableToRemove) {
-                                        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-                                        if ($variableIDToRemove !== false) {
-                                            IPS_DeleteVariable($variableIDToRemove);
-                                        }
-                                    }
-                            
-                                    $this->Log("Data updated successfully.");
-                                }
-                            
-                                public function UpdateDataTimer()
-                                {
-                                    // Methode, die vom Timer ausgelöst wird
-                                    $this->UpdateData();
-                                }
+                            if ($searchKey === 'Text') {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            } else {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                             }
-                            
+                        } else {
+                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                            if ($keyIndex !== false) {
+                                unset($existingVariableIDs[$keyIndex]);
+                            }
+                        }
+
+                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                        SetValue($variableID, $convertedValue);
+                        $counter++;
+                    }
+                }
+            }
+        }
+
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
+            }
+        }
+    }
+}
+?>
