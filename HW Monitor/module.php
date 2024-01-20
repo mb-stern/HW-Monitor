@@ -41,50 +41,35 @@ class HWMonitor extends IPSModule
     }
 
     public function ApplyChanges()
-{
-    parent::ApplyChanges();
+    {
+        parent::ApplyChanges();
 
-    $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-    $contentArray = json_decode($content, true);
+        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $contentArray = json_decode($content, true);
 
-    $idListeString = $this->ReadPropertyString('IDListe');
-    $idListe = json_decode($idListeString, true);
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-    // Alle vorhandenen Variablen löschen
-    $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-    foreach ($existingVariables as $existingVariableID) {
-        IPS_DeleteVariable($existingVariableID);
-    }
+        // Schleife für die ID-Liste
+        $counter = 1;
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-    // Schleife für die ID-Liste
-    $counter = 1;
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+            // Überprüfen, ob die Variable bereits existiert
+            $variableIdentValue = "Variable_" . $gesuchteId . "_Text";
+            $variableID = @$this->GetIDForIdent($variableIdentValue);
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
-        // Variablen anlegen und einstellen für die gefundenen Werte
-        foreach ($foundValues as $searchKey => $values) {
-            foreach ($values as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $counter . "_$searchKey";
-                $variableType = $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
-
-                // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                if ($variableType == VARIABLETYPE_FLOAT) {
-                    $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $counter);
-                } else {
-                    $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $counter);
-                }
-
-                // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
-                $counter++;
+            if ($variableID === false) {
+                // Wenn die Variable nicht existiert, neu erstellen
+                $variableID = $this->RegisterVariableString($variableIdentValue, "Text", "", $gesuchteId * 10 + $counter);
             }
+
+            // Hier weitere Variablen erstellen oder aktualisieren...
+
+            // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+            $convertedValue = (string)$gefundenerWert;
+            SetValue($variableID, $convertedValue);
+            $counter++;
         }
     }
-}
 }
