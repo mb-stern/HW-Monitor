@@ -56,8 +56,6 @@ class HWMonitor extends IPSModule
             IPS_DeleteVariable($existingVariableID);
         }
 
-// ...
-
 // Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
@@ -76,11 +74,14 @@ foreach ($idListe as $idItem) {
                 $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
 
                 // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                $variableID = IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                if ($variableID === false) {
-                    if ($searchKey === 'Text') {
+                if ($searchKey === 'Text') {
+                    $variableID = @$this->GetIDForIdent($variableIdentValue);
+                    if ($variableID === false) {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
-                    } else {
+                    }
+                } else {
+                    $variableID = @$this->GetIDForIdent($variableIdentValue);
+                    if ($variableID === false) {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
                     }
                 }
@@ -94,7 +95,6 @@ foreach ($idListe as $idItem) {
         }
     }
 }
-
 
     }
 }
