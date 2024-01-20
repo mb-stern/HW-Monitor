@@ -56,41 +56,42 @@ class HWMonitor extends IPSModule
             IPS_DeleteVariable($existingVariableID);
         }
 
-// Schleife für die ID-Liste
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
+        // Schleife für die ID-Liste
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-    // Suche nach Werten für die gefundenen IDs
-    $foundValues = [];
-    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-    $this->Log("Found values for ID $gesuchteId: " . print_r($foundValues, true));
+            $this->Log("Found values for ID $gesuchteId: " . print_r($foundValues, true));
 
-    // Variablen anlegen und einstellen für die gefundenen Werte
-    $counter = 0; // Zähler für jede 'id' zurücksetzen
-    foreach ($foundValues as $searchKey => $values) {
-        if (in_array($searchKey, ['id', 'Text', 'Min', 'Max', 'Value'])) {
-            foreach ($values as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                $variablePosition = $gesuchteId * 10 + $counter;
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            $counter = 0; // Zähler für jede 'id' zurücksetzen
+            foreach ($foundValues as $searchKey => $values) {
+                if (in_array($searchKey, ['id', 'Text', 'Min', 'Max', 'Value'])) {
+                    foreach ($values as $gefundenerWert) {
+                        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                        $variablePosition = $gesuchteId * 10 + $counter;
 
-                // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                if ($searchKey === 'Text') {
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } else {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
+                        $variableID = @$this->GetIDForIdent($variableIdentValue);
+                        if ($variableID === false) {
+                            if ($searchKey === 'Text') {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            } else {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            }
+                        }
+
+                        // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                        SetValue($variableID, $convertedValue);
+                        $counter++;
+                    }
                 }
-
-                // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                SetValue($variableID, $convertedValue);
-                $counter++;
             }
         }
-    }
-}
-
-
     }
 }
