@@ -10,6 +10,7 @@ class HWMonitor extends IPSModule
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
+        $this->Log("searchValueForId: Start");
         foreach ($jsonArray as $key => $value) {
             if ($key === 'id' && $value === $searchId) {
                 $this->searchValuesForId($jsonArray, $searchId, $foundValues);
@@ -22,6 +23,7 @@ class HWMonitor extends IPSModule
 
     protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
     {
+        $this->Log("searchValuesForId: Start");
         foreach ($jsonArray as $key => $value) {
             if (is_array($value)) {
                 $this->searchValuesForId($value, $searchId, $foundValues);
@@ -41,7 +43,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
         // Timer für Aktualisierung registrieren
-        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer');
     }
 
     public function ApplyChanges()
@@ -55,8 +57,15 @@ class HWMonitor extends IPSModule
         $this->Update();
     }
 
+    public function HW_UpdateTimer_Callback()
+    {
+        $this->Log("HW_UpdateTimer_Callback: Timer wurde ausgelöst. Update wird durchgeführt.");
+        $this->Update();
+    }
+
     public function Update()
     {
+        $this->Log("Update: Start");
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
 
@@ -117,11 +126,5 @@ class HWMonitor extends IPSModule
             }
         }
     }
-
-    // Funktion für den Timer
-    public function UpdateTimer_Callback()
-    {
-        $this->Log("Timer wurde ausgelöst. Update wird durchgeführt.");
-        $this->Update();
-    }
 }
+?>
