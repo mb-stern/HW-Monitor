@@ -32,37 +32,33 @@ class HWMonitor extends IPSModule
     }
 
     public function Create()
-        {
-            parent::Create();
+    {
+        parent::Create();
 
-            $this->RegisterPropertyString("IPAddress", "192.168.178.76");
-            $this->RegisterPropertyInteger("Port", 8085);
-            $this->RegisterPropertyString("IDListe", '[]');
-            $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
+        $this->RegisterPropertyString("IPAddress", "192.168.178.76");
+        $this->RegisterPropertyInteger("Port", 8085);
+        $this->RegisterPropertyString("IDListe", '[]');
+        $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
-            // Timer für Aktualisierung registrieren
-            $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer_Callback');
-        }
+        // Timer für Aktualisierung registrieren
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'HW_UpdateTimer_Callback');
+    }
 
-        public function HW_UpdateTimer_Callback()
-        {
-            $this->Update();
-        }
+    public function HW_UpdateTimer_Callback()
+    {
+        $this->Update();
+    }
 
-        
+    public function ApplyChanges()
+    {
+        parent::ApplyChanges();
 
+        // Timer für Aktualisierung aktualisieren
+        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
 
-        
-        public function ApplyChanges()
-        {
-            parent::ApplyChanges();
-
-            // Timer für Aktualisierung aktualisieren
-            $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
-            
-            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
-            $this->Update();
-        }
+        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+        $this->Update();
+    }
 
     public function Update()
     {
@@ -126,10 +122,4 @@ class HWMonitor extends IPSModule
             }
         }
     }
-
-    // Funktion für den Timer
-    public function HW_UpdateTimer()
-{
-    $this->Update();
-}
 }
