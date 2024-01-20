@@ -59,44 +59,34 @@ class HWMonitor extends IPSModule
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
-
+        
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
-            $this->Log("Found values for ID $gesuchteId: " . print_r($foundValues, true));
-
+        
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0; // Zähler für jede 'id' zurücksetzen
             foreach ($foundValues as $searchKey => $values) {
-                if (in_array($searchKey, ['id', 'Text', 'Min', 'Max', 'Value'])) {
+                if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
-
-                        // Überprüfen, ob die Variable bereits existiert
-                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                        if ($variableID === false) {
-                            // Variable existiert noch nicht, also erstellen
-                            $variableID = IPS_CreateVariable(0 /* Typ: Integer */);
-                            IPS_SetParent($variableID, $this->InstanceID);
-                            IPS_SetIdent($variableID, $variableIdentValue);
-                            IPS_SetPosition($variableID, $variablePosition);
-                            IPS_SetName($variableID, $variableIdentValue);
-
-                            // Überprüfen, ob der Profiltyp gesetzt ist, andernfalls Standardprofil verwenden
-                            $profileType = ($searchKey === 'Text') ? "~TextBox" : "";
-                            IPS_SetVariableCustomProfile($variableID, $profileType);
+        
+                        // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
+                        if ($searchKey === 'Text') {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        } else {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
-
+        
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                         $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
+        
                         SetValue($variableID, $convertedValue);
                         $counter++;
-                    }
                 }
             }
         }
     }
+}
 }
