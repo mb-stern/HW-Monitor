@@ -57,7 +57,6 @@ class HWMonitor extends IPSModule
         }
 
         // Schleife für die ID-Liste
-        $counter = 1;
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
 
@@ -85,16 +84,15 @@ class HWMonitor extends IPSModule
 
                         // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
                         if ($variableType == VARIABLETYPE_FLOAT) {
-                            $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
+                            $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + mt_rand(1, 9999));
                         } else {
-                            $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + $counter);
+                            $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $gesuchteId * 10 + mt_rand(1, 9999));
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
                         $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                         SetValue($this->GetIDForIdent($variableIdentValue), $convertedValue);
-                        $counter++;
                     }
                 }
             }
