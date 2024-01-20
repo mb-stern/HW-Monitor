@@ -55,76 +55,84 @@ class HWMonitor extends IPSModule
         $this->Update();
     }
 
-    public function Update()
+    private function Update()
     {
-        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        $contentArray = json_decode($content, true);
+        // Timer-Lock setzen
+        if ($this->lock("Update")) {
+            // Log-Nachricht für Debugging hinzufügen
+            $this->Log("Update-Methode wird aufgerufen.");
 
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
+            // Dein bestehender Code hier
+            $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+            $contentArray = json_decode($content, true);
 
-        // Alle vorhandenen Variablen speichern
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-        }
+            $idListeString = $this->ReadPropertyString('IDListe');
+            $idListe = json_decode($idListeString, true);
 
-        // Schleife für die ID-Liste
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
+            // Alle vorhandenen Variablen speichern
+            $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+            $existingVariableIDs = [];
+            foreach ($existingVariables as $existingVariableID) {
+                $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+            }
 
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            // Schleife für die ID-Liste
+            foreach ($idListe as $idItem) {
+                $gesuchteId = $idItem['id'];
 
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            $counter = 0;
-            foreach ($foundValues as $searchKey => $values) {
-                if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
-                    foreach ($values as $gefundenerWert) {
-                        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                        $variablePosition = $gesuchteId * 10 + $counter;
+                // Suche nach Werten für die gefundenen IDs
+                $foundValues = [];
+                $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                        if ($variableID === false) {
-                            if ($searchKey === 'Text') {
-                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                // Variablen anlegen und einstellen für die gefundenen Werte
+                $counter = 0;
+                foreach ($foundValues as $searchKey => $values) {
+                    if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
+                        foreach ($values as $gefundenerWert) {
+                            $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                            $variablePosition = $gesuchteId * 10 + $counter;
+
+                            $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                            if ($variableID === false) {
+                                if ($searchKey === 'Text') {
+                                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                } else {
+                                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                }
                             } else {
-                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                                if ($keyIndex !== false) {
+                                    unset($existingVariableIDs[$keyIndex]);
+                                }
                             }
-                        } else {
-                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                            if ($keyIndex !== false) {
-                                unset($existingVariableIDs[$keyIndex]);
-                            }
+
+                            $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                            SetValue($variableID, $convertedValue);
+                            $counter++;
                         }
-
-                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                        SetValue($variableID, $convertedValue);
-                        $counter++;
                     }
                 }
             }
-        }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
+            // Lösche nicht mehr benötigte Variablen
+            foreach ($existingVariableIDs as $variableToRemove) {
+                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+                if ($variableIDToRemove !== false) {
+                    IPS_DeleteVariable($variableIDToRemove);
+                }
             }
+
+            // Timer-Lock freigeben
+            $this->unlock("Update");
         }
     }
 
     // Funktion für den Timer
-    public function UpdateTimer_Callback()
-{
-    // Log-Ausgabe, um zu überprüfen, ob die Funktion aufgerufen wird
-    $this->Log("UpdateTimer_Callback called");
-
-    // Hier kommt der eigentliche Code der Funktion
-    $this->Update();
-}
+    public function HW_UpdateTimer_Callback()
+    {
+        // Log-Nachricht für Debugging hinzufügen
+        $this->Log("UpdateTimer_Callback wird aufgerufen.");
+        $this->Update();
+    }
 }
