@@ -74,24 +74,15 @@ class HWMonitor extends IPSModule
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
 
-                        // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                        $variableID = @$this->GetIDForIdent($variableIdentValue);
+                        // Überprüfen, ob die Variable bereits existiert
+                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
-                            if ($searchKey === 'Text') {
-                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            } else {
-                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            }
+                            // Variable existiert noch nicht, also erstellen
+                            $variableID = IPS_CreateVariable(0 /* Typ: Integer */, $this->InstanceID, $variablePosition, 0);
+                            IPS_SetName($variableID, $variableIdentValue);
+                            IPS_SetIdent($variableID, $variableIdentValue);
+                            IPS_SetVariableCustomProfile($variableID, "~TextBox");
                         }
 
                         // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                        SetValue($variableID, $convertedValue);
-                        $counter++;
-                    }
-                }
-            }
-        }
-    }
-}
+                        $convertedValue = ($searchKey === 'Text') ? (str
