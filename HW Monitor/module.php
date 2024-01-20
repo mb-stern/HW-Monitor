@@ -57,35 +57,24 @@ class HWMonitor extends IPSModule
     }
 
     // Schleife für die ID-Liste
-    $counter = 1;
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+    foreach ($foundValues as $searchKey => $values) {
+        foreach ($values as $gefundenerWert) {
+            $variableIdentValue = "Variable_" . $counter . "_$searchKey";
+            $variablePosition = $gesuchteId * 10;
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
+            if ($searchKey === 'Text') {
+                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+            } else {
+                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+            }
 
-        // Variablen anlegen und einstellen für die gefundenen Werte
-        foreach ($foundValues as $searchKey => $values) {
-            $variableType = $searchKey === 'Text' ? VARIABLETYPE_STRING : VARIABLETYPE_FLOAT;
-            foreach ($values as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . $counter . "_$searchKey";
-                $variablePosition = $gesuchteId * 10;
-    
-                // Hier die Methode RegisterVariableFloat oder RegisterVariableString verwenden
-                if ($variableType == VARIABLETYPE_FLOAT) {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } else {
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                }
-    
-                // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
-                $convertedValue = ($variableType == VARIABLETYPE_STRING) ? (string)$gefundenerWert : (float)$gefundenerWert;
-    
-                SetValue($variableID, $convertedValue);
-                $counter++;
+            // Konvertiere den Wert, wenn der Typ nicht übereinstimmt
+            $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+            SetValue($variableID, $convertedValue);
+            $counter++;
             }
         }
     }
-}
 }
