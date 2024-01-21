@@ -73,3 +73,8 @@ Aktualisierung der Daten.
 
 Beispiel:
 `HW_Update(12345);`
+
+### 8. Versionen
+
+Version 1.0 (21.1.2024)
+* Initiale Version
