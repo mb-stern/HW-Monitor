@@ -41,8 +41,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger('UpdateInterval', 5);
 
         // Timer für Aktualisierung registrieren
-        //$this->RegisterTimer('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000, 'UpdateTimer_Callback');
-        $this->RegisterTimer('UpdateTimer', 0, 'UpdateInterval(' . $this->InstanceID . ');');
+        $this->RegisterTimer('UpdateTimer', 5, 'UpdateInterval(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
@@ -50,9 +49,7 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
-        //$this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-        $this->SetTimerInterval('UpdateTimer', 0);
-        //$this->SendDebug(__FUNCTION__, 'Timer aktiviert!');
+        $this->SetTimerInterval('UpdateTimer', 5);
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
@@ -60,9 +57,11 @@ class HWMonitor extends IPSModule
 
     public function Update()
     {
+        // Libre Hardware Monitor abfragen
         $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
         $contentArray = json_decode($content, true);
 
+        // Gewählte ID's abfragen
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
