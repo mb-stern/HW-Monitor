@@ -49,7 +49,7 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
-        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
+        $this->SetTimerInterval("UpdateTimer", 0, "UpdateInterval(\$_IPS['TARGET']);");
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
