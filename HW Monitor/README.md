@@ -21,12 +21,12 @@ Beschreibung des Moduls.
 
 ### 3. Software-Installation
 
-* Über den Module Store das 'HW Monitor'-Modul installieren.
+* Über den Module Store kann das 'HW Monitor'-Modul noch nicht installiert werden.
 * Alternativ über das Module Control folgende URL hinzufügen https://github.com/mb-stern/HW-Monitor
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' kann das 'HW Monitor'-Modul mithilfe des Schnellfilters gefunden werden.  
+ Unter 'Instanz hinzufügen' kann das 'Hardware Monitor'-Modul mithilfe des Schnellfilters gefunden werden.  
 	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
 
 __Konfigurationsseite__:
@@ -60,8 +60,8 @@ Die Funktionalität, die das Modul im WebFront bietet.
 
 ### 7. PHP-Befehlsreferenz
 
-`boolean HW_BeispielFunktion(integer $InstanzID);`
-Erklärung der Funktion.
+`boolean HW_Update(integer $InstanzID);`
+Aktualisierung der Daten.
 
 Beispiel:
-`HW_BeispielFunktion(12345);`
+`HW_Update(12345);`
