@@ -111,23 +111,25 @@ class HWMonitor extends IPSModule
                             $variableType = $foundValues['Type'][0]; // Nehme den Wert aus 'Type'
                             $variableProfileName = "HW_" . $variableType; // Füge das Präfix hinzu
             
-                            // Hier wird das VariableProfile erstellt
-                            $this->createVariableProfile(
-                                $variableProfileName, // Dynamischer Profilname
-                                VARIABLETYPE_FLOAT,   // Profile-Typ
-                                "",                   // Profile-Icon (leer für keines)
-                                "",                   // Text vor dem Wert
-                                "",                   // Text nach dem Wert
-                                0,                    // Minimum-Wert
-                                100,                  // Maximum-Wert
-                                0.1                   // Schrittweite
-                            );
-            
                             // Hier wird die Variable erstellt und dem Profil zugeordnet
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $variableProfileName, $variablePosition);
             
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+            
+                            // Hier wird das VariableProfile erstellt, falls es nicht existiert
+                            if (!IPS_VariableProfileExists($variableProfileName)) {
+                                $this->createVariableProfile(
+                                    $variableProfileName, // Dynamischer Profilname
+                                    VARIABLETYPE_FLOAT,   // Profile-Typ
+                                    "",                   // Profile-Icon (leer für keines)
+                                    "",                   // Text vor dem Wert
+                                    "",                   // Text nach dem Wert
+                                    0,                    // Minimum-Wert
+                                    100,                  // Maximum-Wert
+                                    0.1                   // Schrittweite
+                                );
+                            }
                         } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
