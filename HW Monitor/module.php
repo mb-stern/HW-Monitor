@@ -120,4 +120,8 @@ class HWMonitor extends IPSModule
             }
         }
     }
+    public function UpdateInterval()
+{
+    $this->Update();
+}
 }
