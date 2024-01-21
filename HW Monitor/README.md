@@ -1,4 +1,4 @@
-# HW Monitor
+# Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
 
 ### Inhaltsverzeichnis
