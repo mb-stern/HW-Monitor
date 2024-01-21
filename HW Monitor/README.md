@@ -13,7 +13,7 @@ Beschreibung des Moduls.
 
 ### 1. Funktionsumfang
 
-*
+* Abfrage des Libre Hardware Monitors mit der id-Nummer des gewünschten Wertes
 
 ### 2. Voraussetzungen
 
@@ -44,8 +44,12 @@ Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzeln
 
 Name   | Typ     | Beschreibung
 ------ | ------- | ------------
-       |         |
-       |         |
+Id     |   Float      |	ID des Wertes
+Text   |     String   |	Name des Wertes
+Min    |   Float      |	Minimum des Wertes
+Value  |     Float    |	Aktuller Wert
+Max    |   FLoat      |	Maximum des Wertes
+
 
 #### Profile
 
