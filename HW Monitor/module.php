@@ -31,7 +31,7 @@ class HWMonitor extends IPSModule //development
         }
     }
 
-        public function Create()
+    public function Create()
     {
         parent::Create();
 
@@ -44,14 +44,12 @@ class HWMonitor extends IPSModule //development
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
     }
 
-
     public function ApplyChanges()
     {
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
         $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-        //$this->SetTimerInterval('Update', 0);
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
@@ -60,7 +58,11 @@ class HWMonitor extends IPSModule //development
     public function Update()
     {
         // Libre Hardware Monitor abfragen
-        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $content = @file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        if ($content === false) {
+            $this->Log('Failed to fetch data from Libre Hardware Monitor.');
+            return;
+        }
         $contentArray = json_decode($content, true);
 
         // Gewählte ID's abfragen
@@ -85,18 +87,14 @@ class HWMonitor extends IPSModule //development
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
             foreach ($foundValues as $searchKey => $values) {
-                if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
+                if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
 
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
-                            if ($searchKey === 'Text') {
-                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            } else {
-                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            }
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } else {
                             $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                             if ($keyIndex !== false) {
@@ -104,11 +102,16 @@ class HWMonitor extends IPSModule //development
                             }
                         }
 
-                        $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                        // Ersetzungen für Float-Variablen anwenden
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        }
 
-                        SetValue($variableID, $convertedValue);
+                        SetValue($variableID, $gefundenerWert);
                         $counter++;
                     }
+                } else {
+                    // Hier können weitere Aktionen für andere Schlüssel hinzugefügt werden, falls erforderlich.
                 }
             }
         }
