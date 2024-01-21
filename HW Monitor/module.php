@@ -1,5 +1,5 @@
 <?php
-class HWMonitor extends IPSModule //development
+class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
