@@ -1,5 +1,5 @@
 # HW Monitor
-Beschreibung des Moduls.
+Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
 
 ### Inhaltsverzeichnis
 
