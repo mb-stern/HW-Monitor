@@ -53,7 +53,6 @@ class HWMonitor extends IPSModule //development
             IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
             IPS_SetVariableProfileAssociation("HW.Load", 0, "%", "", -1);
         }
-
     }
 
     public function ApplyChanges()
@@ -142,20 +141,81 @@ class HWMonitor extends IPSModule //development
                         }
                     }
 
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                    SetValue($variableID, $convertedValue);
                     $counter++;
                 }
             }
         }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
+        // Setze die Werte für alle Variablen außerhalb der Schleife
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
+
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+
+            $variableValues = [];
+            $counter = 0;
+
+                        // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+                        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+                        foreach ($requiredKeys as $searchKey) {
+                            if (!array_key_exists($searchKey, $foundValues)) {
+                                continue; // Schlüssel nicht vorhanden, überspringen
+                            }
+            
+                            foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                                $variablePosition = $gesuchteId * 10 + $counter;
+            
+                                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                                if ($variableID === false) {
+                                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                                        $type = $foundValues['Type'][0];
+            
+                                        // Prüfen, ob ein Profil für diesen Typ existiert
+                                        if (array_key_exists($type, $typeProfileMapping)) {
+                                            $profilName = $typeProfileMapping[$type];
+                                        } else {
+                                            $profilName = ''; // Standardprofil, falls keines gefunden wurde
+                                        }
+            
+                                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profilName, $variablePosition);
+            
+                                        // Ersetzungen für Float-Variablen anwenden
+                                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+            
+                                        // Speichere den konvertierten Wert in einem Array für jede Variable
+                                        $variableValues[$variableID] = $gefundenerWert;
+                                    } elseif ($searchKey === 'id') {
+                                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                    }
+                                } else {
+                                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                                    if ($keyIndex !== false) {
+                                        unset($existingVariableIDs[$keyIndex]);
+                                    }
+                                }
+            
+                                $counter++;
+                            }
+                        }
+                    }
+            
+                    // Setze die Werte für alle Variablen außerhalb der Schleife
+                    foreach ($variableValues as $variableID => $value) {
+                        SetValue($variableID, $value);
+                    }
+            
+                    // Lösche nicht mehr benötigte Variablen
+                    foreach ($existingVariableIDs as $variableToRemove) {
+                        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+                        if ($variableIDToRemove !== false) {
+                            IPS_DeleteVariable($variableIDToRemove);
+                        }
+                    }
+                }
             }
-        }
-    }
-}
+            
