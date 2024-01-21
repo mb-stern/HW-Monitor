@@ -91,7 +91,7 @@ class HWMonitor extends IPSModule //development
                     foreach ($values as $gefundenerWert) {
                         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                         $variablePosition = $gesuchteId * 10 + $counter;
-
+            
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
@@ -101,17 +101,36 @@ class HWMonitor extends IPSModule //development
                                 unset($existingVariableIDs[$keyIndex]);
                             }
                         }
-
+            
                         // Ersetzungen für Float-Variablen anwenden
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        }
-
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+            
                         SetValue($variableID, $gefundenerWert);
                         $counter++;
                     }
                 } else {
-                    // Hier können weitere Aktionen für andere Schlüssel hinzugefügt werden, falls erforderlich.
+                    // Hier wird für 'id' und 'Text' eine Variable erstellt und der Wert direkt gespeichert
+                    foreach ($values as $gefundenerWert) {
+                        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                        $variablePosition = $gesuchteId * 10 + $counter;
+            
+                        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                        if ($variableID === false) {
+                            if ($searchKey === 'Text') {
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            } else {
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            }
+                        } else {
+                            $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                            if ($keyIndex !== false) {
+                                unset($existingVariableIDs[$keyIndex]);
+                            }
+                        }
+            
+                        SetValue($variableID, $gefundenerWert);
+                        $counter++;
+                    }
                 }
             }
         }
