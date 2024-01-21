@@ -1,6 +1,8 @@
 <?php
 class HWMonitor extends IPSModule
 {
+    private $updateTimer;
+
     protected function Log($Message)
     {
         IPS_LogMessage(__CLASS__, $Message);
@@ -39,7 +41,7 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
         // Timer für Aktualisierung registrieren
-        $this->RegisterTimer("UpdateTimer", 0, 'UpdateTimer_Callback');
+        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
     }
 
     public function ApplyChanges()
@@ -47,7 +49,10 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
-        $this->UpdateTimer();
+        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
+
+        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+        $this->Update();
     }
 
     public function Update()
@@ -117,11 +122,5 @@ class HWMonitor extends IPSModule
     public function UpdateTimer_Callback()
     {
         $this->Update();
-        $this->UpdateTimer();
-    }
-
-    private function UpdateTimer()
-    {
-        $this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
     }
 }
