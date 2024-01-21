@@ -116,7 +116,10 @@ foreach ($idListe as $idItem) {
                             IPS_CreateVariableProfile($profileName, 1);
                         }
 
-                        IPS_SetVariableProfileAssociation($profileName, $gefundenerWert, '', '', 0);
+                        // Konvertiere den String-Wert in eine gültige Gleitkommazahl (ersetze dies durch deine eigene Logik)
+                        $associationValue = floatval($gefundenerWert);
+
+                        IPS_SetVariableProfileAssociation($profileName, $associationValue, '', '', 0);
                         IPS_SetVariableCustomProfile($variableID, $profileName);
                     }
                 }
@@ -134,9 +137,6 @@ foreach ($idListe as $idItem) {
         }
     }
 }
-
-// ...
-
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
