@@ -1,5 +1,5 @@
-# HW Monitor
-Beschreibung des Moduls.
+# Libre Hardware Monitor Modul für IP-Symcon
+Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
 
 ### Inhaltsverzeichnis
 
@@ -53,7 +53,8 @@ Text   |     String   |	Name des Wertes
 Min    |   Float      |	Minimum des Wertes
 Value  |     Float    |	Aktueller Wert
 Max    |   Float      |	Maximum des Wertes
-Type    |   String     |	Profil des Wertes
+Type   |   String     |	Profil des Wertes
+
 
 
 #### Profile
@@ -79,4 +80,5 @@ Beispiel:
 ### 8. Versionen
 
 Version 1.0 (21.1.2024)
+
 * Initiale Version

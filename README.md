@@ -1,4 +1,4 @@
-# HW Monitor
+# Libre Hardware Monitor Modul für IP-Symcon
 
 Folgende Module beinhaltet das HW Monitor Repository:
 
