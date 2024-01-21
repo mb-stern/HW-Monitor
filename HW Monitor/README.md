@@ -53,6 +53,8 @@ Text   |     String   |	Name des Wertes
 Min    |   Float      |	Minimum des Wertes
 Value  |     Float    |	Aktueller Wert
 Max    |   Float      |	Maximum des Wertes
+Type   |   String     |	Profil des Wertes
+
 
 
 #### Profile
@@ -78,4 +80,5 @@ Beispiel:
 ### 8. Versionen
 
 Version 1.0 (21.1.2024)
+
 * Initiale Version
