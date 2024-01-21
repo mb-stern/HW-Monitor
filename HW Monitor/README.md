@@ -33,10 +33,10 @@ __Konfigurationsseite__:
 
 Name     | Beschreibung
 -------- | ------------------
-IP-Adresse     |     IP-Adresse des Rechners auf dem der Libre Hardware Monitor läuft
+IP-Adresse |     IP-Adresse des Rechners auf dem der Libre Hardware Monitor läuft
 Port       |  Port des Rechners (Standard ist 8085). Der Port muss in der Firewall geöffnet sein
-Intervall     |  Intervall für das Update der Werte
-Überwachte ID's     |  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+Intervall  |  Intervall für das Update der Werte
+Überwachte ID's|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
 
 ### 5. Statusvariablen und Profile
 
