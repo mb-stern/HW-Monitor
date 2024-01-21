@@ -18,11 +18,12 @@ Beschreibung des Moduls.
 ### 2. Voraussetzungen
 
 - IP-Symcon ab Version 7.0
+- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
 
 ### 3. Software-Installation
 
 * Über den Module Store kann das 'HW Monitor'-Modul noch nicht installiert werden.
-* Alternativ über das Module Control folgende URL hinzufügen https://github.com/mb-stern/HW-Monitor
+* Download des Moduls via Module Store https://github.com/mb-stern/HW-Monitor
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
