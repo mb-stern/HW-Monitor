@@ -1,4 +1,4 @@
-# Libre Hardware Monitor Tool für IP-Symcon
+# Libre Hardware Monitor Modul für IP-Symcon
 Beschreibung des Moduls.
 
 ### Inhaltsverzeichnis
