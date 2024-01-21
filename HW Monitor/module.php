@@ -52,7 +52,7 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung aktualisieren
         //$this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
         $this->SetTimerInterval('UpdateTimer', 0);
-        $this->SendDebug(__FUNCTION__, 'Timer aktiviert!');
+        //$this->SendDebug(__FUNCTION__, 'Timer aktiviert!');
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
