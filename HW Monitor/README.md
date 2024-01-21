@@ -1,4 +1,4 @@
-# HW Monitor
+# Libre Hardware Monitor Tool für IP-Symcon
 Beschreibung des Moduls.
 
 ### Inhaltsverzeichnis
