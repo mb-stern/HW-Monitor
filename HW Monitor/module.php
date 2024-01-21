@@ -91,29 +91,25 @@ class HWMonitor extends IPSModule //development
                 foreach ($values as $gefundenerWert) {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-
+            
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
+            
                             // Ersetzungen für Float-Variablen anwenden
-                            if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                                $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                            }
-
-                            SetValue($variableID, $gefundenerWert);
-                        } else {
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        } elseif (in_array($searchKey, ['id', 'Text', 'Type'])) {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            SetValue($variableID, $gefundenerWert);
                         }
+                        SetValue($variableID, $gefundenerWert);
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                         if ($keyIndex !== false) {
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-
+            
                     $counter++;
                 }
             }
