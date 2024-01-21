@@ -57,11 +57,6 @@ class HWMonitor extends IPSModule
         $this->Update();
     }
 
-    public function Update_Callback()
-    {
-        $this->Update();
-    }
-
     public function Update()
     {
         // Libre Hardware Monitor abfragen
