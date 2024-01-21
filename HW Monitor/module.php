@@ -102,7 +102,9 @@ foreach ($idListe as $idItem) {
 
                     // Ersetzungen für Float-Variablen anwenden
                     $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                } elseif (in_array($searchKey, ['id', 'Text', 'Type'])) {
+                } elseif ($searchKey === 'id') {
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
                     $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 }
             } else {
@@ -112,13 +114,14 @@ foreach ($idListe as $idItem) {
                 }
             }
 
-            $convertedValue = ($searchKey === 'Text') ? (string)$gefundenerWert : (float)$gefundenerWert;
+            $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
             SetValue($variableID, $convertedValue);
             $counter++;
         }
     }
 }
+
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
