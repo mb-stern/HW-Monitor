@@ -79,24 +79,24 @@ class HWMonitor extends IPSModule //development
 
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) {
+            if (!isset($idItem['id']) || !isset($idItem['Text']) || !isset($idItem['Min']) || !isset($idItem['Max']) || !isset($idItem['Value']) || !isset($idItem['Type'])) {
+                continue; // Überspringe Einträge ohne erforderliche Felder
+            }
+        
             $gesuchteId = $idItem['id'];
-
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            $counter = 0;
+        
+            // ...
+        
             foreach ($foundValues as $searchKey => $values) {
                 foreach ($values as $gefundenerWert) {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-            
+        
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-            
+        
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } elseif (in_array($searchKey, ['id', 'Text', 'Type'])) {
@@ -109,7 +109,7 @@ class HWMonitor extends IPSModule //development
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-            
+        
                     $counter++;
                 }
             }
