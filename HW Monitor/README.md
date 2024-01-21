@@ -22,7 +22,7 @@ Beschreibung des Moduls.
 ### 3. Software-Installation
 
 * Über den Module Store das 'HW Monitor'-Modul installieren.
-* Alternativ über das Module Control folgende URL hinzufügen
+* Alternativ über das Module Control folgende URL hinzufügen https://github.com/mb-stern/HW-Monitor
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
