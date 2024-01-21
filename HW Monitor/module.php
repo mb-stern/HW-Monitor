@@ -111,27 +111,23 @@ class HWMonitor extends IPSModule
                             $variableType = $foundValues['Type'][0]; // Nehme den Wert aus 'Type'
                             $variableProfileName = "HW_" . $variableType; // Füge das Präfix hinzu
             
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            // Hier wird das VariableProfile erstellt
+                            $this->createVariableProfile(
+                                $variableProfileName, // Dynamischer Profilname
+                                VARIABLETYPE_FLOAT,   // Profile-Typ
+                                "",                   // Profile-Icon (leer für keines)
+                                "",                   // Text vor dem Wert
+                                "",                   // Text nach dem Wert
+                                0,                    // Minimum-Wert
+                                100,                  // Maximum-Wert
+                                0.1                   // Schrittweite
+                            );
+            
+                            // Hier wird die Variable erstellt und dem Profil zugeordnet
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $variableProfileName, $variablePosition);
             
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-            
-                            // Hier wird das VariableProfile nur für 'Min', 'Max', 'Value' erstellt
-                            if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                                $this->createVariableProfile(
-                                    $variableProfileName, // Dynamischer Profilname
-                                    VARIABLETYPE_FLOAT,   // Profile-Typ
-                                    "",                   // Profile-Icon (leer für keines)
-                                    "",                   // Text vor dem Wert
-                                    "",                   // Text nach dem Wert
-                                    0,                    // Minimum-Wert
-                                    100,                  // Maximum-Wert
-                                    0.1                   // Schrittweite
-                                );
-            
-                                // Hier wird das VariableProfile dem Variablen-Ident zugewiesen
-                                IPS_SetVariableCustomProfile($variableID, $variableProfileName);
-                            }
                         } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
