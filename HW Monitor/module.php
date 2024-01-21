@@ -105,6 +105,8 @@ foreach ($idListe as $idItem) {
                     $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                 } elseif (in_array($searchKey, ['id', 'Text', 'Type'])) {
                     $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                } else {
+                    continue; // Überspringe unbekannte Schlüssel
                 }
                 SetValue($variableID, $gefundenerWert);
             } else {
