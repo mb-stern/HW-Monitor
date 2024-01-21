@@ -35,13 +35,13 @@ class HWMonitor extends IPSModule
     {
         parent::Create();
 
-        $this->RegisterPropertyString("IPAddress", "192.168.178.76");
-        $this->RegisterPropertyInteger("Port", 8085);
-        $this->RegisterPropertyString("IDListe", '[]');
-        $this->RegisterPropertyInteger("UpdateInterval", 5);
+        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
+        $this->RegisterPropertyInteger('Port', 8085);
+        $this->RegisterPropertyString('IDListe', '[]');
+        $this->RegisterPropertyInteger('UpdateInterval', 5);
 
         // Timer für Aktualisierung registrieren
-        //$this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
+        //$this->RegisterTimer('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000, 'UpdateTimer_Callback');
         $this->RegisterTimer('UpdateTimer', 0, 'UpdateInterval(' . $this->InstanceID . ');');
     }
 
@@ -50,7 +50,7 @@ class HWMonitor extends IPSModule
         parent::ApplyChanges();
 
         // Timer für Aktualisierung aktualisieren
-        //$this->SetTimerInterval("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000);
+        //$this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
         $this->SetTimerInterval('UpdateTimer', 0);
         //$this->SendDebug(__FUNCTION__, 'Timer aktiviert!');
 
@@ -86,15 +86,15 @@ class HWMonitor extends IPSModule
             foreach ($foundValues as $searchKey => $values) {
                 if (in_array($searchKey, ['Text', 'id', 'Min', 'Max', 'Value'])) {
                     foreach ($values as $gefundenerWert) {
-                        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                        $variableIdentValue = 'Variable_' . ($gesuchteId * 10 + $counter) . '_$searchKey';
                         $variablePosition = $gesuchteId * 10 + $counter;
 
                         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                         if ($variableID === false) {
                             if ($searchKey === 'Text') {
-                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), '', $variablePosition);
                             } else {
-                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                                $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), '', $variablePosition);
                             }
                         } else {
                             $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -119,11 +119,5 @@ class HWMonitor extends IPSModule
                 IPS_DeleteVariable($variableIDToRemove);
             }
         }
-    }
-
-    // Funktion für den Timer
-    public function UpdateTimer_Callback()
-    {
-        $this->Update();
     }
 }
