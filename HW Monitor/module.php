@@ -73,9 +73,7 @@ class HWMonitor extends IPSModule //development
         $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
     }
 
-    // ...
-
-// Schleife für die ID-Liste
+    // Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
 
@@ -108,20 +106,6 @@ foreach ($idListe as $idItem) {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
                     $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                    // Hier Variablenprofile erstellen und zuordnen
-                    if ($searchKey === 'Type') {
-                        $profileName = 'HW_' . ucfirst($gefundenerWert);
-                        if (!IPS_VariableProfileExists($profileName)) {
-                            IPS_CreateVariableProfile($profileName, 1);
-                        }
-
-                        // Konvertiere den String-Wert in eine gültige Gleitkommazahl (ersetze dies durch deine eigene Logik)
-                        $associationValue = floatval($gefundenerWert);
-
-                        IPS_SetVariableProfileAssociation($profileName, $associationValue, '', '', 0);
-                        IPS_SetVariableCustomProfile($variableID, $profileName);
-                    }
                 }
             } else {
                 $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -137,6 +121,7 @@ foreach ($idListe as $idItem) {
         }
     }
 }
+
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
