@@ -11,6 +11,10 @@
           {
             "type": "Label",
             "label": "Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
+          },
+          {
+            "type": "Label",
+            "label": "Die IDs sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json."
           }
         ]
       },

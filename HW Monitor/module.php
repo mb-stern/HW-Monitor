@@ -42,6 +42,13 @@ class HWMonitor extends IPSModule //development
 
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
+
+        if (!IPS_VariableProfileExists("HW.Clock")) {
+			IPS_CreateVariableProfile("HW.Clock", 2);
+			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1);
+			IPS_SetVariableProfileAssociation("HW.Clock", 0, "MHz", "", -1);
+		}
+
     }
 
     public function ApplyChanges()
