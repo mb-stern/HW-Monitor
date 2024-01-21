@@ -35,13 +35,14 @@ class HWMonitor extends IPSModule
     {
         parent::Create();
 
-        $this->RegisterPropertyString("IPAddress", "192.168.178.76");
+        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
         $this->RegisterPropertyInteger("Port", 8085);
         $this->RegisterPropertyString("IDListe", '[]');
         $this->RegisterPropertyInteger("UpdateInterval", 300); // Standardmäßig 5 Minuten
 
         // Timer für Aktualisierung registrieren
-        $this->RegisterTimer("UpdateTimer", $this->ReadPropertyInteger("UpdateInterval") * 1000, 'UpdateTimer_Callback');
+        $this->RegisterTimer('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000, 'UpdateTimer_Callback');
+        //$this->RegisterTimer('UpdateTimer', 0, 'AWIDO_Update(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
