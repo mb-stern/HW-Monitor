@@ -86,9 +86,7 @@ class HWMonitor extends IPSModule //development
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-            // ...
-
-foreach ($requiredKeys as $searchKey) {
+    foreach ($requiredKeys as $searchKey) {
     if (!array_key_exists($searchKey, $foundValues)) {
         continue; // Schlüssel nicht vorhanden, überspringen
     }
@@ -99,6 +97,8 @@ foreach ($requiredKeys as $searchKey) {
 
         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
         if ($variableID === false) {
+            $variableProfileName = ""; // Initialisiere das Profil mit einem leeren Wert
+
             if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                 // Hier wird das VariableProfile erstellt, falls es nicht existiert
                 $variableType = $foundValues['Type'][0]; // Nehme den Wert aus 'Type'
@@ -115,8 +115,10 @@ foreach ($requiredKeys as $searchKey) {
                         0.1                   // Schrittweite
                     );
                 }
+            }
 
-                // Variable erstellen
+            if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                // Variable erstellen und dem Profil zuweisen
                 $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $variableProfileName, $variablePosition);
 
                 // Ersetzungen für Float-Variablen anwenden
