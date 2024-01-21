@@ -10,6 +10,7 @@ Beschreibung des Moduls.
 5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
 6. [WebFront](#6-webfront)
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+8. [Versionen](#8-versionen)
 
 ### 1. Funktionsumfang
 
