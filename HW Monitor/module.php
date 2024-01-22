@@ -50,41 +50,41 @@ class HWMonitor extends IPSModule
             // Füge weitere Zuordnungen hinzu, wenn nötig
         ];
 
-        // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
+         // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
 
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
+    foreach ($idListe as $idItem) {
+        $gesuchteId = $idItem['id'];
 
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueById($contentArray, $gesuchteId, $foundValues);
+        // Suche nach Werten für die gefundenen IDs
+        $foundValues = [];
+        $this->searchValueById($contentArray, $gesuchteId, $foundValues);
 
-            // Prüfe, ob 'Type' vorhanden ist
-            if (array_key_exists('Type', $foundValues)) {
-                $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
+        // Prüfe, ob 'Type' vorhanden ist
+        if (array_key_exists('Type', $foundValues)) {
+            $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
 
-                // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
-                if (array_key_exists($type, $typeProfileMapping)) {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
-                    $variablePosition = $gesuchteId * 10;
+            // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
+            if (array_key_exists($type, $typeProfileMapping)) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
+                $variablePosition = $gesuchteId * 10;
 
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    if ($variableID === false) {
-                        $profileName = $typeProfileMapping[$type];
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                if ($variableID === false) {
+                    $profileName = $typeProfileMapping[$type];
 
-                        // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
-                        if (IPS_VariableProfileExists($profileName)) {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), $profileName, $variablePosition);
-                        } else {
-                            $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
-                        }
+                    // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
+                    if (IPS_VariableProfileExists($profileName)) {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), $profileName, $variablePosition);
+                    } else {
+                        $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                     }
                 }
             }
         }
     }
+}
 
 
     public function ApplyChanges()
