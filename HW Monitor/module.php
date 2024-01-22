@@ -1,6 +1,6 @@
 <?php
 
-class HWMonitor extends IPSModule
+class HWMonitor extends IPSModule //development
 {
     private $updateTimer;
 
@@ -32,98 +32,118 @@ class HWMonitor extends IPSModule
         }
     }
 
-public function Create()
-{
-    parent::Create();
+    public function Create()
+    {
+        parent::Create();
 
-    $this->RegisterPropertyString('IPAddress', '192.168.178.76');
-    $this->RegisterPropertyInteger('Port', 8085);
-    $this->RegisterPropertyString('IDListe', '[]');
-    $this->RegisterPropertyInteger('UpdateInterval', 0);
+        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
+        $this->RegisterPropertyInteger('Port', 8085);
+        $this->RegisterPropertyString('IDListe', '[]');
+        $this->RegisterPropertyInteger('UpdateInterval', 0);
 
-    // Timer für Aktualisierung registrieren
-    $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
+        // Timer für Aktualisierung registrieren
+        $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-    // Profile erstellen, falls sie nicht existieren
-    $profileNameClock = "HW.Clock";
-    if (!IPS_VariableProfileExists($profileNameClock)) {
-        IPS_CreateVariableProfile($profileNameClock, 2);
-        IPS_SetVariableProfileValues($profileNameClock, 0, 5000, 1);
-        IPS_SetVariableProfileAssociation($profileNameClock, 0, "MHz", "", -1);
-    }
+        // Profile erstellen, falls sie nicht existieren
+        $profileNameClock = "HW.Clock";
+        if (!IPS_VariableProfileExists($profileNameClock)) {
+            IPS_CreateVariableProfile($profileNameClock, 2);
+            IPS_SetVariableProfileValues($profileNameClock, 0, 5000, 1);
+            IPS_SetVariableProfileAssociation($profileNameClock, 0, "MHz", "", -1);
+        }
 
-    $profileNameLoad = "HW.Load";
-    if (!IPS_VariableProfileExists($profileNameLoad)) {
-        IPS_CreateVariableProfile($profileNameLoad, 2);
-        IPS_SetVariableProfileValues($profileNameLoad, 0, 100, 1);
-        IPS_SetVariableProfileAssociation($profileNameLoad, 0, "%", "", -1);
-    }
+        $profileNameLoad = "HW.Load";
+        if (!IPS_VariableProfileExists($profileNameLoad)) {
+            IPS_CreateVariableProfile($profileNameLoad, 2);
+            IPS_SetVariableProfileValues($profileNameLoad, 0, 100, 1);
+            IPS_SetVariableProfileAssociation($profileNameLoad, 0, "%", "", -1);
+        }
 
-    // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
-    $typeProfileMapping = [
-        "Clock" => "HW.Clock",
-        "Load"  => "HW.Load",
-        // Füge weitere Zuordnungen hinzu, wenn nötig
-    ];
+        // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
+        $typeProfileMapping = [
+            "Clock" => "HW.Clock",
+            "Load"  => "HW.Load",
+            // Füge weitere Zuordnungen hinzu, wenn nötig
+        ];
 
-    // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
-    $idListeString = $this->ReadPropertyString('IDListe');
-    $idListe = json_decode($idListeString, true);
+        // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueById($contentArray, $gesuchteId, $foundValues);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueById($contentArray, $gesuchteId, $foundValues);
 
-        // Prüfe, ob 'Type' vorhanden ist
-        if (array_key_exists('Type', $foundValues)) {
-            $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
+            // Prüfe, ob 'Type' vorhanden ist
+            if (array_key_exists('Type', $foundValues)) {
+                $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
 
-            $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
+                $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
 
-            // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
-            if (array_key_exists($type, $typeProfileMapping)) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
-                $variablePosition = $gesuchteId * 10;
+                // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
+                if (array_key_exists($type, $typeProfileMapping)) {
+                    $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
+                    $variablePosition = $gesuchteId * 10;
 
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                if ($variableID === false) {
-                    $profileName = $typeProfileMapping[$type];
+                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                    if ($variableID === false) {
+                        $profileName = $typeProfileMapping[$type];
 
-                    // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
-                    if (IPS_VariableProfileExists($profileName)) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
+                        // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
+                        if (IPS_VariableProfileExists($profileName)) {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
 
-                        // Ersetzungen für Float-Variablen anwenden
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                            // Ersetzungen für Float-Variablen anwenden
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
 
-                        // Variablenprofil zuordnen
-                        IPS_SetVariableCustomProfile($variableID, $profileName);
+                            // Variablenprofil zuordnen
+                            IPS_SetVariableCustomProfile($variableID, $profileName);
 
-                        $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
+                            $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
+                        } else {
+                            $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
+                        }
                     } else {
-                        $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
+                        $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
                     }
                 } else {
-                    $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
+                    $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
                 }
             } else {
-                $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
+                $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
             }
-        } else {
-            $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
         }
     }
-}
+
+    public function ApplyChanges()
+    {
+        parent::ApplyChanges;
+        // Timer für Aktualisierung aktualisieren
+        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+
+        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+        $this->Update();
+    }
+
 public function Update()
 {
     // Libre Hardware Monitor abfragen
     $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
     $contentArray = json_decode($content, true);
 
-    // ... (restlicher Code bleibt unverändert)
+    // Gewählte ID's abfragen
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
+
+    // Alle vorhandenen Variablen speichern
+    $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+    $existingVariableIDs = [];
+    foreach ($existingVariables as $existingVariableID) {
+        $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+    }
 
     // Schleife für die ID-Liste
     foreach ($idListe as $idItem) {
@@ -158,6 +178,15 @@ public function Update()
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
+
+                    // Variablenprofil zuordnen basierend auf 'Type'
+                    if ($searchKey === 'Type' && array_key_exists('Type', $foundValues)) {
+                        $type = $foundValues['Type'][0];
+                        $profileName = "HW.$type";
+                        if (IPS_VariableProfileExists($profileName)) {
+                            IPS_SetVariableCustomProfile($variableID, $profileName);
+                        }
                     }
                 } else {
                     $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
