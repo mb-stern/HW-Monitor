@@ -50,7 +50,7 @@ class HWMonitor extends IPSModule
             // Füge weitere Zuordnungen hinzu, wenn nötig
         ];
 
-         // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
+         /// Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
@@ -67,16 +67,15 @@ class HWMonitor extends IPSModule
 
             // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
             if (array_key_exists($type, $typeProfileMapping)) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
                 $variablePosition = $gesuchteId * 10;
 
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                $variableID = @IPS_GetObjectIDByIdent($type, $this->InstanceID);
                 if ($variableID === false) {
                     $profileName = $typeProfileMapping[$type];
 
                     // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
                     if (IPS_VariableProfileExists($profileName)) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), $profileName, $variablePosition);
+                        $variableID = $this->RegisterVariableFloat($type, ucfirst($type), $profileName, $variablePosition);
                     } else {
                         $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                     }
