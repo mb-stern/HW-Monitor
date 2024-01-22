@@ -58,8 +58,8 @@ class HWMonitor extends IPSModule //development
 
         // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
         $typeProfileMapping = [
-            'Clock' => 'HW.Clock',
-            'Load'  => 'HW.Load',
+            "Clock" => "HW.Clock",
+            "Load"  => "HW.Load",
             // Füge weitere Zuordnungen hinzu, wenn nötig
         ];
 
