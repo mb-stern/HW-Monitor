@@ -45,19 +45,8 @@ class HWMonitor extends IPSModule
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
         // Profile erstellen, falls sie nicht existieren
-        $profileNameClock = "HW.Clock";
-        if (!IPS_VariableProfileExists($profileNameClock)) {
-            IPS_CreateVariableProfile($profileNameClock, 2);
-            IPS_SetVariableProfileValues($profileNameClock, 0, 5000, 1);
-            IPS_SetVariableProfileAssociation($profileNameClock, 0, "MHz", "", -1);
-        }
-
-        $profileNameLoad = "HW.Load";
-        if (!IPS_VariableProfileExists($profileNameLoad)) {
-            IPS_CreateVariableProfile($profileNameLoad, 2);
-            IPS_SetVariableProfileValues($profileNameLoad, 0, 100, 1);
-            IPS_SetVariableProfileAssociation($profileNameLoad, 0, "%", "", -1);
-        }
+        $this->createVariableProfile("HW.Clock", 0, 5000, "MHz");
+        $this->createVariableProfile("HW.Load", 0, 100, "%");
 
         // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
         $typeProfileMapping = [
@@ -81,8 +70,6 @@ class HWMonitor extends IPSModule
             if (array_key_exists('Type', $foundValues)) {
                 $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
 
-                $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
-
                 // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
                 if (array_key_exists($type, $typeProfileMapping)) {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
@@ -98,19 +85,9 @@ class HWMonitor extends IPSModule
 
                             // Variablenprofil zuordnen basierend auf 'Type'
                             IPS_SetVariableCustomProfile($variableID, $profileName);
-
-                            $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
-                        } else {
-                            $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                         }
-                    } else {
-                        $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
                     }
-                } else {
-                    $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
                 }
-            } else {
-                $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
             }
         }
     }
@@ -207,6 +184,15 @@ class HWMonitor extends IPSModule
             if ($variableIDToRemove !== false) {
                 IPS_DeleteVariable($variableIDToRemove);
             }
+        }
+    }
+
+    private function createVariableProfile($profileName, $minValue, $maxValue, $suffix)
+    {
+        if (!IPS_VariableProfileExists($profileName)) {
+            IPS_CreateVariableProfile($profileName, 2);
+            IPS_SetVariableProfileValues($profileName, $minValue, $maxValue, 1);
+            IPS_SetVariableProfileAssociation($profileName, 0, $suffix, "", -1);
         }
     }
 }
