@@ -1,6 +1,6 @@
 <?php
 
-class HWMonitor extends IPSModule //development
+class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
@@ -96,10 +96,7 @@ class HWMonitor extends IPSModule //development
                         if (IPS_VariableProfileExists($profileName)) {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
 
-                            // Ersetzungen für Float-Variablen anwenden
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-
-                            // Variablenprofil zuordnen
+                            // Variablenprofil zuordnen basierend auf 'Type'
                             IPS_SetVariableCustomProfile($variableID, $profileName);
 
                             $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
@@ -120,99 +117,97 @@ class HWMonitor extends IPSModule //development
 
     public function ApplyChanges()
     {
-        // Führen Sie hier die notwendigen Aktionen durch, wenn sich die Konfiguration ändert
-    
-        // Beispiel: Timer für Aktualisierung aktualisieren
-        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-    
-        // Beispiel: Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
-        $this->Update();
-    
-        // Rufen Sie auch die übergeordnete Methode auf, falls Ihre Klasse davon erbt
         parent::ApplyChanges();
+
+        // Timer für Aktualisierung aktualisieren
+        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+
+        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+        $this->Update();
     }
 
-public function Update()
-{
-    // Libre Hardware Monitor abfragen
-    $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-    $contentArray = json_decode($content, true);
+    public function Update()
+    {
+        // Libre Hardware Monitor abfragen
+        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $contentArray = json_decode($content, true);
 
-    // Gewählte ID's abfragen
-    $idListeString = $this->ReadPropertyString('IDListe');
-    $idListe = json_decode($idListeString, true);
+        // Gewählte ID's abfragen
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-    // Alle vorhandenen Variablen speichern
-    $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-    $existingVariableIDs = [];
-    foreach ($existingVariables as $existingVariableID) {
-        $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-    }
+        // Alle vorhandenen Variablen speichern
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariableIDs = [];
+        foreach ($existingVariables as $existingVariableID) {
+            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+        }
 
-    // Schleife für die ID-Liste
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+        // Schleife für die ID-Liste
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueById($contentArray, $gesuchteId, $foundValues);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueById($contentArray, $gesuchteId, $foundValues);
 
-        // Variablen anlegen und einstellen für die gefundenen Werte
-        $counter = 0;
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            $counter = 0;
 
-        // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-        foreach ($requiredKeys as $searchKey) {
-            if (!array_key_exists($searchKey, $foundValues)) {
-                continue; // Schlüssel nicht vorhanden, überspringen
-            }
-
-            foreach ($foundValues[$searchKey] as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                $variablePosition = $gesuchteId * 10 + $counter;
-
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                if ($variableID === false) {
-                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                        // Ersetzungen für Float-Variablen anwenden
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    } elseif ($searchKey === 'id') {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    }
-
-                    // Variablenprofil zuordnen basierend auf 'Type'
-                    if ($searchKey === 'Type' && array_key_exists('Type', $foundValues)) {
-                        $type = $foundValues['Type'][0];
-                        $profileName = "HW.$type";
-                        if (IPS_VariableProfileExists($profileName)) {
-                            IPS_SetVariableCustomProfile($variableID, $profileName);
-                        }
-                    }
-                } else {
-                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                    if ($keyIndex !== false) {
-                        unset($existingVariableIDs[$keyIndex]);
-                    }
+            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+            foreach ($requiredKeys as $searchKey) {
+                if (!array_key_exists($searchKey, $foundValues)) {
+                    continue; // Schlüssel nicht vorhanden, überspringen
                 }
 
-                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                    $variablePosition = $gesuchteId * 10 + $counter;
 
-                SetValue($variableID, $convertedValue);
-                $counter++;
+                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                    if ($variableID === false) {
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+
+                            // Ersetzungen für Float-Variablen anwenden
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        } elseif ($searchKey === 'id') {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        }
+
+                        // Variablenprofil zuordnen basierend auf 'Type'
+                        if ($searchKey === 'Type' && array_key_exists('Type', $foundValues)) {
+                            $type = $foundValues['Type'][0];
+                            $profileName = "HW.$type";
+                            if (IPS_VariableProfileExists($profileName)) {
+                                IPS_SetVariableCustomProfile($variableID, $profileName);
+                            }
+                        }
+                    } else {
+                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                        if ($keyIndex !== false) {
+                            unset($existingVariableIDs[$keyIndex]);
+                        }
+                    }
+
+                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                    SetValue($variableID, $convertedValue);
+                    $counter++;
+                }
+            }
+        }
+
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
             }
         }
     }
+}
 
-    // Lösche nicht mehr benötigte Variablen
-    foreach ($existingVariableIDs as $variableToRemove) {
-        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-        if ($variableIDToRemove !== false) {
-            IPS_DeleteVariable($variableIDToRemove);
-        }
-    }
-}
-}
