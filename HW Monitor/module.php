@@ -78,14 +78,14 @@ foreach ($idListe as $idItem) {
                 if (IPS_VariableProfileExists($profileName)) {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), $profileName, $variablePosition);
                 } else {
-                    $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
+                    IPS_LogMessage("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                 }
             }
         } else {
-            $this->Log("Profil für 'Type' nicht gefunden - Type: $type"); // Debug-Ausgabe
+            IPS_LogMessage("Profil für 'Type' nicht gefunden - Type: $type"); // Debug-Ausgabe
         }
     } else {
-        $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
+        IPS_LogMessage("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
     }
 }
 }
