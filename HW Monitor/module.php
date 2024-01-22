@@ -31,8 +31,7 @@ class HWMonitor extends IPSModule
             }
         }
     }
-
-    public function Create()
+        public function Create()
     {
         parent::Create();
 
@@ -44,16 +43,16 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Profile erstellen, falls sie nicht existieren
-        $this->createVariableProfile("HW.Clock", 0, 5000, "MHz");
-        $this->createVariableProfile("HW.Load", 0, 100, "%");
-
         // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
         $typeProfileMapping = [
             "Clock" => "HW.Clock",
             "Load"  => "HW.Load",
             // Füge weitere Zuordnungen hinzu, wenn nötig
         ];
+
+        // Profile erstellen, falls sie nicht existieren
+        $this->createVariableProfile("HW.Clock", 0, 5000, "MHz");
+        $this->createVariableProfile("HW.Load", 0, 100, "%");
 
         // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
         $idListeString = $this->ReadPropertyString('IDListe');
@@ -81,16 +80,14 @@ class HWMonitor extends IPSModule
 
                         // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
                         if (IPS_VariableProfileExists($profileName)) {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
-
-                            // Variablenprofil zuordnen basierend auf 'Type'
-                            IPS_SetVariableCustomProfile($variableID, $profileName);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), $profileName, $variablePosition);
                         }
                     }
                 }
             }
         }
     }
+
 
     public function ApplyChanges()
     {
