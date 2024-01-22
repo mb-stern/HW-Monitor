@@ -154,6 +154,9 @@ class HWMonitor extends IPSModule
                         if ($searchKey === 'Type' && array_key_exists('Type', $foundValues)) {
                             $type = $foundValues['Type'][0];
                             $profileName = "HW.$type";
+                            
+                            IPS_LogMessage("HWMonitor", "Variable: $variableIdentValue, Profile: $profileName");
+
                             if (IPS_VariableProfileExists($profileName)) {
                                 IPS_SetVariableCustomProfile($variableID, $profileName);
                             }
