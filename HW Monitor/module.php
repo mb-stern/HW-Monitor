@@ -1,5 +1,5 @@
 <?php
-class HWMonitor extends IPSModule
+class HWMonitor extends IPSModule //development
 {
     private $updateTimer;
 
@@ -44,15 +44,16 @@ class HWMonitor extends IPSModule
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
         if (!IPS_VariableProfileExists("HW.Clock")) {
-            IPS_CreateVariableProfile("HW.Clock", 2);
-            IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1);
-            IPS_SetVariableProfileAssociation("HW.Clock", 0, "MHz", "", -1);
-        }
+			IPS_CreateVariableProfile("HW.Clock", 2);
+			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1);
+			IPS_SetVariableProfileAssociation("HW.Clock", 0, "MHz", "", -1);
+		}
         if (!IPS_VariableProfileExists("HW.Load")) {
-            IPS_CreateVariableProfile("HW.Load", 2);
-            IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
-            IPS_SetVariableProfileAssociation("HW.Load", 0, "%", "", -1);
-        }
+			IPS_CreateVariableProfile("HW.Load", 2);
+			IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
+			IPS_SetVariableProfileAssociation("HW.Load", 0, "%", "", -1);
+		}
+
     }
 
     public function ApplyChanges()
@@ -84,74 +85,61 @@ class HWMonitor extends IPSModule
         $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
     }
 
-    // Profilzuordnung erstellen
-    $typeProfileMapping = [
-        'Clock' => 'HW.Clock',
-        'Load' => 'HW.Load',
-        // Hier weitere Zuordnungen hinzufügen, wenn nötig
-    ];
-
     // Schleife für die ID-Liste
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+foreach ($idListe as $idItem) {
+    $gesuchteId = $idItem['id'];
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
+    // Suche nach Werten für die gefundenen IDs
+    $foundValues = [];
+    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-        // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-        foreach ($requiredKeys as $searchKey) {
-            if (!array_key_exists($searchKey, $foundValues)) {
-                continue; // Schlüssel nicht vorhanden, überspringen
-            }
+    // Variablen anlegen und einstellen für die gefundenen Werte
+    $counter = 0;
 
-            foreach ($foundValues[$searchKey] as $keyIndex => $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $keyIndex) . "_$searchKey";
-                $variablePosition = $gesuchteId * 10 + $keyIndex;
+    // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+    $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+    foreach ($requiredKeys as $searchKey) {
+        if (!array_key_exists($searchKey, $foundValues)) {
+            continue; // Schlüssel nicht vorhanden, überspringen
+        }
 
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                if ($variableID === false) {
-                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                        $type = isset($foundValues['Type'][$keyIndex]) ? $foundValues['Type'][$keyIndex] : null;
+        foreach ($foundValues[$searchKey] as $gefundenerWert) {
+            $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+            $variablePosition = $gesuchteId * 10 + $counter;
 
-                        // Prüfen, ob ein Profil für diesen Typ existiert
-                        if (array_key_exists($type, $typeProfileMapping)) {
-                            $profilName = $typeProfileMapping[$type];
-                        } else {
-                            $profilName = ''; // Standardprofil, falls keines gefunden wurde
-                        }
+            $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+            if ($variableID === false) {
+                if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
 
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profilName, $variablePosition);
-
-                        // Ersetzungen für Float-Variablen anwenden
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-
-                        SetValue($variableID, $gefundenerWert);
-                    } elseif ($searchKey === 'id') {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        SetValue($variableID, $gefundenerWert);
-                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        SetValue($variableID, $gefundenerWert);
-                    }
-                } else {
-                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                    if ($keyIndex !== false) {
-                        unset($existingVariableIDs[$keyIndex]);
-                    }
+                    // Ersetzungen für Float-Variablen anwenden
+                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                } elseif ($searchKey === 'id') {
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                }
+            } else {
+                $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                if ($keyIndex !== false) {
+                    unset($existingVariableIDs[$keyIndex]);
                 }
             }
-        }
-    }
 
-    // Lösche nicht mehr benötigte Variablen
-    foreach ($existingVariableIDs as $variableToRemove) {
-        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-        if ($variableIDToRemove !== false) {
-            IPS_DeleteVariable($variableIDToRemove);
+            $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+            SetValue($variableID, $convertedValue);
+            $counter++;
         }
     }
 }
 
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
+            }
+        }
+    }
 }
