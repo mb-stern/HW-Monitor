@@ -75,69 +75,68 @@ class HWMonitor extends IPSModule //development
     }
 
     public function Update()
-    {
-        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        $contentArray = json_decode($content, true);
+{
+    $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+    $contentArray = json_decode($content, true);
 
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
 
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-        }
+    $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+    $existingVariableIDs = [];
+    foreach ($existingVariables as $existingVariableID) {
+        $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+    }
 
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
+    foreach ($idListe as $idItem) {
+        $gesuchteId = $idItem['id'];
 
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+        $foundValues = [];
+        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            $counter = 0;
+        $counter = 0;
 
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-            foreach ($requiredKeys as $searchKey) {
-                if (!array_key_exists($searchKey, $foundValues)) {
-                    continue;
-                }
-
-                foreach ($foundValues[$searchKey] as $gefundenerWert) {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                    $variablePosition = $gesuchteId * 10 + $counter;
-
-                    $profile = $this->getProfileForType($foundValues['Type'][0]);
-
-                    $variableID = false;
-                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profile, $variablePosition);
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    } elseif ($searchKey === 'id') {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profile, $variablePosition);
-                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), '', $variablePosition);
-                    }
-
-                    if ($variableID !== false) {
-                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) {
-                            unset($existingVariableIDs[$keyIndex]);
-                        }
-
-                        $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-                        SetValue($variableID, $convertedValue);
-                        $counter++;
-                    }
-                }
+        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+        foreach ($requiredKeys as $searchKey) {
+            if (!array_key_exists($searchKey, $foundValues)) {
+                continue;
             }
-        }
 
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
+            foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
+
+                $profile = $this->getProfileForType($foundValues['Type'][0]);
+
+                $variableID = false;
+                if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profile, $variablePosition);
+                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                } elseif ($searchKey === 'id') {
+                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profile, $variablePosition);
+                } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), '', $variablePosition);
+                }
+
+                if ($variableID !== false) {
+                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                    if ($keyIndex !== false) {
+                        unset($existingVariableIDs[$keyIndex]);
+                    }
+
+                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                    SetValue($variableID, $convertedValue);
+                    $counter++;
+                }
             }
         }
     }
+
+    foreach ($existingVariableIDs as $variableToRemove) {
+        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+        if ($variableIDToRemove !== false) {
+            IPS_DeleteVariable($variableIDToRemove);
+        }
+    }
 }
-?>
+}
