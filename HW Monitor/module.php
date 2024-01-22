@@ -69,39 +69,52 @@ class HWMonitor extends IPSModule //development
 
     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
-
+    
         // Suche nach Werten für die gefundenen IDs
         $foundValues = [];
         $this->searchValueById($contentArray, $gesuchteId, $foundValues);
-
+    
         // Prüfe, ob 'Type' vorhanden ist
         if (array_key_exists('Type', $foundValues)) {
             $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
-
+    
+            $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
+    
             // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
             if (array_key_exists($type, $typeProfileMapping)) {
                 $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
                 $variablePosition = $gesuchteId * 10;
-
+    
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                 if ($variableID === false) {
                     $profileName = $typeProfileMapping[$type];
-
+    
                     // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
                     if (IPS_VariableProfileExists($profileName)) {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
-
+    
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-
+    
                         // Variablenprofil zuordnen
                         IPS_SetVariableCustomProfile($variableID, $profileName);
+    
+                        $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
+                    } else {
+                        $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                     }
+                } else {
+                    $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
                 }
+            } else {
+                $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
             }
+        } else {
+            $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
         }
     }
-}
+                    }
+
 
     public function ApplyChanges()
     {
