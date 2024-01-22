@@ -99,9 +99,6 @@ class HWMonitor extends IPSModule
         $foundValues = [];
         $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
-        $variableValues = [];
-        $counter = 0;
-
         // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
         $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
         foreach ($requiredKeys as $searchKey) {
@@ -109,14 +106,14 @@ class HWMonitor extends IPSModule
                 continue; // Schlüssel nicht vorhanden, überspringen
             }
 
-            foreach ($foundValues[$searchKey] as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                $variablePosition = $gesuchteId * 10 + $counter;
+            foreach ($foundValues[$searchKey] as $keyIndex => $gefundenerWert) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $keyIndex) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $keyIndex;
 
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                 if ($variableID === false) {
                     if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                        $type = isset($foundValues['Type'][0]) ? $foundValues['Type'][0] : null;
+                        $type = isset($foundValues['Type'][$keyIndex]) ? $foundValues['Type'][$keyIndex] : null;
 
                         // Prüfen, ob ein Profil für diesen Typ existiert
                         if (array_key_exists($type, $typeProfileMapping)) {
@@ -130,12 +127,13 @@ class HWMonitor extends IPSModule
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
 
-                        // Speichere den konvertierten Wert in einem Array für jede Variable
-                        $variableValues[$variableID] = $gefundenerWert;
+                        SetValue($variableID, $gefundenerWert);
                     } elseif ($searchKey === 'id') {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        SetValue($variableID, $gefundenerWert);
                     } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        SetValue($variableID, $gefundenerWert);
                     }
                 } else {
                     $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -143,9 +141,6 @@ class HWMonitor extends IPSModule
                         unset($existingVariableIDs[$keyIndex]);
                     }
                 }
-
-                SetValue($variableID, $gefundenerWert);
-                $counter++;
             }
         }
     }
@@ -158,4 +153,5 @@ class HWMonitor extends IPSModule
         }
     }
 }
+
 }
