@@ -120,12 +120,16 @@ class HWMonitor extends IPSModule //development
 
     public function ApplyChanges()
     {
-        parent::ApplyChanges;
-        // Timer für Aktualisierung aktualisieren
+        // Führen Sie hier die notwendigen Aktionen durch, wenn sich die Konfiguration ändert
+    
+        // Beispiel: Timer für Aktualisierung aktualisieren
         $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-
-        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+    
+        // Beispiel: Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
+    
+        // Rufen Sie auch die übergeordnete Methode auf, falls Ihre Klasse davon erbt
+        parent::ApplyChanges();
     }
 
 public function Update()
