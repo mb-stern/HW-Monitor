@@ -56,8 +56,8 @@ class HWMonitor extends IPSModule
 
         // Profilezuordnung basierend auf 'Type'
         $typeProfileMapping = [
-            "Clock" => "HW.Clock",
-            "Load"  => "HW.Load",
+            "Clock:" => "HW.Clock",
+            "Load:"  => "HW.Load",
             // Füge weitere Zuordnungen hinzu, wenn nötig
         ];
 
