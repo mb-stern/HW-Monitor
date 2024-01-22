@@ -92,7 +92,7 @@ class HWMonitor extends IPSModule //development
         $gesuchteId = $idItem['id'];
 
         $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+        $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
         $counter = 0;
 
