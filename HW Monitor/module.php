@@ -32,88 +32,92 @@ class HWMonitor extends IPSModule //development
     }
 
     public function Create()
-    {
-        parent::Create();
+{
+    parent::Create();
 
-        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
-        $this->RegisterPropertyInteger('Port', 8085);
-        $this->RegisterPropertyString('IDListe', '[]');
-        $this->RegisterPropertyInteger('UpdateInterval', 0);
+    $this->RegisterPropertyString('IPAddress', '192.168.178.76');
+    $this->RegisterPropertyInteger('Port', 8085);
+    $this->RegisterPropertyString('IDListe', '[]');
+    $this->RegisterPropertyInteger('UpdateInterval', 0);
 
-        // Timer für Aktualisierung registrieren
-        $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
+    // Timer für Aktualisierung registrieren
+    $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Profile erstellen
-        if (!IPS_VariableProfileExists("HW.Clock")) {
-            IPS_CreateVariableProfile("HW.Clock", 2);
-            IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1);
-            IPS_SetVariableProfileAssociation("HW.Clock", 0, "MHz", "", -1);
-        }
+    // Profile erstellen, falls sie nicht existieren
+    $profileNameClock = "HW.Clock";
+    if (!IPS_VariableProfileExists($profileNameClock)) {
+        IPS_CreateVariableProfile($profileNameClock, 2);
+        IPS_SetVariableProfileValues($profileNameClock, 0, 5000, 1);
+        IPS_SetVariableProfileAssociation($profileNameClock, 0, "MHz", "", -1);
+    }
 
-        if (!IPS_VariableProfileExists("HW.Load")) {
-            IPS_CreateVariableProfile("HW.Load", 2);
-            IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
-            IPS_SetVariableProfileAssociation("HW.Load", 0, "%", "", -1);
-        }
+    $profileNameLoad = "HW.Load";
+    if (!IPS_VariableProfileExists($profileNameLoad)) {
+        IPS_CreateVariableProfile($profileNameLoad, 2);
+        IPS_SetVariableProfileValues($profileNameLoad, 0, 100, 1);
+        IPS_SetVariableProfileAssociation($profileNameLoad, 0, "%", "", -1);
+    }
 
-        // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
-        $typeProfileMapping = [
-            "Clock" => "HW.Clock",
-            "Load"  => "HW.Load",
-            // Füge weitere Zuordnungen hinzu, wenn nötig
-        ];
+    // ... (Rest des Codes bleibt unverändert)
 
-        // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
+    // Vordefinierte Zuordnungsliste für 'Type' zu Variablenprofilen
+    $typeProfileMapping = [
+        "Clock" => $profileNameClock,
+        "Load"  => $profileNameLoad,
+        // Füge weitere Zuordnungen hinzu, wenn nötig
+    ];
 
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
+    // Durchlaufe die IDListe und erstelle Variablen basierend auf dem 'Type'-Feld
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
 
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueById($contentArray, $gesuchteId, $foundValues);
+    foreach ($idListe as $idItem) {
+        $gesuchteId = $idItem['id'];
 
-            // Prüfe, ob 'Type' vorhanden ist
-            if (array_key_exists('Type', $foundValues)) {
-                $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
+        // Suche nach Werten für die gefundenen IDs
+        $foundValues = [];
+        $this->searchValueById($contentArray, $gesuchteId, $foundValues);
 
-                $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
+        // Prüfe, ob 'Type' vorhanden ist
+        if (array_key_exists('Type', $foundValues)) {
+            $type = $foundValues['Type'][0]; // Nehme den ersten gefundenen Wert für 'Type'
 
-                // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
-                if (array_key_exists($type, $typeProfileMapping)) {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
-                    $variablePosition = $gesuchteId * 10;
+            $this->Log("ID: $gesuchteId, Type: $type"); // Debug-Ausgabe
 
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    if ($variableID === false) {
-                        $profileName = $typeProfileMapping[$type];
+            // Überprüfe, ob 'Type' in der Zuordnungsliste vorhanden ist
+            if (array_key_exists($type, $typeProfileMapping)) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10) . "_$type";
+                $variablePosition = $gesuchteId * 10;
 
-                        // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
-                        if (IPS_VariableProfileExists($profileName)) {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                if ($variableID === false) {
+                    $profileName = $typeProfileMapping[$type];
 
-                            // Ersetzungen für Float-Variablen anwenden
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                    // Erstelle die Variable nur, wenn ein gültiges Profil in der Zuordnungsliste vorhanden ist
+                    if (IPS_VariableProfileExists($profileName)) {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($type), "", $variablePosition);
 
-                            // Variablenprofil zuordnen
-                            IPS_SetVariableCustomProfile($variableID, $profileName);
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
 
-                            $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
-                        } else {
-                            $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
-                        }
+                        // Variablenprofil zuordnen
+                        IPS_SetVariableCustomProfile($variableID, $profileName);
+
+                        $this->Log("Variable erstellt - ID: $variableID, Ident: $variableIdentValue, Profil: $profileName"); // Debug-Ausgabe
                     } else {
-                        $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
+                        $this->Log("Ungültiges Profil in der Zuordnungsliste - Profil: $profileName"); // Debug-Ausgabe
                     }
                 } else {
-                    $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
+                    $this->Log("Variable bereits vorhanden - ID: $variableID, Ident: $variableIdentValue"); // Debug-Ausgabe
                 }
             } else {
-                $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
+                $this->Log("Ungültiger 'Type' in der Zuordnungsliste - Type: $type"); // Debug-Ausgabe
             }
+        } else {
+            $this->Log("Kein 'Type' gefunden - ID: $gesuchteId"); // Debug-Ausgabe
         }
     }
+}
 
     public function ApplyChanges()
     {
