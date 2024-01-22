@@ -99,7 +99,7 @@ class HWMonitor extends IPSModule
         $foundValues = [];
         $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
-        // Variablen anlegen und einstellen für die gefundenen Werte
+        $variableValues = [];
         $counter = 0;
 
         // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
@@ -109,42 +109,44 @@ class HWMonitor extends IPSModule
                 continue; // Schlüssel nicht vorhanden, überspringen
             }
 
-            $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-            $variablePosition = $gesuchteId * 10 + $counter;
+            foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
 
-            $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-            if ($variableID === false) {
-                if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                    $type = isset($foundValues['Type'][0]) ? $foundValues['Type'][0] : null;
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                if ($variableID === false) {
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                        $type = isset($foundValues['Type'][0]) ? $foundValues['Type'][0] : null;
 
-                    // Prüfen, ob ein Profil für diesen Typ existiert
-                    if (array_key_exists($type, $typeProfileMapping)) {
-                        $profilName = $typeProfileMapping[$type];
-                    } else {
-                        $profilName = ''; // Standardprofil, falls keines gefunden wurde
+                        // Prüfen, ob ein Profil für diesen Typ existiert
+                        if (array_key_exists($type, $typeProfileMapping)) {
+                            $profilName = $typeProfileMapping[$type];
+                        } else {
+                            $profilName = ''; // Standardprofil, falls keines gefunden wurde
+                        }
+
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profilName, $variablePosition);
+
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+
+                        // Speichere den konvertierten Wert in einem Array für jede Variable
+                        $variableValues[$variableID] = $gefundenerWert;
+                    } elseif ($searchKey === 'id') {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
-
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), $profilName, $variablePosition);
-
-                    // Ersetzungen für Float-Variablen anwenden
-                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $foundValues[$searchKey][0]);
-
-                    SetValue($variableID, $gefundenerWert);
-                } elseif ($searchKey === 'id') {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    SetValue($variableID, $foundValues[$searchKey][0]);
-                } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    SetValue($variableID, $foundValues[$searchKey][0]);
+                } else {
+                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                    if ($keyIndex !== false) {
+                        unset($existingVariableIDs[$keyIndex]);
+                    }
                 }
-            } else {
-                $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                if ($keyIndex !== false) {
-                    unset($existingVariableIDs[$keyIndex]);
-                }
+
+                SetValue($variableID, $gefundenerWert);
+                $counter++;
             }
-
-            $counter++;
         }
     }
 
@@ -155,5 +157,4 @@ class HWMonitor extends IPSModule
             IPS_DeleteVariable($variableIDToRemove);
         }
     }
-}
 }
