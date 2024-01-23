@@ -70,7 +70,7 @@ HW.Rate  | Float
 
 ### 6. WebFront
 
-Die Funktionalität, die das Modul im WebFront bietet.
+Anzeige der gewünschten Variabeln oder Grafiken in der Visualisierung.
 
 ### 7. PHP-Befehlsreferenz
 
