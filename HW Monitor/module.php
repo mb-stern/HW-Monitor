@@ -86,6 +86,7 @@ class HWMonitor extends IPSModule //development
     }
 
     // Schleife für die ID-Liste
+// Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
 
@@ -115,8 +116,8 @@ foreach ($idListe as $idItem) {
                     // Ersetzungen für Float-Variablen anwenden
                     $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
 
-                    // Hier das Variablenprofil zuweisen
-                    $this->assignVariableProfile($variableID, $gefundenerWert, $searchKey);
+                    // Hier das Variablenprofil zuweisen basierend auf 'Type'
+                    $this->assignVariableProfileByType($variableID, $gefundenerWert, $foundValues['Type'][$counter]);
                 } elseif ($searchKey === 'id') {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
@@ -136,20 +137,17 @@ foreach ($idListe as $idItem) {
         }
     }
 }
-
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false) {
-                IPS_DeleteVariable($variableIDToRemove);
-            }
-        }
-    }
+}
 // Funktion zum Zuweisen von Variablenprofilen
-private function assignVariableProfile($variableID, $value, $profileType)
+private function assignVariableProfileByType($variableID, $value, $type)
 {
-    $profileName = "HW.Clock";  // Hier den Namen des Profils basierend auf $profileType festlegen
-    // Beispiel: $profileName = "HW.Clock";
+    $typeProfileMapping = [
+        'Clock' => 'HW.Clock',  // Hier die Zuordnungstabelle hinzufügen
+        'Load' => 'HW.Load',
+        // Weitere Zuordnungen entsprechend ergänzen
+    ];
+
+    $profileName = $typeProfileMapping[$type] ?? '';  // Standardwert, falls keine Zuordnung gefunden wurde
 
     if (IPS_VariableProfileExists($profileName)) {
         IPS_SetVariableCustomProfile($variableID, $profileName);
