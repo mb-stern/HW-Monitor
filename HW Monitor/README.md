@@ -59,13 +59,14 @@ Type   |   String   |	Profil des Wertes
 
 
 #### Profile
-aktuell werden keine Profile erstellt
 
 Name   | Typ
 ------ | -------
-HW.Load   | Float
+HW.Fan   | Float
 HW.Clock  | Float
-HW.Temp   | Floar
+HW.Temp   | Float
+HW.Data   | Float
+HW.Rate  | Float
 
 ### 6. WebFront
 
@@ -81,6 +82,8 @@ Beispiel:
 
 ### 8. Versionen
 
-Version 1.0 (21.1.2024)
+Version 1.1 (23.1.2024)
+* Variabelprofile werden erstellt und zugeordnet
 
+Version 1.0 (21.1.2024)
 * Initiale Version

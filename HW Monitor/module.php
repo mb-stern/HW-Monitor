@@ -50,17 +50,29 @@ class HWMonitor extends IPSModule //development
             IPS_SetVariableProfileDigits("HW.Clock", 0); //Nachkommastellen
 			IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
 		}
-        if (!IPS_VariableProfileExists("HW.Load")) {
-			IPS_CreateVariableProfile("HW.Load", 2);
-			IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
-            IPS_SetVariableProfileDigits("HW.Load", 0);
-			IPS_SetVariableProfileText("HW.Load", "", " %");
+        if (!IPS_VariableProfileExists("HW.Data")) {
+			IPS_CreateVariableProfile("HW.Data", 2);
+			IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
+            IPS_SetVariableProfileDigits("HW.Data", 1);
+			IPS_SetVariableProfileText("HW.Data", "", " GB");
 		}
         if (!IPS_VariableProfileExists("HW.Temp")) {
 			IPS_CreateVariableProfile("HW.Temp", 2);
 			IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
             IPS_SetVariableProfileDigits("HW.Temp", 0);
 			IPS_SetVariableProfileText("HW.Temp", "", " °C");
+		}
+        if (!IPS_VariableProfileExists("HW.Fan")) {
+			IPS_CreateVariableProfile("HW.Fan", 2);
+			IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
+            IPS_SetVariableProfileDigits("HW.Fan", 0);
+			IPS_SetVariableProfileText("HW.Fan", "", " RPM");
+		}
+        if (!IPS_VariableProfileExists("HW.Rate")) {
+			IPS_CreateVariableProfile("HW.Rate", 2);
+			IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
+            IPS_SetVariableProfileDigits("HW.Rate", 0);
+			IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
 		}
     }
 
@@ -81,9 +93,21 @@ class HWMonitor extends IPSModule //development
             case 'Clock':
                 return 'HW.Clock';
             case 'Load':
-                return 'HW.Load';
+                return '~Progress';
             case 'Temperature':
                 return 'HW.Temp';
+            case 'Fan':
+                return 'HW.Fan';
+            case 'Voltage':
+                return '~Volt';
+            case 'Power':
+                return '~Watt';
+            case 'Data':
+                return 'HW.Data';
+            case 'Level':
+                return '~Progress';
+            case 'Throughput':
+                return 'HW.Rate';
             // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
             default:
                 return '';
