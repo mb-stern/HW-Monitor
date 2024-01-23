@@ -1,5 +1,6 @@
 # Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
+Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
 
 ### Inhaltsverzeichnis
 
@@ -58,16 +59,18 @@ Type   |   String   |	Profil des Wertes
 
 
 #### Profile
-aktuell werden keine Profile erstellt
 
 Name   | Typ
 ------ | -------
-       |
-       |
+HW.Fan   | Float
+HW.Clock  | Float
+HW.Temp   | Float
+HW.Data   | Float
+HW.Rate  | Float
 
 ### 6. WebFront
 
-Die Funktionalität, die das Modul im WebFront bietet.
+Anzeige der gewünschten Variabeln oder Grafiken in der Visualisierung.
 
 ### 7. PHP-Befehlsreferenz
 
@@ -79,6 +82,8 @@ Beispiel:
 
 ### 8. Versionen
 
-Version 1.0 (21.1.2024)
+Version 1.1 (23.1.2024)
+* Variabelprofile werden erstellt und zugeordnet
 
+Version 1.0 (21.1.2024)
 * Initiale Version
