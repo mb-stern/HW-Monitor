@@ -103,24 +103,28 @@ foreach ($idListe as $idItem) {
         if (!array_key_exists($searchKey, $foundValues)) {
             continue; // Schlüssel nicht vorhanden, überspringen
         }
-
+    
         foreach ($foundValues[$searchKey] as $gefundenerWert) {
             $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
             $variablePosition = $gesuchteId * 10 + $counter;
-
+    
             $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
             if ($variableID === false) {
                 if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
+    
                     // Ersetzungen für Float-Variablen anwenden
                     $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-
+    
                     // Hier das Variablenprofil zuweisen basierend auf 'Type'
                     $this->assignVariableProfileByType($variableID, $gefundenerWert, $foundValues['Type'][$counter]);
                 } elseif ($searchKey === 'id') {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                } elseif ($searchKey === 'Type') {
+                    // 'Type' wird hier nicht überprüft, da es bereits in assignVariableProfileByType behandelt wird
+                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                } else {
+                    // Alle anderen Schlüssel, einschließlich 'Text', werden hier als String-Variable erstellt
                     $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 }
             } else {
@@ -129,9 +133,9 @@ foreach ($idListe as $idItem) {
                     unset($existingVariableIDs[$keyIndex]);
                 }
             }
-
-            $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
+    
+            $convertedValue = ($searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+    
             SetValue($variableID, $convertedValue);
             $counter++;
         }
