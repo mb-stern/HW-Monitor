@@ -114,6 +114,9 @@ foreach ($idListe as $idItem) {
 
                     // Ersetzungen für Float-Variablen anwenden
                     $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+
+                    // Hier das Variablenprofil zuweisen
+                    $this->assignVariableProfile($variableID, $gefundenerWert, $searchKey);
                 } elseif ($searchKey === 'id') {
                     $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                 } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
@@ -142,4 +145,14 @@ foreach ($idListe as $idItem) {
             }
         }
     }
+// Funktion zum Zuweisen von Variablenprofilen
+private function assignVariableProfile($variableID, $value, $profileType)
+{
+    $profileName = "HW.Clock";  // Hier den Namen des Profils basierend auf $profileType festlegen
+    // Beispiel: $profileName = "HW.Clock";
+
+    if (IPS_VariableProfileExists($profileName)) {
+        IPS_SetVariableCustomProfile($variableID, $profileName);
+    }
+}
 }
