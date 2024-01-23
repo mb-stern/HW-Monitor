@@ -44,14 +44,16 @@ class HWMonitor extends IPSModule //development
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
         if (!IPS_VariableProfileExists("HW.Clock")) {
-			IPS_CreateVariableProfile("HW.Clock", 2);
-			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1);
-			IPS_SetVariableProfileAssociation("HW.Clock", 0, "MHz", "", -1);
+			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
+			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
+            IPS_SetVariableProfileDigits("HW.Clock", 0); //Nachkommastellen
+			IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
 		}
         if (!IPS_VariableProfileExists("HW.Load")) {
 			IPS_CreateVariableProfile("HW.Load", 2);
 			IPS_SetVariableProfileValues("HW.Load", 0, 100, 1);
-			IPS_SetVariableProfileAssociation("HW.Load", 0, "%", "", -1);
+            IPS_SetVariableProfileDigits("HW.Load", 0);
+			IPS_SetVariableProfileText("HW.Load", "", " %");
 		}
 
     }
