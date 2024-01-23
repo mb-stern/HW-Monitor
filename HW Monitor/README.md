@@ -49,12 +49,12 @@ Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzeln
 
 Name   | Typ     | Beschreibung
 ------ | ------- | ------------
-Id     |   Float      |	ID des Wertes
-Text   |     String   |	Name des Wertes
-Min    |   Float      |	Minimum des Wertes
-Value  |     Float    |	Aktueller Wert
-Max    |   Float      |	Maximum des Wertes
-Type   |   String     |	Profil des Wertes
+Id     |   Float    |       ID des Wertes
+Text   |   String   |	Name des Wertes
+Min    |   Float    |	Minimum des Wertes
+Value  |   Float    |	Aktueller Wert
+Max    |   Float    |	Maximum des Wertes
+Type   |   String   |	Profil des Wertes
 
 
 
@@ -63,8 +63,9 @@ aktuell werden keine Profile erstellt
 
 Name   | Typ
 ------ | -------
-       |
-       |
+HW.Load   | Float
+HW.Clock  | Float
+HW.Temp   | Floar
 
 ### 6. WebFront
 

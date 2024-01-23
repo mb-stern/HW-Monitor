@@ -43,6 +43,7 @@ class HWMonitor extends IPSModule //development
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
+        // Benötigte Varaiblen erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
 			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
 			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
@@ -55,7 +56,12 @@ class HWMonitor extends IPSModule //development
             IPS_SetVariableProfileDigits("HW.Load", 0);
 			IPS_SetVariableProfileText("HW.Load", "", " %");
 		}
-
+        if (!IPS_VariableProfileExists("HW.Temp")) {
+			IPS_CreateVariableProfile("HW.Temp", 2);
+			IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
+            IPS_SetVariableProfileDigits("HW.Temp", 0);
+			IPS_SetVariableProfileText("HW.Temp", "", " °C");
+		}
     }
 
     public function ApplyChanges()
@@ -64,7 +70,6 @@ class HWMonitor extends IPSModule //development
 
         // Timer für Aktualisierung aktualisieren
         $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-        //$this->SetTimerInterval('Update', 0);
 
         // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
         $this->Update();
@@ -77,6 +82,8 @@ class HWMonitor extends IPSModule //development
                 return 'HW.Clock';
             case 'Load':
                 return 'HW.Load';
+            case 'Temperature':
+                return 'HW.Temp';
             // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
             default:
                 return '';
