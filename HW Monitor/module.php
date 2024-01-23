@@ -86,75 +86,74 @@ class HWMonitor extends IPSModule //development
     }
 
     // Schleife für die ID-Liste
-// Schleife für die ID-Liste
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
+    foreach ($idListe as $idItem) {
+        $gesuchteId = $idItem['id'];
 
-    // Suche nach Werten für die gefundenen IDs
-    $foundValues = [];
-    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+        // ... (vorhandener Code)
 
-    // Variablen anlegen und einstellen für die gefundenen Werte
-    $counter = 0;
+        // Variablen anlegen und einstellen für die gefundenen Werte
+        $counter = 0;
 
-    // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-    $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-    foreach ($requiredKeys as $searchKey) {
-        if (!array_key_exists($searchKey, $foundValues)) {
-            continue; // Schlüssel nicht vorhanden, überspringen
-        }
-    
-        foreach ($foundValues[$searchKey] as $gefundenerWert) {
-            $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-            $variablePosition = $gesuchteId * 10 + $counter;
-    
-            $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-            if ($variableID === false) {
-                if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-    
-                    // Ersetzungen für Float-Variablen anwenden
-                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-    
-                    // Hier das Variablenprofil zuweisen basierend auf 'Type'
-                    $this->assignVariableProfileByType($variableID, $gefundenerWert, $foundValues['Type'][$counter]);
-                } elseif ($searchKey === 'id') {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } elseif ($searchKey === 'Type') {
-                    // 'Type' wird hier nicht überprüft, da es bereits in assignVariableProfileByType behandelt wird
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+        // Hinzufügen einer Zuordnungsliste für Type zu Variablenprofilen
+        $typeToProfileMapping = [
+            'Clock' => 'HW.Clock',
+            'Load' => 'HW.Load',
+            // Weitere Zuordnungen hier hinzufügen, falls benötigt
+        ];
+
+        foreach ($requiredKeys as $searchKey) {
+            if (!array_key_exists($searchKey, $foundValues)) {
+                continue; // Schlüssel nicht vorhanden, überspringen
+            }
+
+            foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
+
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                if ($variableID === false) {
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                    } elseif ($searchKey === 'id') {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
                 } else {
-                    // Alle anderen Schlüssel, einschließlich 'Text', werden hier als String-Variable erstellt
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                    if ($keyIndex !== false) {
+                        unset($existingVariableIDs[$keyIndex]);
+                    }
                 }
-            } else {
-                $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                if ($keyIndex !== false) {
-                    unset($existingVariableIDs[$keyIndex]);
+
+                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                SetValue($variableID, $convertedValue);
+                $counter++;
+
+                // Hinzufügen der Zuordnung des Variablenprofils basierend auf dem 'Type'
+                if (isset($foundValues['Type'][0])) {
+                    $variableProfile = isset($typeToProfileMapping[$foundValues['Type'][0]]) ? $typeToProfileMapping[$foundValues['Type'][0]] : '';
+                    if (!IPS_VariableProfileExists($variableProfile)) {
+                        // Hier könnten Sie eine Standardprofil-Erstellung vornehmen oder eine Warnung ausgeben.
+                        $this->Log("Variable profile '{$variableProfile}' does not exist!");
+                    } else {
+                        IPS_SetVariableCustomProfile($variableID, $variableProfile);
+                    }
                 }
             }
-    
-            $convertedValue = ($searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-    
-            SetValue($variableID, $convertedValue);
-            $counter++;
         }
     }
-}
-}
-// Funktion zum Zuweisen von Variablenprofilen
-private function assignVariableProfileByType($variableID, $value, $type)
-{
-    $typeProfileMapping = [
-        'Clock' => 'HW.Clock',  // Hier die Zuordnungstabelle hinzufügen
-        'Load' => 'HW.Load',
-        // Weitere Zuordnungen entsprechend ergänzen
-    ];
 
-    $profileName = $typeProfileMapping[$type] ?? '';  // Standardwert, falls keine Zuordnung gefunden wurde
-
-    if (IPS_VariableProfileExists($profileName)) {
-        IPS_SetVariableCustomProfile($variableID, $profileName);
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false) {
+                IPS_DeleteVariable($variableIDToRemove);
+            }
+        }
     }
-}
 }
