@@ -89,8 +89,6 @@ class HWMonitor extends IPSModule //development
     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
 
-        // ... (vorhandener Code)
-
         // Variablen anlegen und einstellen für die gefundenen Werte
         $counter = 0;
 
@@ -101,27 +99,15 @@ class HWMonitor extends IPSModule //development
             // Weitere Zuordnungen hier hinzufügen, falls benötigt
         ];
 
-        foreach ($requiredKeys as $searchKey) {
-            if (!array_key_exists($searchKey, $foundValues)) {
-                continue; // Schlüssel nicht vorhanden, überspringen
-            }
-
-            foreach ($foundValues[$searchKey] as $gefundenerWert) {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+        // Überprüfen, ob 'Type' in $foundValues vorhanden ist
+        if (array_key_exists('Type', $foundValues)) {
+            foreach ($foundValues['Type'] as $typeValue) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_Type";
                 $variablePosition = $gesuchteId * 10 + $counter;
 
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                 if ($variableID === false) {
-                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                        // Ersetzungen für Float-Variablen anwenden
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    } elseif ($searchKey === 'id') {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    }
+                    $variableID = $this->RegisterVariableString($variableIdentValue, 'Type', '', $variablePosition);
                 } else {
                     $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                     if ($keyIndex !== false) {
@@ -129,20 +115,16 @@ class HWMonitor extends IPSModule //development
                     }
                 }
 
-                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                SetValue($variableID, $convertedValue);
+                SetValue($variableID, $typeValue);
                 $counter++;
 
                 // Hinzufügen der Zuordnung des Variablenprofils basierend auf dem 'Type'
-                if (isset($foundValues['Type'][0])) {
-                    $variableProfile = isset($typeToProfileMapping[$foundValues['Type'][0]]) ? $typeToProfileMapping[$foundValues['Type'][0]] : '';
-                    if (!IPS_VariableProfileExists($variableProfile)) {
-                        // Hier könnten Sie eine Standardprofil-Erstellung vornehmen oder eine Warnung ausgeben.
-                        $this->Log("Variable profile '{$variableProfile}' does not exist!");
-                    } else {
-                        IPS_SetVariableCustomProfile($variableID, $variableProfile);
-                    }
+                $variableProfile = isset($typeToProfileMapping[$typeValue]) ? $typeToProfileMapping[$typeValue] : '';
+                if (!IPS_VariableProfileExists($variableProfile)) {
+                    // Hier könnten Sie eine Standardprofil-Erstellung vornehmen oder eine Warnung ausgeben.
+                    $this->Log("Variable profile '{$variableProfile}' does not exist!");
+                } else {
+                    IPS_SetVariableCustomProfile($variableID, $variableProfile);
                 }
             }
         }
