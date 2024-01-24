@@ -1,6 +1,6 @@
 # Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
-Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
 
 ### Inhaltsverzeichnis
 
@@ -15,7 +15,9 @@ Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http
 
 ### 1. Funktionsumfang
 
-* Abfrage des Libre Hardware Monitors mit der id-Nummer des gewünschten Wertes
+* Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Varaiablen.
+* ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42)
+
 
 ### 2. Voraussetzungen
 
