@@ -15,14 +15,14 @@ Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://19
 
 ### 1. Funktionsumfang
 
-* Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Varaiablen
+* Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
 ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
 
 
 ### 2. Voraussetzungen
 
 - IP-Symcon ab Version 7.0
-- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor.
 
 ### 3. Software-Installation
 
