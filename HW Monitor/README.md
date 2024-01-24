@@ -1,6 +1,6 @@
 # Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
-Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
 
 ### Inhaltsverzeichnis
 
@@ -15,12 +15,14 @@ Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http
 
 ### 1. Funktionsumfang
 
-* Abfrage des Libre Hardware Monitors mit der id-Nummer des gewünschten Wertes
+* Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
+![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
+
 
 ### 2. Voraussetzungen
 
 - IP-Symcon ab Version 7.0
-- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor.
 
 ### 3. Software-Installation
 
@@ -40,6 +42,7 @@ IP-Adresse |     IP-Adresse des Rechners auf dem der Libre Hardware Monitor läu
 Port       |  Port des Rechners (Standard ist 8085). Der Port muss in der Firewall geöffnet sein
 Intervall  |  Intervall für das Update der Werte
 Überwachte ID's|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42)
 
 ### 5. Statusvariablen und Profile
 
