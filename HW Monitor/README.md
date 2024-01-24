@@ -16,7 +16,8 @@ Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://19
 ### 1. Funktionsumfang
 
 * Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Varaiablen.
-* ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42)
+* ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42), ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/5f228911-40dd-4749-9b3b-ba94f1292452)
+
 
 
 ### 2. Voraussetzungen
