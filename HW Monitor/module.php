@@ -171,7 +171,7 @@ class HWMonitor extends IPSModule
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
 
                             //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Wert: ".$variableIdentValue.", Key: ".$searchKey.", Position: ".$variablePosition."", 0);
+                            $this->SendDebug("Float-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
 
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
@@ -186,10 +186,16 @@ class HWMonitor extends IPSModule
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+
+                            //Debug senden
+                            $this->SendDebug("Float-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
                         } 
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+
+                            //Debug senden
+                            $this->SendDebug("String-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
                         }
                     } 
                     else 
