@@ -139,7 +139,7 @@ class HWMonitor extends IPSModule
         $gesuchteId = $idItem['id'];
 
         //Debug senden
-        $this->SendDebug("Ausgewählte ID's", "".$gesuchteId."", 0);
+        $this->SendDebug("Ausgewählte ID", "".$gesuchteId."", 0);
 
         // Suche nach Werten für die gefundenen IDs
         $foundValues = [];
@@ -197,6 +197,8 @@ class HWMonitor extends IPSModule
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             if ($variableIDToRemove !== false) {
                 IPS_DeleteVariable($variableIDToRemove);
+                //Debug senden
+        $this->SendDebug("Variabel gelöscht", "".$variableIDToRemove."", 0);
             }
         }
     }
