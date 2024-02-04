@@ -171,7 +171,7 @@ class HWMonitor extends IPSModule
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
 
                             //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
+                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
 
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
