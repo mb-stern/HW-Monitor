@@ -188,14 +188,14 @@ class HWMonitor extends IPSModule
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
 
                             //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
+                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         } 
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
 
                             //Debug senden
-                            $this->SendDebug("String-Variable erstellt", "Name: ".$searchKey.", Position: ".$variablePosition."", 0);
+                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         }
                     } 
                     else 
