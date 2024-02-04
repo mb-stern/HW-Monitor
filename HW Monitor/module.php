@@ -121,7 +121,7 @@ class HWMonitor extends IPSModule
         $contentArray = json_decode($content, true);
 
         //Debug senden
-        $this->SendDebug("Verbindungseinstellung im Config", "".$this->ReadPropertyString('IPAddress').":".$this->ReadPropertyInteger('Port')."", 0);
+        $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
 
         // Gewählte ID's abfragen
         $idListeString = $this->ReadPropertyString('IDListe');
