@@ -180,7 +180,7 @@ class HWMonitor extends IPSModule
                                 IPS_SetVariableCustomProfile($variableID, $variableProfile);
 
                                 //Debug senden
-                                $this->SendDebug("Variable erstellt", "Variable-ID: ".$variableID.", Profil: ".$variableProfile."", 0);
+                                $this->SendDebug("Variable und Profil erstellt", "Variable-ID: ".$variableID.", Profil: ".$variableProfile."", 0);
                             }
                         } 
                         elseif ($searchKey === 'id') 
