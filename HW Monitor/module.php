@@ -127,9 +127,6 @@ class HWMonitor extends IPSModule
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
-    //Debug senden
-    $this->SendDebug("Ausgewählte ID's", "".$idListeString."", 0);
-
     // Alle vorhandenen Variablen speichern
     $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
     $existingVariableIDs = [];
@@ -140,6 +137,9 @@ class HWMonitor extends IPSModule
     // Schleife für die ID-Liste
     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
+
+        //Debug senden
+        $this->SendDebug("Ausgewählte ID's", "".$gesuchteId."", 0);
 
         // Suche nach Werten für die gefundenen IDs
         $foundValues = [];
