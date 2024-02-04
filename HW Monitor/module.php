@@ -178,6 +178,9 @@ class HWMonitor extends IPSModule
                             if ($variableProfile !== '') 
                             {
                                 IPS_SetVariableCustomProfile($variableID, $variableProfile);
+
+                                //Debug senden
+                                $this->SendDebug("Variable erstellt", "Variable-ID: ".$variableID.", Profil: ".$variableProfile."", 0);
                             }
                         } 
                         elseif ($searchKey === 'id') 
@@ -203,8 +206,8 @@ class HWMonitor extends IPSModule
                     SetValue($variableID, $convertedValue);
                     $counter++;
   
-                //Debug senden
-                $this->SendDebug("Variable aktualisiert", "Varible-ID: ".$variableID.", Wert: ".$convertedValue."", 0);
+                    //Debug senden
+                    $this->SendDebug("Variable aktualisiert", "Variable-ID: ".$variableID.", Wert: ".$convertedValue."", 0);
 
                 }
             }
