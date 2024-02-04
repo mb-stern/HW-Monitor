@@ -128,7 +128,7 @@ class HWMonitor extends IPSModule
     $idListe = json_decode($idListeString, true);
 
     //Debug senden
-    $this->SendDebug("Ausgewählte ID's", "".$idListe."", 0);
+    $this->SendDebug("Ausgewählte ID's", "".$idListeString."", 0);
 
     // Alle vorhandenen Variablen speichern
     $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
