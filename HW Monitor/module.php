@@ -204,7 +204,7 @@ class HWMonitor extends IPSModule
                     $counter++;
   
                 //Debug senden
-                $this->SendDebug("Ausgewählte ID", "".$variableID." ".$convertedValue."", 0);
+                $this->SendDebug("Variable aktualisiert", "Varible-ID: ".$variableID.", Wert: ".$convertedValue."", 0);
 
                 }
             }
