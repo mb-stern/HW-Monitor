@@ -140,12 +140,14 @@ class HWMonitor extends IPSModule
         {
             $gesuchteId = $idItem['id'];
 
-            //Debug senden
-            $this->SendDebug("Ausgewählte ID", "".$gesuchteId."", 0);
+
 
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+
+            //Debug senden
+            $this->SendDebug("Ausgewählte ID", "".$contentArray." ".$gesuchteId." ".$foundValues."", 0);
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
