@@ -85,7 +85,10 @@ Beispiel:
 
 ### 8. Versionen
 
-Version 1.1 (23.1.2024)
+Version 1.2 (04.02.2024)
+* Debug hinzugefügt
+
+Version 1.1 (23.01.2024)
 * Variabelprofile werden erstellt und zugeordnet
 
 Version 1.0 (21.1.2024)
