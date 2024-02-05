@@ -85,8 +85,9 @@ Beispiel:
 
 ### 8. Versionen
 
-Version 1.2 (04.02.2024)
+Version 1.2 (05.02.2024)
 * Debug hinzugefügt
+* Muster IP-Adresse wird nicht mehr standardmässig geladen bei Installation des Moduls. Dies führte bei der Installation zu Fehlermeldungen.
 
 Version 1.1 (23.01.2024)
 * Variabelprofile werden erstellt und zugeordnet
