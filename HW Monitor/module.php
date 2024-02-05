@@ -80,11 +80,20 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
-        // Timer für Aktualisierung aktualisieren
-        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
 
-        // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
-        $this->Update();
+        if ($ipAddress && $port && !empty($idListe)) 
+        {
+            // Timer für Aktualisierung aktualisieren
+            $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+    
+            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+            $this->Update();
+        } 
+        else 
+        {
+            // Erforderliche Konfigurationsparameter fehlen, hier kannst du ggf. eine Warnung ausgeben
+            $this->SendDebug("Konfigurationsfehler", "Erforderliche Konfigurationsparameter fehlen.", 0);
+        }
     }
 
     protected function getVariableProfileByType($type)
