@@ -35,7 +35,7 @@ class HWMonitor extends IPSModule
     {
         parent::Create();
 
-        $this->RegisterPropertyString('IPAddress', '192.168.178.75');
+        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
         $this->RegisterPropertyInteger('Port', 8085);
         $this->RegisterPropertyString('IDListe', '[]');
         $this->RegisterPropertyInteger('UpdateInterval', 0);

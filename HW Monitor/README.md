@@ -88,6 +88,7 @@ Beispiel:
 Version 1.2 (05.02.2024)
 * Debug hinzugefügt
 * Muster IP-Adresse wird nicht mehr standardmässig geladen bei Installation des Moduls. Dies führte bei der Installation zu Fehlermeldungen.
+* Fenster für ID's im Konfigurationsformular vergrössert.
 
 Version 1.1 (23.01.2024)
 * Variabelprofile werden erstellt und zugeordnet
