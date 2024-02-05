@@ -91,5 +91,5 @@ Version 1.2 (04.02.2024)
 Version 1.1 (23.01.2024)
 * Variabelprofile werden erstellt und zugeordnet
 
-Version 1.0 (21.01.2024)
+Version 1.0 (21.1.2024)
 * Initiale Version
