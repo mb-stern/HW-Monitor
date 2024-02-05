@@ -80,6 +80,10 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
+        // Überprüfen, ob die erforderlichen Konfigurationsparameter gesetzt sind
+        $ipAddress = $this->ReadPropertyString('IPAddress');
+        $port = $this->ReadPropertyInteger('Port');
+        $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
 
         if ($ipAddress && $port && !empty($idListe)) 
         {
