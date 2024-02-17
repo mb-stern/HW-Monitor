@@ -40,6 +40,10 @@
         "rowCount": 15,
         "add": true,
         "delete": true,
+        "sort": {
+          "column": "id",
+          "direction": "ascending"
+      },
         "columns": 
         [
             {
