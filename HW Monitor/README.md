@@ -1,6 +1,7 @@
 # Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
 Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
+Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen.
 
 ### Inhaltsverzeichnis
 
@@ -16,8 +17,7 @@ Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://19
 ### 1. Funktionsumfang
 
 * Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
-
+* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen.
 
 ### 2. Voraussetzungen
 
@@ -38,11 +38,14 @@ __Konfigurationsseite__:
 
 Name     | Beschreibung
 -------- | ------------------
-IP-Adresse |     IP-Adresse des Rechners auf dem der Libre Hardware Monitor läuft
-Port       |  Port des Rechners (Standard ist 8085). Der Port muss in der Firewall geöffnet sein
-Intervall  |  Intervall für das Update der Werte
-Überwachte ID's|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42)
+IP-Adresse 		|  IP-Adresse des Rechners auf dem der Libre Hardware Monitor läuft
+Port       		|  Port des Rechners (Standard ist 8085). Der Port muss in der Firewall geöffnet sein
+Intervall  		|  Intervall für das Update der Werte
+Überwachte ID's	|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+
+![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/d107d460-658c-4279-bcd2-681bf1cba80b)
+
+![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
 
 ### 5. Statusvariablen und Profile
 
@@ -60,16 +63,15 @@ Max    |   Float    |	Maximum des Wertes
 Type   |   String   |	Profil des Wertes
 
 
-
 #### Profile
 
 Name   | Typ
 ------ | -------
-HW.Fan   | Float
+HW.Fan    | Float
 HW.Clock  | Float
 HW.Temp   | Float
 HW.Data   | Float
-HW.Rate  | Float
+HW.Rate   | Float
 
 ### 6. WebFront
 
@@ -84,6 +86,10 @@ Beispiel:
 `HW_Update(12345);`
 
 ### 8. Versionen
+
+Version 1.3 (17.02.2024)
+* Anpassung des Codes um die Store Kompatibilät zu erlangen
+* Anpassung von Debug und Fehlermeldung
 
 Version 1.2 (05.02.2024)
 * Debug hinzugefügt

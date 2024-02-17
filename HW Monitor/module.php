@@ -3,11 +3,6 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    protected function Log($Message)
-    {
-        IPS_LogMessage(__CLASS__, $Message);
-    }
-
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
@@ -35,7 +30,7 @@ class HWMonitor extends IPSModule
     {
         parent::Create();
 
-        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
+        $this->RegisterPropertyString('IPAddress', '0.0.0.0');
         $this->RegisterPropertyInteger('Port', 8085);
         $this->RegisterPropertyString('IDListe', '[]');
         $this->RegisterPropertyInteger('UpdateInterval', 0);
@@ -43,7 +38,7 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Benötigte Varaiblen erstellen
+        // Benötigte Variablen erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
 			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
 			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
@@ -80,23 +75,24 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
+        // Timer für Aktualisierung aktualisieren
+        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+
         // Überprüfen, ob die erforderlichen Konfigurationsparameter gesetzt sind
         $ipAddress = $this->ReadPropertyString('IPAddress');
         $port = $this->ReadPropertyInteger('Port');
         $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
 
-        if ($ipAddress && $port && !empty($idListe)) 
+        // Überprüfe, ob die IP-Adresse nicht die Muster-IP ist
+        if ($ipAddress == '0.0.0.0') 
         {
-            // Timer für Aktualisierung aktualisieren
-            $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-    
-            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
-            $this->Update();
+            $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);   
+            $this->LogMessage("IP-Adresse ist nicht konfiguriert", KL_ERROR);
         } 
         else 
         {
-            // Erforderliche Konfigurationsparameter fehlen, hier kannst du ggf. eine Warnung ausgeben
-            $this->SendDebug("Konfigurationsfehler", "Erforderliche Konfigurationsparameter fehlen.", 0);
+            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+            $this->Update();
         }
     }
 
@@ -164,6 +160,8 @@ class HWMonitor extends IPSModule
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+            
+            
             foreach ($requiredKeys as $searchKey) 
             {
                 if (!array_key_exists($searchKey, $foundValues)) 
@@ -181,34 +179,20 @@ class HWMonitor extends IPSModule
                     {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                            //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-
-                            // Variablenprofil basierend auf 'Type'-Wert zuordnen
-                            $variableProfile = $this->getVariableProfileByType($foundValues['Type'][0]);
-                            if ($variableProfile !== '') 
-                            {
-                                IPS_SetVariableCustomProfile($variableID, $variableProfile);
-                            }
                         } 
+                        
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                            //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         } 
+                        
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                            //Debug senden
-                            $this->SendDebug("String-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         }
                     } 
                     else 
@@ -223,10 +207,11 @@ class HWMonitor extends IPSModule
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
-                    $counter++;
-  
+
                     //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variable-ID: ".$variableID.", Wert: ".$convertedValue."", 0);
+                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+
+                    $counter++;
 
                 }
             }
@@ -238,9 +223,9 @@ class HWMonitor extends IPSModule
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             if ($variableIDToRemove !== false)
             {
-                IPS_DeleteVariable($variableIDToRemove);
+                $this->UnregisterVariable($variableToRemove);
                 //Debug senden
-                $this->SendDebug("Variabel gelöscht", "".$variableIDToRemove."", 0);
+                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
             }
         }
     }
