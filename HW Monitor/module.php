@@ -3,11 +3,6 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    protected function Log($Message)
-    {
-        IPS_LogMessage(__CLASS__, $Message);
-    }
-
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
