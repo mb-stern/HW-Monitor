@@ -75,6 +75,9 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
+        // Timer für Aktualisierung aktualisieren
+        $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+
         // Überprüfen, ob die erforderlichen Konfigurationsparameter gesetzt sind
         $ipAddress = $this->ReadPropertyString('IPAddress');
         $port = $this->ReadPropertyInteger('Port');
