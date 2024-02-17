@@ -196,11 +196,7 @@ class HWMonitor extends IPSModule
                     } 
                     else 
                     {
-                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) 
-                        {
-                            unset($existingVariableIDs[$keyIndex]);
-                        }
+                        $this->UnregisterVariable($variableID);
                     }
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
@@ -208,7 +204,7 @@ class HWMonitor extends IPSModule
                     SetValue($variableID, $convertedValue);
 
                     //Debug senden
-                    $this->SendDebug("String-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                    $this->SendDebug("Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
 
