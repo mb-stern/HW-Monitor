@@ -17,7 +17,7 @@ Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt 
 ### 1. Funktionsumfang
 
 * Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
-* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen
+* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen.
 
 ### 2. Voraussetzungen
 
@@ -88,7 +88,8 @@ Beispiel:
 ### 8. Versionen
 
 Version 1.3 (17.02.2024)
-* Anpassung des Codes und die Store Kompatibilät zu erlangen
+* Anpassung des Codes um die Store Kompatibilät zu erlangen
+* Anpassung von Debug und Fehlermeldung
 
 Version 1.2 (05.02.2024)
 * Debug hinzugefügt
