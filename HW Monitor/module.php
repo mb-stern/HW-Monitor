@@ -178,7 +178,7 @@ class HWMonitor extends IPSModule
                     {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
@@ -186,17 +186,21 @@ class HWMonitor extends IPSModule
                         
                         elseif ($searchKey === 'id') 
                         {
-                            $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
                         
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
-                            $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                     } 
                     else 
                     {
-                        $this->UnregisterVariable($variableID);
+                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                        if ($keyIndex !== false) 
+                        {
+                            unset($existingVariableIDs[$keyIndex]);
+                        }
                     }
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
@@ -218,7 +222,7 @@ class HWMonitor extends IPSModule
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             if ($variableIDToRemove !== false)
             {
-                $this->UnregisterVariable($variableID);
+                $this->UnregisterVariable($variableIdentValue);
                 //Debug senden
                 $this->SendDebug("Variable gelöscht", "".$variableIdentValue."", 0);
             }
