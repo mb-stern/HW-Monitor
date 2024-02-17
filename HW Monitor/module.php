@@ -30,7 +30,7 @@ class HWMonitor extends IPSModule
     {
         parent::Create();
 
-        $this->RegisterPropertyString('IPAddress', '192.168.178.76');
+        $this->RegisterPropertyString('IPAddress', '0.0.0.0');
         $this->RegisterPropertyInteger('Port', 8085);
         $this->RegisterPropertyString('IDListe', '[]');
         $this->RegisterPropertyInteger('UpdateInterval', 0);
@@ -80,18 +80,16 @@ class HWMonitor extends IPSModule
         $port = $this->ReadPropertyInteger('Port');
         $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
 
-        if ($ipAddress && $port && !empty($idListe)) 
+        i// Überprüfe, ob die IP-Adresse nicht die Muster-IP ist
+        if ($ipAddress == '0.0.0.0') 
         {
-            // Timer für Aktualisierung aktualisieren
-            $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
-    
-            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
-            $this->Update();
+            $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);   
+            $this->LogMessage("IP-Adresse ist nicht konfiguriert", KL_ERROR);
         } 
         else 
         {
-            // Erforderliche Konfigurationsparameter fehlen, hier kannst du ggf. eine Warnung ausgeben
-            $this->SendDebug("Konfigurationsfehler", "Erforderliche Konfigurationsparameter fehlen.", 0);
+            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+            $this->Update();
         }
     }
 
