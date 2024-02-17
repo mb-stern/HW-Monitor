@@ -38,7 +38,7 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Benötigte Varaiblen erstellen
+        // Benötigte Variablen erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
 			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
 			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
@@ -233,7 +233,7 @@ class HWMonitor extends IPSModule
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             if ($variableIDToRemove !== false)
             {
-                IPS_DeleteVariable($variableIDToRemove);
+                $this->UnregisterVariable($variableIDToRemove);
                 //Debug senden
                 $this->SendDebug("Variabel gelöscht", "".$variableIDToRemove."", 0);
             }
