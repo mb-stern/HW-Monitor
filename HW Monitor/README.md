@@ -43,7 +43,7 @@ Port       		|  Port des Rechners (Standard ist 8085). Der Port muss in der Fire
 Intervall  		|  Intervall für das Update der Werte
 Überwachte ID's	|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
 
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/55f4548f-b3db-45b8-be8c-d81effd12d42)
+![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/d107d460-658c-4279-bcd2-681bf1cba80b)
 
 ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
 
