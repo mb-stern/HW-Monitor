@@ -180,9 +180,6 @@ class HWMonitor extends IPSModule
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
-                            //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
-
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
@@ -190,17 +187,11 @@ class HWMonitor extends IPSModule
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                            //Debug senden
-                            $this->SendDebug("Float-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         } 
                         
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-
-                            //Debug senden
-                            $this->SendDebug("String-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey."", 0);
                         }
                     } 
                     else 
@@ -215,6 +206,10 @@ class HWMonitor extends IPSModule
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
+
+                    //Debug senden
+                    $this->SendDebug("String-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+
                     $counter++;
   
                     //Debug senden
