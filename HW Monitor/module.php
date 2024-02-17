@@ -211,9 +211,6 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("String-Variable erstellt", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
-  
-                    //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variable-ID: ".$variableID.", Wert: ".$convertedValue."", 0);
 
                 }
             }
@@ -225,7 +222,7 @@ class HWMonitor extends IPSModule
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             if ($variableIDToRemove !== false)
             {
-                $this->UnregisterVariable($variableIdentValue);
+                $this->UnregisterVariable($variableID);
                 //Debug senden
                 $this->SendDebug("Variable gelöscht", "".$variableIdentValue."", 0);
             }
