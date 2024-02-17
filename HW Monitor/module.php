@@ -222,7 +222,7 @@ class HWMonitor extends IPSModule
             {
                 $this->UnregisterVariable($variableToRemove);
                 //Debug senden
-                $this->SendDebug("Variable gelöscht", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
             }
         }
     }
