@@ -80,7 +80,7 @@ class HWMonitor extends IPSModule
         $port = $this->ReadPropertyInteger('Port');
         $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
 
-        i// Überprüfe, ob die IP-Adresse nicht die Muster-IP ist
+        // Überprüfe, ob die IP-Adresse nicht die Muster-IP ist
         if ($ipAddress == '0.0.0.0') 
         {
             $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);   
