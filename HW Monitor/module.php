@@ -181,10 +181,9 @@ class HWMonitor extends IPSModule
                         } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                            // Setze die Elternkategorie 'Text' für die Variable 'Text'
-                            $parentCategoryId = IPS_GetObjectIDByIdent('Text', $this->InstanceID);
+                            // RegisterVariableString mit der Elternkategorie 'Text' aufrufen
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $parentCategoryId);
+                            IPS_SetParent($variableID, IPS_GetObjectIDByIdent('Text', $this->InstanceID));
                         }
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -202,7 +201,8 @@ class HWMonitor extends IPSModule
             
                     $counter++;
                 }
-            }     
+            }
+            
         }
 
         // Lösche nicht mehr benötigte Variablen
