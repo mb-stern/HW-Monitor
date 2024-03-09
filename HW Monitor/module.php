@@ -189,11 +189,6 @@ class HWMonitor extends IPSModule
             elseif ($searchKey === 'Text' || $searchKey === 'Type') 
             {
                 $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                
-                // Parent für die Variable "Text" setzen
-                if ($searchKey === 'Text') {
-                    IPS_SetParent($variableID, $this->InstanceID);
-                }
             }
         } 
         else 
@@ -203,6 +198,11 @@ class HWMonitor extends IPSModule
             {
                 unset($existingVariableIDs[$keyIndex]);
             }
+        }
+
+        // Parent für die Variable "Text" setzen, falls vorhanden
+        if ($searchKey === 'Text') {
+            IPS_SetParent($variableID, $this->InstanceID);
         }
 
         $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
@@ -215,6 +215,7 @@ class HWMonitor extends IPSModule
         $counter++;
     }
 }
+
     }
 
     // Lösche nicht mehr benötigte Variablen
