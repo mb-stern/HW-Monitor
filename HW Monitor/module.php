@@ -161,7 +161,6 @@ class HWMonitor extends IPSModule
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
-            
             foreach ($requiredKeys as $searchKey) {
                 if (!array_key_exists($searchKey, $foundValues)) {
                     continue; // Schlüssel nicht vorhanden, überspringen
@@ -190,27 +189,17 @@ class HWMonitor extends IPSModule
                         }
                     }
             
-                    // Elternkategorie festlegen
+                    // Parent direkt auf die Variable "Text" setzen
                     if ($searchKey === 'Text') {
-                        $parentCategoryIdent = 'Text';
-                    } elseif ($searchKey === 'Type') {
-                        $parentCategoryIdent = 'Type';
-                    } else {
-                        // Wenn keine spezielle Elternkategorie benötigt wird, überspringen
-                        continue;
+                        $parentVariableIdent = 'Text';
+                        $parentVariableID = @IPS_GetObjectIDByIdent($parentVariableIdent, $this->InstanceID);
+                        if ($parentVariableID === false) {
+                            // Fehlermeldung ausgeben, wenn die Variable "Text" nicht gefunden wird
+                            echo "Warnung: Variable 'Text' wurde nicht gefunden.";
+                        } else {
+                            IPS_SetParent($variableID, $parentVariableID);
+                        }
                     }
-            
-                    // Elternkategorie-ID abrufen oder erstellen
-                    $parentCategoryId = @IPS_GetObjectIDByIdent($parentCategoryIdent, $this->InstanceID);
-                    if ($parentCategoryId === false) {
-                        $parentCategoryId = IPS_CreateCategory();
-                        IPS_SetName($parentCategoryId, ucfirst($parentCategoryIdent));
-                        IPS_SetIdent($parentCategoryId, $parentCategoryIdent);
-                        IPS_SetParent($parentCategoryId, $this->InstanceID);
-                    }
-            
-                    // Variablen der Elternkategorie unterordnen
-                    IPS_SetParent($variableID, $parentCategoryId);
             
                     // Wert setzen
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
