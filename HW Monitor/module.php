@@ -185,7 +185,7 @@ class HWMonitor extends IPSModule
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $variableIdentValue);
+                            IPS_SetParent($variableID, ucfirst($searchKey);
                         } 
                         
                         elseif ($searchKey === 'Type') 
