@@ -180,10 +180,8 @@ class HWMonitor extends IPSModule
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
-                            // RegisterVariableString mit der Elternkategorie 'Text' aufrufen
+                        } elseif (in_array($searchKey, ['Text', 'Type'])) {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, IPS_GetObjectIDByIdent('Text', $this->InstanceID));
                         }
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -192,11 +190,33 @@ class HWMonitor extends IPSModule
                         }
                     }
             
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                    // Elternkategorie festlegen
+                    if ($searchKey === 'Text') {
+                        $parentCategoryIdent = 'Text';
+                    } elseif ($searchKey === 'Type') {
+                        $parentCategoryIdent = 'Type';
+                    } else {
+                        // Wenn keine spezielle Elternkategorie benötigt wird, überspringen
+                        continue;
+                    }
             
+                    // Elternkategorie-ID abrufen oder erstellen
+                    $parentCategoryId = @IPS_GetObjectIDByIdent($parentCategoryIdent, $this->InstanceID);
+                    if ($parentCategoryId === false) {
+                        $parentCategoryId = IPS_CreateCategory();
+                        IPS_SetName($parentCategoryId, ucfirst($parentCategoryIdent));
+                        IPS_SetIdent($parentCategoryId, $parentCategoryIdent);
+                        IPS_SetParent($parentCategoryId, $this->InstanceID);
+                    }
+            
+                    // Variablen der Elternkategorie unterordnen
+                    IPS_SetParent($variableID, $parentCategoryId);
+            
+                    // Wert setzen
+                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                     SetValue($variableID, $convertedValue);
             
-                    //Debug senden
+                    // Debug senden
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
                     $counter++;
