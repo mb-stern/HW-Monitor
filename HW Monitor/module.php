@@ -178,7 +178,14 @@ class HWMonitor extends IPSModule
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
                     {
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        if ($searchKey === 'Text' || $searchKey === 'Type') 
+                        {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            if ($searchKey === 'Text') {
+                                IPS_SetParent($variableID, $this->InstanceID);
+                            }
+                        }
+                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
@@ -191,13 +198,7 @@ class HWMonitor extends IPSModule
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
                         
-                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            if ($searchKey === 'Text') {
-                                IPS_SetParent($variableID, $this->InstanceID);
-                            }
-                        }
+                        
                     } 
                     else 
                     {
