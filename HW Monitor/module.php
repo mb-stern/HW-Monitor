@@ -142,18 +142,11 @@ class HWMonitor extends IPSModule
     $contentArray = json_decode($content, true);
 
     // Debug senden
-    $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
+    $this->SendDebug("Verbindungseinstellung", "{$this->ReadPropertyString('IPAddress')} : {$this->ReadPropertyInteger('Port')}", 0);
 
     // Gewählte ID's abfragen
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
-
-    // Alle vorhandenen Variablen speichern
-    $existingVariables = IPS_GetChildrenIDs($textVariableID);
-    $existingVariableIDs = [];
-    foreach ($existingVariables as $existingVariableID) {
-        $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-    }
 
     // Schleife für die ID-Liste
     foreach ($idListe as $idItem) {
@@ -202,7 +195,7 @@ class HWMonitor extends IPSModule
                 SetValue($variableID, $convertedValue);
 
                 // Debug senden
-                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $this->SendDebug("Variable aktualisiert", "Variabel-ID: {$variableID}, Position: {$variablePosition}, Name: {$searchKey}, Wert: {$convertedValue}", 0);
 
                 $counter++;
             }
@@ -215,7 +208,7 @@ class HWMonitor extends IPSModule
         if ($variableIDToRemove !== false) {
             $this->UnregisterVariable($variableIDToRemove);
             // Debug senden
-            $this->SendDebug("Variable gelöscht", "Variable ID: ".$variableIDToRemove.", Ident: ".$variableToRemove."", 0);
+            $this->SendDebug("Variable gelöscht", "Variable ID: {$variableIDToRemove}, Ident: {$variableToRemove}", 0);
         }
     }
 }
