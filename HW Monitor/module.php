@@ -181,7 +181,16 @@ class HWMonitor extends IPSModule
                         } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                            // Register the variable
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+            
+                            // Use 'Text' as parent if it's the 'Text' variable, otherwise use $parentId
+                            $parentId = ($searchKey === 'Text') ? $variableID : $parentId;
+            
+                            // Avoid setting 'Text' as its own parent
+                            if ($searchKey !== 'Text') {
+                                IPS_SetParent($variableID, $parentId);
+                            }
                         }
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -190,14 +199,14 @@ class HWMonitor extends IPSModule
                         }
                     }
             
-                    // Elternobjekt setzen
-                    IPS_SetParent($variableID, $parentId);
+                    // SetValue only for non-'Text' variables
+                    if ($searchKey !== 'Text') {
+                        // Wert setzen
+                        SetValue($variableID, $gefundenerWert);
             
-                    // Wert setzen
-                    SetValue($variableID, $gefundenerWert);
-            
-                    // Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$gefundenerWert."", 0);
+                        // Debug senden
+                        $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$gefundenerWert."", 0);
+                    }
             
                     $counter++;
                 }
