@@ -234,7 +234,7 @@ class HWMonitor extends IPSModule
                 $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
                 if (count($childVariables) > 0) {
                     foreach ($childVariables as $childVariableID) {
-                        $this->UnregisterVariable(IPS_GetObject($childVariableID)['ObjectIdent']);
+                        $this->UnregisterVariable(IPS_GetObject($childVariableID);
                         // Debug senden
                         $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
                     }
