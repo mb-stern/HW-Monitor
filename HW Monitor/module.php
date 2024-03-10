@@ -222,7 +222,7 @@ class HWMonitor extends IPSModule
         $counter++;
     }
 }
-
+}
 
         // Lösche nicht mehr benötigte Variablen
 foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey) {
