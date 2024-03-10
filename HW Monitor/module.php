@@ -207,7 +207,7 @@ class HWMonitor extends IPSModule
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                         if ($keyIndex !== false) 
                         {
-                            unset($existingVariableIDs[$keyIndex]);
+                            $this->UnregisterVariable($variableID);
                         }
                     }
 
