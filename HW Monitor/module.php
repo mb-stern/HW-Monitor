@@ -162,8 +162,10 @@ class HWMonitor extends IPSModule
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
             
-            $parentIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_Text"; // Identifikator der 'Text'-Variable
+            $parentVariableID = "Variable_" . ($gesuchteId * 10 + $counter) . "_Text"; // Identifikator der 'Text'-Variable
 
+            
+            
             foreach ($requiredKeys as $searchKey) 
 {
     if (!array_key_exists($searchKey, $foundValues)) 
