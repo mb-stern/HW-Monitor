@@ -226,6 +226,7 @@ class HWMonitor extends IPSModule
 
         /// Lösche nicht mehr benötigte Variablen
 foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey) 
+$this->SendDebug("Search Key", "".$searchKey."", 0);
 {
     if (!isset($foundValues[$searchKey])) 
     {
