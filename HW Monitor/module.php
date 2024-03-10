@@ -162,7 +162,9 @@ class HWMonitor extends IPSModule
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
             
-            foreach ($requiredKeys as $searchKey) 
+            $parentIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_Text"; // Identifikator der 'Text'-Variable
+
+foreach ($requiredKeys as $searchKey) 
 {
     if (!array_key_exists($searchKey, $foundValues)) 
     {
@@ -174,16 +176,10 @@ class HWMonitor extends IPSModule
         $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
         $variablePosition = $gesuchteId * 10 + $counter;
 
-        $parentIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "Text"; // Identifikator der 'Text'-Variable
-
         $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
         if ($variableID === false) 
         {
-            if ($searchKey === 'Text') 
-            {
-                $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition, $parentIdent);
-            }
-            elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+            if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
             {
                 $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition, $parentIdent);
 
@@ -194,7 +190,7 @@ class HWMonitor extends IPSModule
             {
                 $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition, $parentIdent);
             } 
-            elseif ($searchKey === 'Type') 
+            elseif ($searchKey === 'Text' || $searchKey === 'Type') 
             {
                 $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition, $parentIdent);
             }
