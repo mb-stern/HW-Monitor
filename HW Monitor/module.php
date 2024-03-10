@@ -173,19 +173,14 @@ class HWMonitor extends IPSModule
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-                    $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Text", "", $gesuchteId * 10);
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
                     {
-                        if ($searchKey === 'Text') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        }
-                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                            IPS_SetParent($variableID, $parentId);
+
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
@@ -193,13 +188,11 @@ class HWMonitor extends IPSModule
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $parentId);
                         } 
                         
-                        elseif ($searchKey === 'Type') 
+                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $parentId);
                         }
                     } 
                     else 
@@ -224,35 +217,16 @@ class HWMonitor extends IPSModule
             }
         }
 
-        /// Lösche nicht mehr benötigte Variablen
-foreach ($existingVariableIDs as $variableToRemove) 
-{
-    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-    if ($variableIDToRemove !== false)
-    {
-        // Überprüfe, ob Unterobjekte vorhanden sind
-        $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
-        if (is_array($childVariables) && count($childVariables) > 0) {
-            foreach ($childVariables as $childVariableID) {
-                $this->UnregisterVariable($childVariableID);
-                // Debug senden
-                $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
+        // Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) 
+        {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false)
+            {
+                $this->UnregisterVariable($variableToRemove);
+                //Debug senden
+                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
             }
         }
-        
-        // Dann lösche die Elternvariable, wenn keine Unterobjekte mehr vorhanden sind
-        if (is_array($childVariables) && count($childVariables) == 0) {
-            if ($this->UnregisterVariable($variableIDToRemove)) {
-                // Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableIDToRemove."", 0);
-            } else {
-                // Fehler beim Löschen der Variable
-                $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: ".$variableIDToRemove, 0);
-            }
-        }
-    }
-}
-
-
     }
 }
