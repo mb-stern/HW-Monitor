@@ -204,9 +204,8 @@ class HWMonitor extends IPSModule
                     } 
                     else 
                     {
-                        //$keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        //if ($keyIndex !== false) 
-                        if (in_array($searchKey, ['Min', 'Max', 'Value', 'id', 'Type']))
+                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                        if ($keyIndex !== false) 
                         {
                             unset($existingVariableIDs[$keyIndex]);
                         }
