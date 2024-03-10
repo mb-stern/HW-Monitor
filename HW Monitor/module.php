@@ -40,35 +40,35 @@ class HWMonitor extends IPSModule
 
         // Benötigte Variablen erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
-            IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
-            IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
+			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
+			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
             IPS_SetVariableProfileDigits("HW.Clock", 0); //Nachkommastellen
-            IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
-        }
+			IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
+		}
         if (!IPS_VariableProfileExists("HW.Data")) {
-            IPS_CreateVariableProfile("HW.Data", 2);
-            IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
+			IPS_CreateVariableProfile("HW.Data", 2);
+			IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
             IPS_SetVariableProfileDigits("HW.Data", 1);
-            IPS_SetVariableProfileText("HW.Data", "", " GB");
-        }
+			IPS_SetVariableProfileText("HW.Data", "", " GB");
+		}
         if (!IPS_VariableProfileExists("HW.Temp")) {
-            IPS_CreateVariableProfile("HW.Temp", 2);
-            IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
+			IPS_CreateVariableProfile("HW.Temp", 2);
+			IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
             IPS_SetVariableProfileDigits("HW.Temp", 0);
-            IPS_SetVariableProfileText("HW.Temp", "", " °C");
-        }
+			IPS_SetVariableProfileText("HW.Temp", "", " °C");
+		}
         if (!IPS_VariableProfileExists("HW.Fan")) {
-            IPS_CreateVariableProfile("HW.Fan", 2);
-            IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
+			IPS_CreateVariableProfile("HW.Fan", 2);
+			IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
             IPS_SetVariableProfileDigits("HW.Fan", 0);
-            IPS_SetVariableProfileText("HW.Fan", "", " RPM");
-        }
+			IPS_SetVariableProfileText("HW.Fan", "", " RPM");
+		}
         if (!IPS_VariableProfileExists("HW.Rate")) {
-            IPS_CreateVariableProfile("HW.Rate", 2);
-            IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
+			IPS_CreateVariableProfile("HW.Rate", 2);
+			IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
             IPS_SetVariableProfileDigits("HW.Rate", 0);
-            IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
-        }
+			IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
+		}
     }
 
     public function ApplyChanges()
@@ -93,6 +93,33 @@ class HWMonitor extends IPSModule
         {
             // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
             $this->Update();
+        }
+    }
+
+    protected function getVariableProfileByType($type)
+    {
+        switch ($type) {
+            case 'Clock':
+                return 'HW.Clock';
+            case 'Load':
+                return '~Progress';
+            case 'Temperature':
+                return 'HW.Temp';
+            case 'Fan':
+                return 'HW.Fan';
+            case 'Voltage':
+                return '~Volt';
+            case 'Power':
+                return '~Watt';
+            case 'Data':
+                return 'HW.Data';
+            case 'Level':
+                return '~Progress';
+            case 'Throughput':
+                return 'HW.Rate';
+            // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
+            default:
+                return '';
         }
     }
 
@@ -122,6 +149,8 @@ class HWMonitor extends IPSModule
         {
             $gesuchteId = $idItem['id'];
 
+
+
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
@@ -131,6 +160,7 @@ class HWMonitor extends IPSModule
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+            
             
             foreach ($requiredKeys as $searchKey) 
             {
@@ -144,9 +174,7 @@ class HWMonitor extends IPSModule
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
 
-                    $parentID = $this->GetOrCreateTextCategory($gefundenerWert);
-
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $parentID);
+                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
                     {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
@@ -156,10 +184,12 @@ class HWMonitor extends IPSModule
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
+                        
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
+                        
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
@@ -173,6 +203,7 @@ class HWMonitor extends IPSModule
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
+
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
@@ -181,6 +212,7 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
+
                 }
             }
         }
@@ -197,20 +229,4 @@ class HWMonitor extends IPSModule
             }
         }
     }
-
-    private function GetOrCreateTextCategory($categoryName)
-    {
-        $categoryID = @IPS_GetObjectIDByIdent('Category_' . $categoryName, $this->InstanceID);
-        if ($categoryID === false) 
-        {
-            $categoryID = IPS_CreateCategory();
-            IPS_SetIdent($categoryID, 'Category_' . $categoryName);
-            IPS_SetName($categoryID, $categoryName);
-            IPS_SetParent($categoryID, $this->InstanceID);
-        }
-    
-        return $categoryID;
-    }
 }
-
-
