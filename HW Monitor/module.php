@@ -1,7 +1,8 @@
 <?php
 class HWMonitor extends IPSModule
 {
-    
+    private $updateTimer;
+
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
@@ -211,3 +212,5 @@ class HWMonitor extends IPSModule
         return $categoryID;
     }
 }
+
+
