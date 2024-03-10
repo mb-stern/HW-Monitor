@@ -177,8 +177,6 @@ class HWMonitor extends IPSModule
             if ($searchKey === 'Text') 
             {
                 $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                $textParentID = $variableID;
-                return $textParentID;
             }
             elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
             {
@@ -208,6 +206,7 @@ class HWMonitor extends IPSModule
         $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
         SetValue($variableID, $convertedValue);
+        $textParentID = $variableID;
         
         // Setze 'Text' als Parent
         if ($searchKey !== 'Text') {
