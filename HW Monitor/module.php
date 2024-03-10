@@ -161,13 +161,8 @@ foreach ($idListe as $idItem)
     
     // Elternvariable für 'Text' erstellen
     $parentId = 0;
-    $textVariableValue = "";
     if (in_array('Text', $requiredKeys)) {
         $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Text", "", $gesuchteId * 10);
-        if (isset($foundValues['Text'][0])) {
-            $textVariableValue = $foundValues['Text'][0];
-            SetValue($parentId, $textVariableValue);
-        }
     }
     
     foreach ($requiredKeys as $searchKey) 
@@ -231,7 +226,6 @@ foreach ($idListe as $idItem)
         }
     }
 }
-
 
 
         // Lösche nicht mehr benötigte Variablen
