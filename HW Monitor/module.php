@@ -40,35 +40,35 @@ class HWMonitor extends IPSModule
 
         // Benötigte Variablen erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
-            IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
-            IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
+			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
+			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
             IPS_SetVariableProfileDigits("HW.Clock", 0); //Nachkommastellen
-            IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
-        }
+			IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
+		}
         if (!IPS_VariableProfileExists("HW.Data")) {
-            IPS_CreateVariableProfile("HW.Data", 2);
-            IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
+			IPS_CreateVariableProfile("HW.Data", 2);
+			IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
             IPS_SetVariableProfileDigits("HW.Data", 1);
-            IPS_SetVariableProfileText("HW.Data", "", " GB");
-        }
+			IPS_SetVariableProfileText("HW.Data", "", " GB");
+		}
         if (!IPS_VariableProfileExists("HW.Temp")) {
-            IPS_CreateVariableProfile("HW.Temp", 2);
-            IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
+			IPS_CreateVariableProfile("HW.Temp", 2);
+			IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
             IPS_SetVariableProfileDigits("HW.Temp", 0);
-            IPS_SetVariableProfileText("HW.Temp", "", " °C");
-        }
+			IPS_SetVariableProfileText("HW.Temp", "", " °C");
+		}
         if (!IPS_VariableProfileExists("HW.Fan")) {
-            IPS_CreateVariableProfile("HW.Fan", 2);
-            IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
+			IPS_CreateVariableProfile("HW.Fan", 2);
+			IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
             IPS_SetVariableProfileDigits("HW.Fan", 0);
-            IPS_SetVariableProfileText("HW.Fan", "", " RPM");
-        }
+			IPS_SetVariableProfileText("HW.Fan", "", " RPM");
+		}
         if (!IPS_VariableProfileExists("HW.Rate")) {
-            IPS_CreateVariableProfile("HW.Rate", 2);
-            IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
+			IPS_CreateVariableProfile("HW.Rate", 2);
+			IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
             IPS_SetVariableProfileDigits("HW.Rate", 0);
-            IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
-        }
+			IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
+		}
     }
 
     public function ApplyChanges()
@@ -141,7 +141,7 @@ class HWMonitor extends IPSModule
         $existingVariableIDs = [];
         foreach ($existingVariables as $existingVariableID) 
         {
-            $existingVariableIDs[] = $existingVariableID; // Hier die Korrektur, den Identifikator (ObjectID) hinzufügen
+            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
         }
 
         // Schleife für die ID-Liste
@@ -173,7 +173,7 @@ class HWMonitor extends IPSModule
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-                    $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Wert", "", $gesuchteId * 10);
+                    $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Text", "", $gesuchteId * 10);
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
@@ -225,34 +225,15 @@ class HWMonitor extends IPSModule
         }
 
         // Lösche nicht mehr benötigte Variablen
-foreach ($existingVariableIDs as $variableToRemove) {
-    $variableObject = IPS_GetObject($variableToRemove);
-    $variableIdent = $variableObject['ObjectIdent'];
-    
-    // Überprüfe, ob Unterobjekte vorhanden sind
-    $childVariables = IPS_GetChildrenIDs($variableToRemove);
-    if (count($childVariables) > 0) {
-        foreach ($childVariables as $childVariableID) {
-            $childVariableObject = IPS_GetObject($childVariableID);
-            $childVariableIdent = $childVariableObject['ObjectIdent'];
-            
-            $this->UnregisterVariable($childVariableIdent);
-            // Debug senden
-            $this->SendDebug("Untervariable gelöscht", $childVariableIdent, 0);
-        }
-    }
-    
-    // Dann lösche die Elternvariable, wenn keine Unterobjekte mehr vorhanden sind
-    if (count($childVariables) == 0) {
-        if ($this->UnregisterVariable($variableIdent)) {
-            // Debug senden
-            $this->SendDebug("Variable gelöscht", $variableIdent, 0);
-        } else {
-            // Fehler beim Löschen der Variable
-            $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: " . $variableIdent, 0);
+        foreach ($existingVariableIDs as $variableToRemove) 
+        {
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            if ($variableIDToRemove !== false)
+            {
+                $this->UnregisterVariable($variableToRemove);
+                //Debug senden
+                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+            }
         }
     }
 }
-    }
-}
-
