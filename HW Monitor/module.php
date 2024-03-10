@@ -225,15 +225,25 @@ class HWMonitor extends IPSModule
         }
 
         // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
-        {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
-            {
-                $this->UnregisterVariable($variableToRemove);
-                //Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-            }
+foreach ($existingVariableIDs as $variableToRemove) 
+{
+    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+    if ($variableIDToRemove !== false)
+    {
+        // Lösche Untervariablen zuerst
+        $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
+        foreach ($childVariables as $childVariableID) {
+            $this->UnregisterVariable(IPS_GetObject($childVariableID)['ObjectIdent']);
+            // Debug senden
+            $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
         }
+        
+        // Dann lösche die Elternvariable
+        $this->UnregisterVariable($variableToRemove);
+        // Debug senden
+        $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+    }
+}
+
     }
 }
