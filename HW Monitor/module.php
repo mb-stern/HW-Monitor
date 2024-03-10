@@ -209,7 +209,7 @@ class HWMonitor extends IPSModule
         $textParentID = $variableID;
         
         // Setze 'Text' als Parent
-        if ($searchKey !== 'Text') {
+        if ($searchKey === 'id') {
             IPS_SetParent($variableID, $textParentID);
         }
 
