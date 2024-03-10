@@ -226,7 +226,7 @@ class HWMonitor extends IPSModule
 
         // Lösche nicht mehr benötigte Variablen
 foreach ($existingVariableIDs as $variableToRemove) {
-    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+    $variableIDToRemove = $variableToRemove; // Direkte Zuweisung der Objekt-ID
     if ($variableIDToRemove !== false) {
         // Überprüfe, ob Unterobjekte vorhanden sind
         $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
