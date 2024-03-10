@@ -234,7 +234,7 @@ foreach ($existingVariableIDs as $variableToRemove)
         $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
         if (count($childVariables) > 0) {
             foreach ($childVariables as $childVariableID) {
-                $this->UnregisterVariable($childVariableID);
+                $this->UnregisterVariable($variableID);
                 // Debug senden
                 $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
             }
