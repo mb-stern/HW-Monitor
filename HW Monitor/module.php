@@ -229,8 +229,9 @@ foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey)
     if (!isset($foundValues[$searchKey])) 
 {
     {
-        continue; // Schlüssel nicht vorhanden, überspringen
         $this->SendDebug("Löschschlaufe beendet ", "Kein Ident gefunden zum löschen", 0);
+        continue; // Schlüssel nicht vorhanden, überspringen
+        
     }
 
     foreach ($foundValues[$searchKey] as $gefundenerWert) 
