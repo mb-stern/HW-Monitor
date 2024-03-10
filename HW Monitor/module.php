@@ -212,7 +212,7 @@ class HWMonitor extends IPSModule
         
         
         // Setze 'Text' als Parent, wenn die Variable noch keinen Elternteil hat
-if ($searchKey !== 'Text' && !IPS_VariableExists($variableID)) {
+        if ($searchKey !== 'Text' && IPS_VariableExists($variableID)) {
     IPS_SetParent($variableID, $textParentID);
 }
 
