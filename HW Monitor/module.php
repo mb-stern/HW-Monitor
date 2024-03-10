@@ -225,15 +225,26 @@ class HWMonitor extends IPSModule
         }
 
         // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
+foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey) 
+{
+    if (!array_key_exists($searchKey, $foundValues)) 
+    {
+        continue; // Schlüssel nicht vorhanden, überspringen
+    }
+
+    foreach ($foundValues[$searchKey] as $gefundenerWert) 
+    {
+        $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+        $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+        if ($variableID !== false)
         {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
-            {
-                $this->UnregisterVariable($variableToRemove);
-                //Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-            }
+            $this->UnregisterVariable($variableID);
+            // Debug senden
+            $this->SendDebug("Variable gelöscht", "".$variableIdentValue."", 0);
         }
+        $counter++;
+    }
+}
+
     }
 }
