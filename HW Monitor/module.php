@@ -207,14 +207,15 @@ class HWMonitor extends IPSModule
 
         SetValue($variableID, $convertedValue);
         if ($searchKey === 'Text') {
-            $textParentID = $variablePosition;
+            $textParentID = $variableID;
         }
         
         
-        // Setze 'Text' als Parent
-        if ($searchKey !== 'Text') {
-            IPS_SetParent($variableID, $textParentID);
-        }
+        // Setze 'Text' als Parent, wenn die Variable noch keinen Elternteil hat
+if ($searchKey !== 'Text' && !IPS_VariableExists($variableID)) {
+    IPS_SetParent($variableID, $textParentID);
+}
+
 
         //Debug senden
         $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
