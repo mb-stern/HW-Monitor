@@ -224,10 +224,10 @@ class HWMonitor extends IPSModule
             }
         }
 
-        // Lösche nicht mehr benötigte Variablen
+        /// Lösche nicht mehr benötigte Variablen
 foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey) 
 {
-    if (!array_key_exists($searchKey, $foundValues)) 
+    if (!isset($foundValues[$searchKey])) 
     {
         continue; // Schlüssel nicht vorhanden, überspringen
     }
@@ -245,6 +245,7 @@ foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey)
         $counter++;
     }
 }
+
 
     }
 }
