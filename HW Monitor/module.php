@@ -207,7 +207,7 @@ class HWMonitor extends IPSModule
 
         SetValue($variableID, $convertedValue);
         if ($searchKey === 'Text') {
-            $textParentID = $variableID;
+            $textParentID = $variableIdentValue;
         }
         
         
