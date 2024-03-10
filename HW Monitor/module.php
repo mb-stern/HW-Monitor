@@ -180,7 +180,7 @@ class HWMonitor extends IPSModule
                         if ($searchKey === 'Text') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            $parentId = $this->RegisterVariableString($variableIdentValue);
+                            $parentId = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
