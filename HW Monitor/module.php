@@ -173,7 +173,7 @@ class HWMonitor extends IPSModule
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-                    $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Text", "", $gesuchteId * 10);
+                    $parentId = $this->RegisterVariableString("Variable_" . ($gesuchteId * 10) . "_Text", "Wert", "", $gesuchteId * 10);
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
