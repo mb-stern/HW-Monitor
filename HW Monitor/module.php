@@ -163,7 +163,7 @@ class HWMonitor extends IPSModule
             
             
  // Identifikator der 'Text'-Variable
-$parentIdent = "Text";
+$parentIdent = "Variable_Text";
 
 // ID der 'Text'-Variable erhalten
 $parentVariableID = @IPS_GetObjectIDByIdent($parentIdent, $this->InstanceID);
