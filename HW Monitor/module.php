@@ -242,16 +242,15 @@ class HWMonitor extends IPSModule
                 
                 // Dann lösche die Elternvariable, wenn keine Unterobjekte mehr vorhanden sind
                 if (count($childVariables) == 0) {
-                    if ($this->UnregisterVariable($variableToRemove)) {
+                    if ($this->UnregisterVariable($variableIDToRemove)) {
                         // Debug senden
-                        $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+                        $this->SendDebug("Variable gelöscht", "".$variableIDToRemove."", 0);
                     } else {
                         // Fehler beim Löschen der Variable
-                        $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: ".$variableToRemove, 0);
+                        $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: ".$variableIDToRemove, 0);
                     }
                 }
             }
         }
-
     }
 }
