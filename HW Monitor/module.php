@@ -162,11 +162,13 @@ class HWMonitor extends IPSModule
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
             
-            $parentVariableID = "Variable_Text"; // Identifikator der 'Text'-Variable
+ // Identifikator der 'Text'-Variable
+$parentIdent = "Text";
 
-            
-            
-            foreach ($requiredKeys as $searchKey) 
+// ID der 'Text'-Variable erhalten
+$parentVariableID = @IPS_GetObjectIDByIdent($parentIdent, $this->InstanceID);
+
+foreach ($requiredKeys as $searchKey) 
 {
     if (!array_key_exists($searchKey, $foundValues)) 
     {
@@ -195,8 +197,11 @@ class HWMonitor extends IPSModule
             elseif ($searchKey === 'Text' || $searchKey === 'Type') 
             {
                 $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                
                 // Setzen der Parent-Beziehung, falls $searchKey 'Text' ist
-                IPS_SetParent($variableID, $parentVariableID);
+                if ($searchKey === 'Text' && $parentVariableID !== false) {
+                    IPS_SetParent($variableID, $parentVariableID);
+                }
             }
         } 
         else 
