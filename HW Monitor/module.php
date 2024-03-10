@@ -206,13 +206,13 @@ class HWMonitor extends IPSModule
         $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
         SetValue($variableID, $convertedValue);
-        if ($searchKey === 'Text') {
+        if ($searchKey === 'id') {
             $textParentID = $convertedValue;
         }
         
         
         // Setze 'Text' als Parent
-        if ($searchKey !== 'Text') {
+        if ($searchKey !== 'id') {
             IPS_SetParent($variableID, $textParentID);
         }
 
