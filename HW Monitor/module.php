@@ -214,6 +214,7 @@ class HWMonitor extends IPSModule
                 }
             }
         }
+    }
 
         private function GetOrCreateTextCategory($categoryName)
         {
