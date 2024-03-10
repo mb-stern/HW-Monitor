@@ -225,32 +225,33 @@ class HWMonitor extends IPSModule
         }
 
         // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
-        {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
-            {
-                // Überprüfe, ob Unterobjekte vorhanden sind
-                $childVariables = IPS_GetChildrenIDs($variableIDToRemove);
-                if (count($childVariables) > 0) {
-                    foreach ($childVariables as $childVariableID) {
-                        $this->UnregisterVariable($childVariableID);
-                        // Debug senden
-                        $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
-                    }
-                }
-                
-                // Dann lösche die Elternvariable, wenn keine Unterobjekte mehr vorhanden sind
-                if (count($childVariables) == 0) {
-                    if ($this->UnregisterVariable($variableIDToRemove)) {
-                        // Debug senden
-                        $this->SendDebug("Variable gelöscht", "".$variableIDToRemove."", 0);
-                    } else {
-                        // Fehler beim Löschen der Variable
-                        $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: ".$variableIDToRemove, 0);
-                    }
-                }
+foreach ($existingVariableIDs as $variableToRemove) 
+{
+    $variableID = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+    if ($variableID !== false)
+    {
+        // Überprüfe, ob Unterobjekte vorhanden sind
+        $childVariables = IPS_GetChildrenIDs($variableID);
+        if (count($childVariables) > 0) {
+            foreach ($childVariables as $childVariableID) {
+                $this->UnregisterVariable($childVariableID);
+                // Debug senden
+                $this->SendDebug("Untervariable gelöscht", "".$childVariableID."", 0);
             }
         }
+        
+        // Dann lösche die Elternvariable, wenn keine Unterobjekte mehr vorhanden sind
+        if (count($childVariables) == 0) {
+            if ($this->UnregisterVariable($variableID)) {
+                // Debug senden
+                $this->SendDebug("Variable gelöscht", "".$variableID."", 0);
+            } else {
+                // Fehler beim Löschen der Variable
+                $this->SendDebug("Fehler beim Löschen der Variable", "Variable konnte nicht gelöscht werden: ".$variableID, 0);
+            }
+        }
+    }
+}
+
     }
 }
