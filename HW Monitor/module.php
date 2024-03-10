@@ -1,7 +1,29 @@
 <?php
 class HWMonitor extends IPSModule
 {
-    private $updateTimer;
+    
+    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === 'id' && $value === $searchId) {
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
+                break;
+            } elseif (is_array($value)) {
+                $this->searchValueForId($value, $searchId, $foundValues);
+            }
+        }
+    }
+
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if (is_array($value)) {
+                $this->searchValuesForId($value, $searchId, $foundValues);
+            } else {
+                $foundValues[$key][] = $value;
+            }
+        }
+    }
 
     public function Create()
     {
