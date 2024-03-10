@@ -230,7 +230,7 @@ foreach (['id', 'Value', 'Max', 'Min', 'Type', 'Text'] as $searchKey)
 {
     {
         continue; // Schlüssel nicht vorhanden, überspringen
-        $this->SendDebug("Löschschlaufe beendet ", 0);
+        $this->SendDebug("Löschschlaufe beendet ", "Kein Ident gefunden zum löschen", 0);
     }
 
     foreach ($foundValues[$searchKey] as $gefundenerWert) 
