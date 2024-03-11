@@ -137,7 +137,8 @@ class HWMonitor extends IPSModule
         $idListe = json_decode($idListeString, true);
 
         // Schleife für die ID-Liste
-        foreach ($idListe as $idItem) {
+        foreach ($idListe as $idItem) 
+        {
             $gesuchteId = $idItem['id'];
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
@@ -167,13 +168,15 @@ class HWMonitor extends IPSModule
                     $variablePosition = $gesuchteId * 10 + $counter;
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    if ($variableID === false) {
+                    if ($variableID === false) 
+                    {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        } else {
+                        } else 
+                        {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                     }
@@ -188,21 +191,21 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
+                }   
             }
+        }
+    }
+
+    // Lösche nicht mehr benötigte Variablen
+    foreach ($existingVariableIDs as $variableToRemove) 
+    {
+        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+        if ($variableIDToRemove !== false)
+        {
+            $this->UnregisterVariable($variableToRemove);
+            //Debug senden
+            $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
         }
     }
 }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
-        {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
-            {
-                $this->UnregisterVariable($variableToRemove);
-                //Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-            }
-        }
-    }
-}
