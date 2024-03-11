@@ -161,11 +161,11 @@ class HWMonitor extends IPSModule
             $categoryID = IPS_GetCategoryIDByName($categoryNameClean, $this->InstanceID);
             if ($categoryID === false) 
             {
-                $categoryID = IPS_CreateCategory();
+                $categoryNameClean = IPS_CreateCategory();
                 $categoryIdent = "Category_" . $categoryNameClean; // Eindeutiger Identifikator ohne Sonderzeichen
-                IPS_SetIdent($categoryID, $categoryIdent); // Setzen des Identifikators
-                IPS_SetName($categoryID, $categoryName);
-                IPS_SetParent($categoryID, $this->InstanceID);
+                IPS_SetIdent($categoryNameClean, $categoryIdent); // Setzen des Identifikators
+                IPS_SetName($categoryNameClean, $categoryName);
+                IPS_SetParent($categoryNameClean, $this->InstanceID);
             }
 
 
