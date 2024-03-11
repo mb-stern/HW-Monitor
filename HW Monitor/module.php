@@ -141,8 +141,12 @@ class HWMonitor extends IPSModule
     {
         $gesuchteId = $idItem['id'];
 
+        // Suche nach Werten für die gefundenen IDs
+        $foundValues = [];
+        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+
         // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-        $categoryName = "Kategorie_" . $gesuchteId;
+        $categoryName = $foundValues['Text'][0];
         $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
         if ($categoryID === false) {
             $categoryID = IPS_CreateCategory();
@@ -150,10 +154,6 @@ class HWMonitor extends IPSModule
             IPS_SetParent($categoryID, $this->InstanceID);
         }
         $categoryIDs[$gesuchteId] = $categoryID;
-
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
         // Variablen anlegen und in die Kategorie platzieren
         foreach ($foundValues as $searchKey => $values) 
@@ -172,15 +172,9 @@ class HWMonitor extends IPSModule
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    } 
-					elseif ($searchKey === 'id') 
+                    } else 
                     {
-                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                    } 
-                        
-                    elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                    {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
                 }
 
@@ -218,5 +212,3 @@ class HWMonitor extends IPSModule
 }
 
 }
-
-
