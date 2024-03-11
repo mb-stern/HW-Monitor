@@ -207,10 +207,7 @@ class HWMonitor extends IPSModule
                     //Debug senden
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", ParentID: ".$parentId.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
         
-                    if ($searchKey === 'Value') {
-                        $parentId = 0; // Reset Parent ID nach 'Value'
-                    }
-        
+                    $parentId = $variableID; // Setze Parent ID für die nächste Variable
                     $counter++;
                 }
             }
