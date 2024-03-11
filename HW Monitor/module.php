@@ -178,7 +178,7 @@ class HWMonitor extends IPSModule
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-                    $parentId = $variableID;
+                    $parentId = $variableID; // 'Text' als Parent setzen
                 } else {
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
@@ -206,10 +206,6 @@ class HWMonitor extends IPSModule
         
                     //Debug senden
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", ParentID: ".$parentId.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
-        
-                    if ($searchKey === 'Value') {
-                        $parentId = 0; // Reset Parent ID nach 'Value'
-                    }
         
                     $counter++;
                 }
