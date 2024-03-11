@@ -171,27 +171,26 @@ class HWMonitor extends IPSModule
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", 0);
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "");
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                         if ($keyIndex !== false) {
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-                    $parentId = $variableID; // 'Text' als Parent setzen
                 } else {
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $parentId);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])));
         
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } elseif ($searchKey === 'id') {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $parentId);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "");
                         } elseif ($searchKey === 'Type') {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $parentId);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "");
                         }
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
@@ -205,10 +204,14 @@ class HWMonitor extends IPSModule
                     SetValue($variableID, $convertedValue);
         
                     //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", ParentID: ".$parentId.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
         
-                    $parentId = $variableID; // Setze Parent ID für die nächste Variable
                     $counter++;
+                }
+        
+                // Parent setzen
+                if ($parentId !== null) {
+                    IPS_SetParent($variableID, $parentId);
                 }
             }
         }
