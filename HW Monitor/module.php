@@ -241,6 +241,13 @@ foreach ($existingVariables as $existingVariableID)
         $this->UnregisterVariable($variableIDToRemove);
         //Debug senden
         $this->SendDebug("Variable gelöscht", "".$variableIDToRemove."", 0);
+
+        // Entferne die gelöschte Variable aus dem Array
+        $keyIndex = array_search($objectIdent, $existingVariableIDs);
+        if ($keyIndex !== false) 
+        {
+            unset($existingVariableIDs[$keyIndex]);
+        }
     } 
     elseif ($object['ObjectType'] == 3) // Wenn es sich um eine Kategorie handelt
     {
@@ -253,9 +260,17 @@ foreach ($existingVariables as $existingVariableID)
             IPS_DeleteCategory($categoryIDToRemove);
             //Debug senden
             $this->SendDebug("Kategorie gelöscht", "".$categoryIDToRemove."", 0);
+
+            // Entferne die gelöschte Kategorie aus dem Array
+            $keyIndex = array_search($objectIdent, $existingVariableIDs);
+            if ($keyIndex !== false) 
+            {
+                unset($existingVariableIDs[$keyIndex]);
+            }
         }
     }
 }
+
 
 }
 }
