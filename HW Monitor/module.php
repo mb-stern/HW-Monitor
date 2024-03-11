@@ -169,16 +169,16 @@ class HWMonitor extends IPSModule
             foreach ($foundValues[$searchKey] as $gefundenerWert) {
                 if ($searchKey === 'Text') {
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
+                    $parentId = 0; // Setze Parent-ID für 'Text' auf 0
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", 0);
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $parentId);
                     } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                         if ($keyIndex !== false) {
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-                    $parentId = $variableID; // 'Text' als Parent setzen
                 } else {
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
