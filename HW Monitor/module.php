@@ -157,18 +157,13 @@ class HWMonitor extends IPSModule
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
-            $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
-            $categoryID = IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
+            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
             if ($categoryID === false) 
             {
-                $categoryID = IPS_CreateCategory();
-                $categoryIdent = "Category_" . $categoryNameClean; // Eindeutiger Identifikator ohne Sonderzeichen
-                IPS_SetIdent($categoryID, $categoryIdent); // Setzen des Identifikators
-                IPS_SetName($categoryID, $categoryName);
-                IPS_SetParent($categoryID, $this->InstanceID);
+            $categoryID = IPS_CreateCategory();
+            IPS_SetName($categoryID, $categoryName);
+            IPS_SetParent($categoryID, $this->InstanceID);
             }
-
-
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
