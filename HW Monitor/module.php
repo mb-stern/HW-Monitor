@@ -142,17 +142,16 @@ class HWMonitor extends IPSModule
         $gesuchteId = $idItem['id'];
 
         // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-        if (!isset($categoryIDs[$gesuchteId])) 
-        {
-            $categoryName = "Kategorie_$gesuchteId";
-            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
-            if ($categoryID === false) {
-                $categoryID = IPS_CreateCategory();
-                IPS_SetName($categoryID, $categoryName);
-                IPS_SetParent($categoryID, $this->InstanceID);
-            }
-            $categoryIDs[$gesuchteId] = $categoryID;
+    
+        $categoryName = "Kategorie_" . $gesuchteId;
+        $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
+        if ($categoryID === false) {
+            $categoryID = IPS_CreateCategory();
+            IPS_SetName($categoryID, $categoryName);
+            IPS_SetParent($categoryID, $this->InstanceID);
         }
+        $categoryIDs[$gesuchteId] = $categoryID;
+    }
 
         // Suche nach Werten für die gefundenen IDs
         $foundValues = [];
