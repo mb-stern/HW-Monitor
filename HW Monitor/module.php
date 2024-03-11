@@ -256,5 +256,5 @@ foreach ($existingVariables as $existingVariableID)
         }
     }
 }
-
+}
 }
