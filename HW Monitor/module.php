@@ -142,7 +142,6 @@ class HWMonitor extends IPSModule
         $gesuchteId = $idItem['id'];
 
         // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-    
         $categoryName = "Kategorie_" . $gesuchteId;
         $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
         if ($categoryID === false) {
@@ -157,15 +156,15 @@ class HWMonitor extends IPSModule
         $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
         // Variablen anlegen und in die Kategorie platzieren
-        $counter = 0;
         foreach ($foundValues as $searchKey => $values) 
         {
+            $counter = 0;
             foreach ($values as $gefundenerWert) 
             {
                 $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey" . "_$counter";
                 $variablePosition = $gesuchteId * 10 + $counter;
 
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryIDs[$gesuchteId]);
                 if ($variableID === false) 
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
