@@ -162,64 +162,56 @@ class HWMonitor extends IPSModule
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
             
-            foreach ($requiredKeys as $searchKey) 
-            {
-                if (!array_key_exists($searchKey, $foundValues)) 
-                {
+            foreach ($requiredKeys as $searchKey) {
+                if (!array_key_exists($searchKey, $foundValues)) {
                     continue; // Schlüssel nicht vorhanden, überspringen
                 }
-
-                foreach ($foundValues[$searchKey] as $gefundenerWert) 
-                {
+            
+                foreach ($foundValues[$searchKey] as $gefundenerWert) {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-
+            
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    if ($variableID === false) 
-                    {
-                        if ($searchKey === 'Text') 
-                        {
+                    if ($variableID === false) {
+                        if ($searchKey === 'Text') {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                             $parentID = $variableID;
-                        }
-                        elseif ($searchKey === 'id') 
-                        {
+                        } elseif ($searchKey === 'id') {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $parentID);
-                        } 
-                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
-                        {
+                            if (!isset($parentID)) {
+                                IPS_SetParent($variableID, $parentID);
+                            }
+                        } elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                            IPS_SetParent($variableID, $parentID);
+                            if (!isset($parentID)) {
+                                IPS_SetParent($variableID, $parentID);
+                            }
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        }
-                        elseif ($searchKey === 'Type') 
-                        {
+                        } elseif ($searchKey === 'Type') {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                            IPS_SetParent($variableID, $parentID);
+                            if (!isset($parentID)) {
+                                IPS_SetParent($variableID, $parentID);
+                            }
                         }
-                    } 
-                    else 
-                    {
+                    } else {
                         $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) 
-                        {
+                        if ($keyIndex !== false) {
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-
+            
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
+            
                     SetValue($variableID, $convertedValue);
-
+            
                     //Debug senden
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
-
+            
                     $counter++;
-
                 }
             }
+            
         }
 
         // Lösche nicht mehr benötigte Variablen
