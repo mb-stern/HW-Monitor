@@ -139,7 +139,7 @@ class HWMonitor extends IPSModule
     // Schleife für die ID-Liste
     foreach ($idListe as $idItem) 
     {
-        $gesuchteId = $idItem['Text'];
+        $gesuchteId = $idItem['id'];
 
         // Kategorie für diese ID erstellen, falls noch nicht vorhanden
         if (!isset($categoryIDs[$gesuchteId])) 
