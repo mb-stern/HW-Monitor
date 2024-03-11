@@ -155,16 +155,6 @@ class HWMonitor extends IPSModule
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-            $categoryName = $foundValues['Text'][0];
-            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
-            if ($categoryID === false) 
-            {
-            $categoryID = IPS_CreateCategory();
-            IPS_SetName($categoryID, $categoryName);
-            IPS_SetParent($categoryID, $this->InstanceID);
-            }
-
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
 
@@ -213,9 +203,6 @@ class HWMonitor extends IPSModule
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-
-                    // Variable in die Kategorie platzieren
-                    IPS_SetParent($variableID, $categoryID);
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
