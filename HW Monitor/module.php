@@ -162,7 +162,7 @@ class HWMonitor extends IPSModule
         {
             foreach ($values as $gefundenerWert) 
             {
-                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey" . "_$counter";
                 $variablePosition = $gesuchteId * 10 + $counter;
 
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
@@ -211,6 +211,7 @@ class HWMonitor extends IPSModule
         }
     }
 }
+
 }
 
 
