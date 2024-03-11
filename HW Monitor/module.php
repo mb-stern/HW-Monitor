@@ -240,17 +240,17 @@ class HWMonitor extends IPSModule
         }
     }
 
-    // Lösche nicht mehr benötigte Kategorien
-    $existingCategories = IPS_GetChildrenIDs($this->InstanceID);
-    foreach ($existingCategories as $existingCategoryID) 
+   // Lösche nicht mehr benötigte Kategorien
+$existingCategories = IPS_GetChildrenIDs($this->InstanceID);
+foreach ($existingCategories as $existingCategoryID) 
+{
+    if (IPS_CategoryExists($existingCategoryID) && !in_array($existingCategoryID, $existingVariableIDs)) 
     {
-        if (IPS_CategoryExists($existingCategoryID) && !in_array($existingCategoryID, $existingVariableIDs)) 
-        {
-            IPS_DeleteCategory($existingCategoryID, true);
-            //Debug senden
-            $this->SendDebug("Kategorie gelöscht", "".$existingCategoryID."", 0);
-        }
+        IPS_DeleteCategory($existingCategoryID);
+        //Debug senden
+        $this->SendDebug("Kategorie gelöscht", "".$existingCategoryID."", 0);
     }
+}
 }
 
 }
