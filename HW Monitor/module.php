@@ -229,28 +229,32 @@ class HWMonitor extends IPSModule
     }
 
     // Lösche nicht mehr benötigte Variablen und Kategorien
-    foreach ($existingVariableIDs as $variableToRemove) 
+foreach ($existingVariables as $existingVariableID) 
+{
+    $object = IPS_GetObject($existingVariableID);
+    $objectIdent = $object['ObjectIdent'];
+
+    // Prüfen, ob es sich um eine Variable handelt
+    if ($object['ObjectType'] == 2) 
     {
-        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-        if ($variableIDToRemove !== false)
+        $variableIDToRemove = $existingVariableID;
+        $this->UnregisterVariable($variableIDToRemove);
+        //Debug senden
+        $this->SendDebug("Variable gelöscht", "".$variableIDToRemove."", 0);
+    } 
+    elseif ($object['ObjectType'] == 3) // Wenn es sich um eine Kategorie handelt
+    {
+        $categoryIDToRemove = $existingVariableID;
+        $categoryVariables = IPS_GetChildrenIDs($categoryIDToRemove);
+        
+        // Überprüfen, ob die Kategorie leer ist
+        if (empty($categoryVariables)) 
         {
-            $this->UnregisterVariable($variableToRemove);
+            IPS_DeleteCategory($categoryIDToRemove);
             //Debug senden
-            $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+            $this->SendDebug("Kategorie gelöscht", "".$categoryIDToRemove."", 0);
         }
     }
-
-   // Lösche nicht mehr benötigte Kategorien
-$existingCategories = IPS_GetChildrenIDs($this->InstanceID);
-foreach ($existingCategories as $existingCategoryID) 
-{
-    if (IPS_CategoryExists($existingCategoryID) && !in_array($existingCategoryID, $existingVariableIDs)) 
-    {
-        IPS_DeleteCategory($existingCategoryID);
-        //Debug senden
-        $this->SendDebug("Kategorie gelöscht", "".$existingCategoryID."", 0);
-    }
-}
 }
 
 }
