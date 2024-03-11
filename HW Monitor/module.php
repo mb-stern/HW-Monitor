@@ -141,12 +141,21 @@ class HWMonitor extends IPSModule
     {
         $gesuchteId = $idItem['id'];
 
-        // Suche nach Werten für die gefundenen IDs
-        $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
         // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-        $categoryName = $foundValues['Text'][0];
+        $categoryName = '';
+        $foundValues = [];
+        foreach ($contentArray as $key => $value) {
+            if ($key === 'id' && $value === $gesuchteId) {
+                $foundValues = $contentArray;
+                break;
+            } elseif (is_array($value)) {
+                $this->searchValuesForId($value, $gesuchteId, $foundValues);
+            }
+        }
+        if (!empty($foundValues['Text'])) {
+            $categoryName = $foundValues['Text'][0];
+        }
+        
         $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
         if ($categoryID === false) {
             $categoryID = IPS_CreateCategory();
@@ -158,37 +167,37 @@ class HWMonitor extends IPSModule
         // Variablen anlegen und in die Kategorie platzieren
         foreach ($foundValues as $searchKey => $values) 
         {
-            $counter = 0;
-            foreach ($values as $gefundenerWert) 
-            {
-                $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey" . "_$counter";
-                $variablePosition = $gesuchteId * 10 + $counter;
-
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryIDs[$gesuchteId]);
-                if ($variableID === false) 
+            if (in_array($searchKey, ['id', 'Max', 'Min', 'Value', 'Type'])) {
+                $counter = 0;
+                foreach ($values as $gefundenerWert) 
                 {
-                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                    $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey" . "_$counter";
+                    $variablePosition = $gesuchteId * 10 + $counter;
+
+                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryIDs[$gesuchteId]);
+                    if ($variableID === false) 
                     {
-                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                        // Ersetzungen für Float-Variablen anwenden
-                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    } else 
-                    {
-                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        if ($searchKey === 'Type') {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        } else {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                            // Ersetzungen für Float-Variablen anwenden
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        }
                     }
-                }
 
-                // Variable in die Kategorie platzieren
-                IPS_SetParent($variableID, $categoryIDs[$gesuchteId]);
+                    // Variable in die Kategorie platzieren
+                    IPS_SetParent($variableID, $categoryIDs[$gesuchteId]);
 
-                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-                SetValue($variableID, $convertedValue);
+                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                    SetValue($variableID, $convertedValue);
 
-                // Debug senden
-                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                    // Debug senden
+                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
-                $counter++;
-            }   
+                    $counter++;
+                }   
+            }
         }
     }
 
