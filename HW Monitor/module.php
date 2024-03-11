@@ -214,6 +214,9 @@ class HWMonitor extends IPSModule
                         }
                     }
 
+                    // Variable in die Kategorie platzieren
+                    IPS_SetParent($variableID, $categoryIDs[$gesuchteId]);
+
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
