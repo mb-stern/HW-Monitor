@@ -129,8 +129,8 @@ class HWMonitor extends IPSModule
     $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
     $contentArray = json_decode($content, true);
 
-    // Array zum Speichern der Kategorie-IDs für jede ID
-    $categoryIDs = [];
+    //Debug senden
+    $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
 
     // Gewählte ID's abfragen
     $idListeString = $this->ReadPropertyString('IDListe');
@@ -153,45 +153,62 @@ class HWMonitor extends IPSModule
             IPS_SetName($categoryID, $categoryName);
             IPS_SetParent($categoryID, $this->InstanceID);
         }
-        $categoryIDs[$gesuchteId] = $categoryID;
 
-        // Variablen anlegen und in die Kategorie platzieren
-        foreach ($foundValues as $searchKey => $values) 
+        // Variablen anlegen und einstellen für die gefundenen Werte
+        $counter = 0;
+
+        // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+        
+        
+        foreach ($requiredKeys as $searchKey) 
         {
-            $counter = 0;
-            foreach ($values as $gefundenerWert) 
+            if (!array_key_exists($searchKey, $foundValues)) 
             {
-                $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey" . "_$counter";
+                continue; // Schlüssel nicht vorhanden, überspringen
+            }
+
+            foreach ($foundValues[$searchKey] as $gefundenerWert) 
+            {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                 $variablePosition = $gesuchteId * 10 + $counter;
 
-                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryIDs[$gesuchteId]);
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
                 if ($variableID === false) 
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                     {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                     } 
-                    else 
+                    
+                    elseif ($searchKey === 'id') 
+                    {
+                        $variableID = $this->RegisterVariableInteger($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    } 
+                    
+                    elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                     {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
-                }
-
-                // Variable in die Kategorie platzieren
-                IPS_SetParent($variableID, $categoryIDs[$gesuchteId]);
+                } 
 
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
                 SetValue($variableID, $convertedValue);
 
-                // Debug senden
+                //Debug senden
                 $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                 $counter++;
-            }   
+
+            }
         }
     }
+}
+
 
     // Lösche nicht mehr benötigte Variablen
     $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
