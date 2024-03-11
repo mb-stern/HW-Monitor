@@ -207,7 +207,6 @@ class HWMonitor extends IPSModule
             }
         }
     }
-}
 
 
     // Lösche nicht mehr benötigte Variablen
