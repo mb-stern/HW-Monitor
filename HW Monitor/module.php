@@ -157,7 +157,7 @@ class HWMonitor extends IPSModule
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
-            $categoryID = @IPS_GetObjectIDByIdent($categoryName, $this->InstanceID);
+            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
             if ($categoryID === false) 
             {
             $categoryID = IPS_CreateCategory();
