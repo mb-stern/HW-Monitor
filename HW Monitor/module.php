@@ -179,6 +179,8 @@ class HWMonitor extends IPSModule
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
+                    // Setze Wert für 'Text'
+                    SetValue($variableID, $gefundenerWert);
                 } else {
                     $variableIdentValue = "Variable_" . $gesuchteId . "_$searchKey";
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
