@@ -124,122 +124,133 @@ class HWMonitor extends IPSModule
     }
 
     public function Update()
+{
+    // Libre Hardware Monitor abfragen
+    $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+    $contentArray = json_decode($content, true);
+
+    //Debug senden
+    $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
+
+    // Gewählte ID's abfragen
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
+
+    // Alle vorhandenen Variablen speichern
+    $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+    $existingVariableIDs = [];
+    foreach ($existingVariables as $existingVariableID) 
     {
-        // Libre Hardware Monitor abfragen
-        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        $contentArray = json_decode($content, true);
+        $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+    }
 
-        //Debug senden
-        $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
+    // Schleife für die ID-Liste
+    foreach ($idListe as $idItem) 
+    {
+        $gesuchteId = $idItem['id'];
 
-        // Gewählte ID's abfragen
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
+        // Suche nach Werten für die gefundenen IDs
+        $foundValues = [];
+        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-        // Alle vorhandenen Variablen speichern
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) 
+        // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+        $categoryName = $foundValues['Text'][0];
+        $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
+        if ($categoryID === false) 
         {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-        }
-
-        // Schleife für die ID-Liste
-        foreach ($idListe as $idItem) 
-        {
-            $gesuchteId = $idItem['id'];
-
-
-
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
-            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-            $categoryName = $foundValues['Text'][0];
-            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
-            if ($categoryID === false) 
-            {
             $categoryID = IPS_CreateCategory();
             IPS_SetName($categoryID, $categoryName);
             IPS_SetParent($categoryID, $this->InstanceID);
-            }
-
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            $counter = 0;
-
-            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-            
-            
-            foreach ($requiredKeys as $searchKey) 
-            {
-                if (!array_key_exists($searchKey, $foundValues)) 
-                {
-                    continue; // Schlüssel nicht vorhanden, überspringen
-                }
-
-                foreach ($foundValues[$searchKey] as $gefundenerWert) 
-                {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                    $variablePosition = $gesuchteId * 10 + $counter;
-
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    if ($variableID === false) 
-                    {
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
-                            // Ersetzungen für Float-Variablen anwenden
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        } 
-                        
-                        elseif ($searchKey === 'id') 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } 
-                        
-                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        }
-                    } 
-                    else 
-                    {
-                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) 
-                        {
-                            unset($existingVariableIDs[$keyIndex]);
-                        }
-                    }
-
-                    // Variable in die Kategorie platzieren
-                    IPS_SetParent($variableID, $categoryID);
-
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                    SetValue($variableID, $convertedValue);
-
-                    //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
-
-                    $counter++;
-
-                }
-            }
         }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
+        // Variablen anlegen und einstellen für die gefundenen Werte
+        $counter = 0;
+
+        // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+        
+        
+        foreach ($requiredKeys as $searchKey) 
         {
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
+            if (!array_key_exists($searchKey, $foundValues)) 
             {
-                $this->UnregisterVariable($variableToRemove);
+                continue; // Schlüssel nicht vorhanden, überspringen
+            }
+
+            foreach ($foundValues[$searchKey] as $gefundenerWert) 
+            {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
+
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
+                if ($variableID === false) 
+                {
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                    {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                    } 
+                    
+                    elseif ($searchKey === 'id') 
+                    {
+                        $variableID = $this->RegisterVariableInteger($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    } 
+                    
+                    elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                    {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
+                } 
+                else 
+                {
+                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                    if ($keyIndex !== false) 
+                    {
+                        unset($existingVariableIDs[$keyIndex]);
+                    }
+                }
+
+                // Variable in die Kategorie platzieren
+                IPS_SetParent($variableID, $categoryID);
+
+                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+
+                SetValue($variableID, $convertedValue);
+
                 //Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+
+                $counter++;
+
             }
         }
     }
+
+    // Lösche nicht mehr benötigte Variablen und Kategorien
+    foreach ($existingVariableIDs as $variableToRemove) 
+    {
+        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+        if ($variableIDToRemove !== false)
+        {
+            $this->UnregisterVariable($variableToRemove);
+            //Debug senden
+            $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+        }
+    }
+
+    // Lösche nicht mehr benötigte Kategorien
+    $existingCategories = IPS_GetChildrenIDs($this->InstanceID);
+    foreach ($existingCategories as $existingCategoryID) 
+    {
+        if (IPS_CategoryExists($existingCategoryID) && !in_array($existingCategoryID, $existingVariableIDs)) 
+        {
+            IPS_DeleteCategory($existingCategoryID, true);
+            //Debug senden
+            $this->SendDebug("Kategorie gelöscht", "".$existingCategoryID."", 0);
+        }
+    }
+}
+
 }
