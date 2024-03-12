@@ -157,7 +157,7 @@ class HWMonitor extends IPSModule
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
-            if ($categoryName === false) 
+            if ($categoryName === true) 
             $this->SendDebug("Kategorieprüfung", "Die Kategorie vor der Prüfung: ".$categoryName."", 0);
             {
             $categoryID = IPS_CreateCategory();
