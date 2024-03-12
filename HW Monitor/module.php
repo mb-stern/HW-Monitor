@@ -219,7 +219,7 @@ class HWMonitor extends IPSModule
                     }
 
                     // Variable in die Kategorie platzieren
-                    currentTime = time(); // Aktuelle Zeitstempel
+                    $currentTime = time(); // Aktuelle Zeitstempel
                     $variableIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey" . "_$currentTime"; // Eindeutiger Identifikator mit aktueller Zeit
                     IPS_SetIdent($variableID, $variableIdent); // Setzen des Identifikators
                     IPS_SetParent($variableID, $categoryID);
