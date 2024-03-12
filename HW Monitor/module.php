@@ -157,7 +157,8 @@ class HWMonitor extends IPSModule
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
-            $categoryID = $categoryName;
+            $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
+            $categoryID = $categoryNameClean;
             $this->SendDebug("Kategorie-ID", "Die Kategorie-ID lautet: ".$categoryID."", 0);
             if ($categoryID === false) 
             {
