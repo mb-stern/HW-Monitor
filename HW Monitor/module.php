@@ -165,6 +165,7 @@ class HWMonitor extends IPSModule
             $categoryID = IPS_CreateCategory();
             IPS_SetName($categoryID, $categoryName);
             IPS_SetParent($categoryID, $this->InstanceID);
+            $this->SendDebug("Kategorie erstellt", "Die Kategorie erstellt: ".$categoryID."", 0);
             }
 
             // Variablen anlegen und einstellen für die gefundenen Werte
