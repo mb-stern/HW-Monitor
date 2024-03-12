@@ -222,9 +222,6 @@ class HWMonitor extends IPSModule
                         $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
                     }
 
-
-            
-
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
