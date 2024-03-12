@@ -160,12 +160,12 @@ class HWMonitor extends IPSModule
             $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
             $categoryID = $categoryNameClean;
             $this->SendDebug("Kategorie-ID", "Die Kategorie-ID lautet: ".$categoryID."", 0);
-            if ($categoryID === false) 
+            if ($categoryID == false) 
             {
             $categoryID = IPS_CreateCategory();
             IPS_SetName($categoryID, $categoryName);
             IPS_SetParent($categoryID, $this->InstanceID);
-            $this->SendDebug("Kategorie erstellt", "Die Kategorie erstellt: ".$categoryID."", 0);
+            $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
             }
 
             // Variablen anlegen und einstellen für die gefundenen Werte
