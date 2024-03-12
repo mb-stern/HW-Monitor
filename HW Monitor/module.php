@@ -155,9 +155,7 @@ class HWMonitor extends IPSModule
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-$categoryName = $foundValues['Text'][0];
-$categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
+
 
 // Kategorie für diese ID erstellen, falls noch nicht vorhanden
 $categoryName = $foundValues['Text'][0];
