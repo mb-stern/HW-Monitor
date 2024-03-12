@@ -151,21 +151,22 @@ class HWMonitor extends IPSModule
 
 
 
-            // Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            /// Suche nach Werten für die gefundenen IDs
+$foundValues = [];
+$this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-            $categoryName = $foundValues['Text'][0];
-            $categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
-            $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name".$categoryName."", 0);
-            if ($categoryID === false) 
-            {
-            $categoryID = IPS_CreateCategory();
-            IPS_SetName($categoryID, $categoryName);
-            IPS_SetParent($categoryID, $this->InstanceID);
-			$this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
-            }
+// Kategorie für diese ID erstellen, falls noch nicht vorhanden
+$categoryName = $foundValues['Text'][0];
+$categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+$this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+if ($categoryID === false || IPS_GetObject($categoryID)['ObjectType'] !== 3) {
+    // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
+    $categoryID = IPS_CreateCategory();
+    IPS_SetName($categoryID, $categoryName);
+    IPS_SetParent($categoryID, $this->InstanceID);
+    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+}
+
 
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
