@@ -167,7 +167,7 @@ if ($categoryID === false) {
     // Kategorie erstellen, wenn sie nicht existiert
     $categoryID = IPS_CreateCategory();
     IPS_SetName($categoryID, $categoryName);
-    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID.".$categoryName."", 0);
+    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."".$categoryName."", 0);
 }
 
 
