@@ -220,6 +220,11 @@ class HWMonitor extends IPSModule
                         }
                     }
 
+                    // Variable in die Kategorie platzieren
+                    $variableIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey"; // Beispiel für einen eindeutigen Identifikator
+                    IPS_SetIdent($variableID, $variableIdent); // Setzen des Identifikators
+                    IPS_SetParent($variableID, $categoryID);
+
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
