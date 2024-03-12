@@ -161,6 +161,7 @@ $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entf
 
 // Überprüfen, ob die Kategorie bereits existiert
 $categoryID = @IPS_GetObjectIDByIdent($categoryNameClean, $this->InstanceID);
+$this->SendDebug("Kategorie Ident", "Die Kategorie hat folgenden Ident: ".$categoryID."", 0);
 if ($categoryID === false) {
     // Kategorie erstellen, wenn sie nicht existiert
     $categoryID = IPS_CreateCategory();
