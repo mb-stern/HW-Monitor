@@ -152,21 +152,21 @@ class HWMonitor extends IPSModule
 
 
             /// Suche nach Werten für die gefundenen IDs
-$foundValues = [];
-$this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-// Kategorie für diese ID erstellen, falls noch nicht vorhanden
-$categoryName = $foundValues['Text'][0];
-$categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-$this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
-if ($categoryID === false) 
-{
-    // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
-    $categoryID = IPS_CreateCategory();
-    IPS_SetName($categoryID, $categoryName);
-    IPS_SetParent($categoryID, $this->InstanceID);
-    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
-}
+            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+            $categoryName = $foundValues['Text'][0];
+            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+            $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+            if ($categoryID === false) 
+            {
+                // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
+                $categoryID = IPS_CreateCategory();
+                IPS_SetName($categoryID, $categoryName);
+                IPS_SetParent($categoryID, $this->InstanceID);
+                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+            }
 
 
             // Variablen anlegen und einstellen für die gefundenen Werte
@@ -219,6 +219,8 @@ if ($categoryID === false)
                     }
 
                     // Variable in die Kategorie platzieren
+                    $variableIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey"; // Beispiel für einen eindeutigen Identifikator
+                    IPS_SetIdent($variableID, $variableIdent); // Setzen des Identifikators
                     IPS_SetParent($variableID, $categoryID);
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
