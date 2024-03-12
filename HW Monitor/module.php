@@ -159,7 +159,8 @@ $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 $categoryName = $foundValues['Text'][0];
 $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
 $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
-if ($categoryID === false || IPS_GetObject($categoryID)['ObjectType'] !== 3) {
+if ($categoryID === false) 
+{
     // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
     $categoryID = IPS_CreateCategory();
     IPS_SetName($categoryID, $categoryName);
