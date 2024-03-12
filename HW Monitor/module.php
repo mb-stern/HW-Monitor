@@ -194,7 +194,7 @@ class HWMonitor extends IPSModule
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
+                            IPS_SetParent($variableID, $categoryID);
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
@@ -202,11 +202,13 @@ class HWMonitor extends IPSModule
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            IPS_SetParent($variableID, $categoryID);
                         } 
                         
                         elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            IPS_SetParent($variableID, $categoryID);
                         }
                     } 
                     else 
@@ -217,11 +219,6 @@ class HWMonitor extends IPSModule
                             unset($existingVariableIDs[$keyIndex]);
                         }
                     }
-
-                    // Variable in die Kategorie platzieren
-                    $variableIdent = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey"; // Beispiel für einen eindeutigen Identifikator
-                    IPS_SetIdent($variableID, $variableIdent); // Setzen des Identifikators
-                    IPS_SetParent($variableID, $categoryID);
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
