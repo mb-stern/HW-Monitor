@@ -163,6 +163,7 @@ $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entf
 $categoryID = IPS_CreateCategory();
 IPS_SetName($categoryID, $categoryName);
 IPS_SetParent($categoryID, $this->InstanceID);
+$this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
 
 
 
