@@ -164,7 +164,7 @@ $categoryID = @IPS_GetObjectIDByIdent($categoryNameClean, $this->InstanceID);
 $this->SendDebug("Kategorie Ident", "Die Kategorie hat folgenden Ident: ".$categoryID."", 0);
 if ($categoryID === false) {
     // Kategorie erstellen, wenn sie nicht existiert
-    $categoryID = IPS_CreateCategory();
+    $categoryID = $categoryNameClean;
     IPS_SetName($categoryID, $categoryName);
     IPS_SetParent($categoryID, $this->InstanceID);
     $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
