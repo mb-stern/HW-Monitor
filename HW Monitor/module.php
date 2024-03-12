@@ -160,12 +160,13 @@ $categoryName = $foundValues['Text'][0];
 $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
 
 // Überprüfen, ob die Kategorie bereits existiert
-$categoryID = @IPS_GetCategoryIDByName($categoryNameClean, $this->InstanceID);
+$categoryID = @IPS_GetObjectDByIdent($categoryNameClean, $this->InstanceID);
 if ($categoryID === false) {
     // Kategorie erstellen, wenn sie nicht existiert
     $categoryID = IPS_CreateCategory();
     IPS_SetName($categoryID, $categoryName);
     IPS_SetParent($categoryID, $this->InstanceID);
+    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
 }
 
 
