@@ -159,14 +159,16 @@ class HWMonitor extends IPSModule
 $categoryName = $foundValues['Text'][0];
 $categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
 
+// Kategorie für diese ID erstellen, falls noch nicht vorhanden
+$categoryName = $foundValues['Text'][0];
+$categoryNameClean = preg_replace('/[^a-zA-Z0-9]/', '_', $categoryName); // Entfernen von Sonderzeichen
+
 // Überprüfen, ob die Kategorie bereits existiert
-$categoryID = @IPS_GetObjectIDByIdent($categoryNameClean, $this->InstanceID);
-$this->SendDebug("Kategorie Ident", "Die Kategorie hat folgenden Ident: ".$categoryID."", 0);
+$categoryID = @IPS_GetCategoryIDByName($categoryName, $this->InstanceID);
 if ($categoryID === false) {
     // Kategorie erstellen, wenn sie nicht existiert
-    $categoryID = $categoryNameClean;
+    $categoryID = IPS_CreateCategory();
     IPS_SetName($categoryID, $categoryName);
-    IPS_SetParent($categoryID, $this->InstanceID);
     $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
 }
 
