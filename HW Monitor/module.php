@@ -240,14 +240,22 @@ class HWMonitor extends IPSModule
             }
         }
 
-        /// Lösche nicht mehr benötigte Variablen und Kategorien
-    foreach ($existingObjects as $existingObjectID) 
+        // Lösche nicht mehr benötigte Variablen und Kategorien
+foreach ($existingObjects as $existingObjectID) 
+{
+    if (!in_array($existingObjectID, $newObjectIDs)) 
     {
-        if (!in_array($existingObjectID, $newObjectIDs)) 
+        if (IPS_VariableExists($existingObjectID)) 
         {
-            IPS_DeleteObject($existingObjectID);
-            $this->SendDebug("Objekt gelöscht", "Objekt mit ID $existingObjectID wurde gelöscht", 0);
+            IPS_DeleteVariable($existingObjectID);
+            $this->SendDebug("Variable gelöscht", "Variable mit ID $existingObjectID wurde gelöscht", 0);
+        } 
+        elseif (IPS_CategoryExists($existingObjectID)) 
+        {
+            IPS_DeleteCategory($existingObjectID);
+            $this->SendDebug("Kategorie gelöscht", "Kategorie mit ID $existingObjectID wurde gelöscht", 0);
         }
     }
 }
+
 }
