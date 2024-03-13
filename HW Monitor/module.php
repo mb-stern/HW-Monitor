@@ -251,11 +251,7 @@ foreach ($existingObjects as $existingObjectID)
             IPS_DeleteCategory($existingObjectID);
             $this->SendDebug("Kategorie gelöscht", "Kategorie mit ID $existingObjectID wurde gelöscht", 0);   
         } 
-        elseif (IPS_CategoryExists($existingObjectID)) 
-        {
-            $this->UnregisterVariable($existingObjectID);
-            $this->SendDebug("Variable gelöscht", "Variable mit ID $existingObjectID wurde gelöscht", 0);
-        }
+        
     }
 }
 }
