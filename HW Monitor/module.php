@@ -209,7 +209,7 @@ class HWMonitor extends IPSModule
                         }
 
                         // Setze den Identifikator
-                        IPS_SetIdent($variableID, $variableIdentValue);
+                        //IPS_SetIdent($variableID, $variableIdentValue);
                         // Setze das Elternobjekt
                         IPS_SetParent($variableID, $categoryID);
                     } 
