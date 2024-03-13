@@ -253,7 +253,7 @@ foreach ($existingObjects as $existingObjectID)
         } 
         elseif (IPS_CategoryExists($existingObjectID)) 
         {
-            I$this->UnregisterVariable($existingObjectID);
+            $this->UnregisterVariable($existingObjectID);
             $this->SendDebug("Variable gelöscht", "Variable mit ID $existingObjectID wurde gelöscht", 0);
         }
     }
