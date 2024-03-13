@@ -239,7 +239,7 @@ class HWMonitor extends IPSModule
             $this->SendDebug("Variable Ident", $variableIdent, 0);
         }
         
-
+        $this->SendDebug("Existing Variable IDs", json_encode($existingVariableIDs), 0);
 
 
         foreach ($existingVariableIDs as $variableToRemove) 
