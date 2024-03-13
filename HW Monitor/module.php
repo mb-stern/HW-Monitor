@@ -257,5 +257,5 @@ foreach ($existingObjects as $existingObjectID)
         }
     }
 }
-
+}
 }
