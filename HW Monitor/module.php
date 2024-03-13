@@ -146,6 +146,7 @@ class HWMonitor extends IPSModule
 
 
         $existingObjects = IPS_GetChildrenIDs($this->InstanceID);
+        $newObjectIDs = [];
 
 
 
