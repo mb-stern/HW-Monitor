@@ -246,13 +246,17 @@ foreach ($existingObjects as $existingObjectID)
     if (!in_array($existingObjectID, $newObjectIDs)) 
     {
         if (IPS_VariableExists($existingObjectID)) 
-        
+        {
+            IPS_DeleteVariable($existingObjectID);
+            $this->SendDebug("Variable gelöscht", "Variable mit ID $existingObjectID wurde gelöscht", 0);
+        } 
+        elseif (IPS_CategoryExists($existingObjectID)) 
         {
             IPS_DeleteCategory($existingObjectID);
-            $this->SendDebug("Kategorie gelöscht", "Kategorie mit ID $existingObjectID wurde gelöscht", 0);   
-        } 
-        
+            $this->SendDebug("Kategorie gelöscht", "Kategorie mit ID $existingObjectID wurde gelöscht", 0);
+        }
     }
 }
+
 }
 }
