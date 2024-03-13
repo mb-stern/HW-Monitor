@@ -256,14 +256,9 @@ foreach ($existingVariableIDs as $variableToRemoveIdent)
     {
         // Elternobjekt ID abrufen
         $parentID = IPS_GetParent($variableIDToRemove);
-        $this->UnregisterVariable($variableToRemove);
-        // Elternobjekt aktualisieren
-        IPS_ApplyChanges($parentID);
-        // Elternobjekt löschen, falls keine Variablen mehr vorhanden sind
-        $childVariables = IPS_GetChildrenIDs($parentID);
-        if (count($childVariables) === 0) {
+        
             IPS_DeleteCategory($parentID);
-        }
+
         //Debug senden
         $this->SendDebug("Variable und Elternverzeichnis gelöscht", "".$variableToRemoveIdent." und ".$parentID."", 0);
     }
