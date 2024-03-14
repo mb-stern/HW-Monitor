@@ -241,12 +241,13 @@ class HWMonitor extends IPSModule
         }
 
        // Lösche nicht mehr benötigte Variablen und Kategorien
-foreach ($idListe as $idItem) {
+foreach ($idListe as $idItem) 
+$this->SendDebug("Test", "bis hierher 1", 0);
+{
     if (!isset($idItem['Text']) || !isset($idItem['id'])) {
         continue;
     }
-    $this->SendDebug("Test", "bis hierher", 0);
-    $this->SendDebug("Kategorie gelöscht", $categoryName, 0);
+    $this->SendDebug("Test", "bis hierher 2", 0);
     $gesuchteId = $idItem['id'];
     $categoryName = $idItem['Text'];
     $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
