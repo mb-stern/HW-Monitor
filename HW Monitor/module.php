@@ -253,6 +253,9 @@ foreach ($existingVariableIDs as $variableToRemove) {
 
 // Lösche leere Kategorien
 foreach ($idListe as $idItem) {
+    if (!array_key_exists('Text', $idItem)) {
+        continue;
+    }
     $gesuchteId = $idItem['id'];
     $categoryName = $idItem['Text'];
     $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
@@ -266,6 +269,7 @@ foreach ($idListe as $idItem) {
         }
     }
 }
+
 
 }
 }
