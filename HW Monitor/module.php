@@ -252,7 +252,8 @@ foreach ($existingObjects as $existingObjectID)
         } 
         elseif (IPS_CategoryExists($existingObjectID)) 
         {
-            IPS_DeleteCategory($existingObjectID);
+            IIPS_DeleteCategory($existingObjectID, true); // Das zweite Argument true gibt an, dass alle untergeordneten Objekte ebenfalls gelöscht werden sollen
+
             $this->SendDebug("Kategorie gelöscht", "Kategorie mit ID $existingObjectID wurde gelöscht", 0);
         }
     }
