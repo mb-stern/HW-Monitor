@@ -241,7 +241,7 @@ class HWMonitor extends IPSModule
         }
 
        // Lösche nicht mehr benötigte Variablen und Kategorien
-       / Schleife für die ID-Liste
+       
        foreach ($idListe as $idItem) 
        {
            $gesuchteId = $idItem['id'];
