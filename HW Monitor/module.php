@@ -242,7 +242,6 @@ class HWMonitor extends IPSModule
 
        // Lösche nicht mehr benötigte Variablen und Kategorien
 foreach ($idListe as $idItem) 
-$this->SendDebug("Test 1", "Test 1", 0);
 {
     if (!isset($idItem['Text']) || !isset($idItem['id'])) {
         continue;
