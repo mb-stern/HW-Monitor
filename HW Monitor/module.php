@@ -255,14 +255,11 @@ class HWMonitor extends IPSModule
            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
            $categoryName = $foundValues['Text'][0];
            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-           $this->SendDebug("Löschfunktion", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+           $this->SendDebug("Löschfunktion", "Prüfung der Kategorie mit id: ".$gesuchteId." mit Kategorie-ID: ".$categoryID." und Name: ".$categoryName."", 0);
            if ($categoryID === false) 
            {
-               // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
-               $categoryID = IPS_CreateCategory();
-               IPS_SetName($categoryID, $categoryName);
-               IPS_SetParent($categoryID, $this->InstanceID);
-               $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+               // Kategorie löschen, wenn die ID nicht existiert
+               $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryID."", 0);
            }
 }
 
