@@ -259,4 +259,4 @@ class HWMonitor extends IPSModule
 
 
 }
-}
+
