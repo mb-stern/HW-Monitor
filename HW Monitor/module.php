@@ -244,7 +244,7 @@ class HWMonitor extends IPSModule
        foreach ($idListe as $idItem) 
        {
            $gesuchteId = $idItem['id'];
-       
+           $this->SendDebug("Löschfunktion", "Gesuchte ID: $gesuchteId", 0);
            // Suche nach Werten für die gefundenen IDs
            $foundValues = [];
            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
@@ -252,7 +252,7 @@ class HWMonitor extends IPSModule
            // Kategorie für diese ID erstellen oder abrufen
            $categoryName = $foundValues['Text'][0];
            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-           $this->SendDebug("Löschfunktion", "Gefnderener Kategoriename zur Prüfung zum löschen: $categoryName", 0);
+           $this->SendDebug("Löschfunktion", "Gefundener Kategoriename zur Prüfung zum löschen: $categoryName", 0);
            
            // Wenn die 'id' nicht mehr in der Liste vorhanden ist, lösche die Kategorie und alle Variablen darin
            if (!in_array($gesuchteId, array_column($idListe, 'id'))) {
