@@ -161,7 +161,10 @@ class HWMonitor extends IPSModule
     $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
     // Kategorie für diese ID erstellen oder abrufen
-    $categoryName = isset($foundValues['Text'][0]) ? $foundValues['Text'][0] : '';
+    $categoryName = '';
+    if (isset($foundValues['Text'][0])) {
+        $categoryName = $foundValues['Text'][0];
+    }
     $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
     
     // Wenn die 'id' nicht mehr in der Liste vorhanden ist, lösche die Kategorie und alle Variablen darin
@@ -190,6 +193,7 @@ class HWMonitor extends IPSModule
         }
     }
 }
+
 
 
 
