@@ -252,7 +252,7 @@ foreach ($idListe as $idItem) {
         $categoryChildren = IPS_GetChildrenIDs($categoryID);
         // Lösche alle Variablen innerhalb der Kategorie
         foreach ($categoryChildren as $childID) {
-            $this->UnregisterVariable($childID);
+            IPS_DeleteVariable($childID);
             //Debug senden
             $this->SendDebug("Variable gelöscht", "ID: $childID", 0);
         }
