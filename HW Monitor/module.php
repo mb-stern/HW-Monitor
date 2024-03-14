@@ -252,6 +252,7 @@ class HWMonitor extends IPSModule
            // Kategorie für diese ID erstellen oder abrufen
            $categoryName = $foundValues['Text'][0];
            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+           $this->SendDebug("Löschfunktion", "Gefnderener Kategoriename zur Prüfung zum löschen: $categoryName", 0);
            
            // Wenn die 'id' nicht mehr in der Liste vorhanden ist, lösche die Kategorie und alle Variablen darin
            if (!in_array($gesuchteId, array_column($idListe, 'id'))) {
