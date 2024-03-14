@@ -247,7 +247,7 @@ $this->SendDebug("Test", "bis hierher 1", 0);
     if (!isset($idItem['Text']) || !isset($idItem['id'])) {
         continue;
     }
-    $this->SendDebug("Test", "bis hierher 2", 0);
+    $this->SendDebug("Test 1", 0);
     $gesuchteId = $idItem['id'];
     $categoryName = $idItem['Text'];
     $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
