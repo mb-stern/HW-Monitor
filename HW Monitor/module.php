@@ -240,6 +240,7 @@ class HWMonitor extends IPSModule
         // Wenn die Variable nicht in der aktuellen ID-Liste gefunden wurde, löschen
         if (!$found) 
         {
+            IPS_DeleteCategory($variableID);
             $this->UnregisterVariable($variableID);
             // Debug-Nachricht senden
             $this->SendDebug("Variable gelöscht", "Variable ID: " . $variableID, 0);
