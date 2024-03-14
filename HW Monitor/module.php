@@ -244,9 +244,10 @@ class HWMonitor extends IPSModule
         $existingIds = array_column($idListe, 'id');
         
         foreach ($idListe as $idItem) 
-        $this->SendDebug("Löschfunktion", "Ankommende ID's: ".$idItem['id']."", 0);
+        
         {
             $gesuchteId = $idItem['id'];
+            $this->SendDebug("Löschfunktion", "Ankommende ID's: ".$gesuchteId."", 0);
 
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
