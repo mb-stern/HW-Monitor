@@ -241,28 +241,29 @@ class HWMonitor extends IPSModule
         }
 
        // Lösche nicht mehr benötigte Variablen und Kategorien
-foreach ($idListe as $idItem) {
-    if (!isset($idItem['Text'])) 
-    $this->SendDebug("Löschfunktion", "ID: ".(!isset($idItem['Text']))."", 0);
-    {
-        continue;
-    }
-    $gesuchteId = $idItem['id'];
-    $categoryName = $idItem['Text'];
-    $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-    if ($categoryID !== false) {
-        $categoryChildren = IPS_GetChildrenIDs($categoryID);
-        // Lösche alle Variablen innerhalb der Kategorie
-        foreach ($categoryChildren as $childID) {
-            IPS_DeleteVariable($childID);
-            //Debug senden
-            $this->SendDebug("Variable gelöscht", "ID: $childID", 0);
-        }
-        // Lösche die Kategorie selbst
-        IPS_DeleteCategory($categoryID);
-        //Debug senden
-        $this->SendDebug("Kategorie gelöscht", $categoryName, 0);
-    }
+       / Schleife für die ID-Liste
+       foreach ($idListe as $idItem) 
+       {
+           $gesuchteId = $idItem['id'];
+
+
+
+           /// Suche nach Werten für die gefundenen IDs
+           $foundValues = [];
+           $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+
+           // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+           $categoryName = $foundValues['Text'][0];
+           $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+           $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+           if ($categoryID === false) 
+           {
+               // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
+               $categoryID = IPS_CreateCategory();
+               IPS_SetName($categoryID, $categoryName);
+               IPS_SetParent($categoryID, $this->InstanceID);
+               $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+           }
 }
 
 }
