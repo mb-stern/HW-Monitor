@@ -241,35 +241,39 @@ class HWMonitor extends IPSModule
         }
 
        // Lösche nicht mehr benötigte Variablen und Kategorien
-$existingIds = array_column($idListe, 'id');
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
+        $existingIds = array_column($idListe, 'id');
+        $this->SendDebug("Löschfunktion", "Ankommende ID's: ".$existingIds."", 0);
+        foreach ($idListe as $idItem) 
+        {
+            $gesuchteId = $idItem['id'];
 
-    // Suche nach Werten für die gefundenen IDs
-    $foundValues = [];
-    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            // Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-    // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-    $categoryName = $foundValues['Text'][0];
-    $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-    $this->SendDebug("Löschfunktion", "Prüfung der Kategorie mit id: ".$gesuchteId." mit Kategorie-ID: ".$categoryID." und Name: ".$categoryName."", 0);
-    if (!in_array($gesuchteId, $existingIds)) {
-        // Wenn die ID nicht mehr vorhanden ist, lösche die Kategorie und alle Variablen darin
-        if ($categoryID !== false) {
-            // Alle Variablen innerhalb der Kategorie löschen
-            $categoryChildren = IPS_GetChildrenIDs($categoryID);
-            foreach ($categoryChildren as $childID) {
-                IPS_DeleteVariable($childID);
-                //Debug senden
-                $this->SendDebug("Variable gelöscht", "ID: $childID", 0);
+            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+            $categoryName = $foundValues['Text'][0];
+            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+            $this->SendDebug("Löschfunktion", "Prüfung der Kategorie mit id: ".$gesuchteId." mit Kategorie-ID: ".$categoryID." und Name: ".$categoryName."", 0);
+            if (!in_array($gesuchteId, $existingIds)) 
+            {
+                // Wenn die ID nicht mehr vorhanden ist, lösche die Kategorie und alle Variablen darin
+                if ($categoryID !== false) {
+                    // Alle Variablen innerhalb der Kategorie löschen
+                    $categoryChildren = IPS_GetChildrenIDs($categoryID);
+                    foreach ($categoryChildren as $childID) 
+                    {
+                        IPS_DeleteVariable($childID);
+                        //Debug senden
+                        $this->SendDebug("Variable gelöscht", "ID: $childID", 0);
+                    }
+                    // Kategorie selbst löschen
+                    IPS_DeleteCategory($categoryID);
+                    //Debug senden
+                    $this->SendDebug("Kategorie gelöscht", $categoryName, 0);
+                }
             }
-            // Kategorie selbst löschen
-            IPS_DeleteCategory($categoryID);
-            //Debug senden
-            $this->SendDebug("Kategorie gelöscht", $categoryName, 0);
         }
-    }
-}
 
     }
 }
