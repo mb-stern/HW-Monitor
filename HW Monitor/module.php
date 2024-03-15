@@ -218,19 +218,9 @@ class HWMonitor extends IPSModule
                         // Setze das Elternobjekt
                         IPS_SetParent($variableID, $categoryID);
                     } 
-                    else 
-                    {
-                        // Variable bereits vorhanden, Wert aktualisieren
-                        $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-                        SetValue($variableID, $convertedValue);
-                        //Debug senden
-                        $this->SendDebug("Variable aktualisiert 1", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
-                    }
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
                     SetValue($variableID, $convertedValue);
-
                     //Debug senden
                     $this->SendDebug("Variable aktualisiert 2", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
