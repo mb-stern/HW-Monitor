@@ -235,8 +235,13 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
+
+
                     if ($variableID === true)
+                    {
                     $this->SendDebug("Test", "Variabel-ID: ".$variableID."", 0);
+                    }
+
 
                 }
             }
