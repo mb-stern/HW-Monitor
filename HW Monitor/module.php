@@ -183,8 +183,7 @@ class HWMonitor extends IPSModule
             
                 // Variablen anlegen und einstellen für die gefundenen Werte
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
-                if ($variableID === false) 
-                {
+              
                     // Variable erstellen
                     if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                     {
@@ -204,11 +203,7 @@ class HWMonitor extends IPSModule
                         
                     // Setze das Elternobjekt
                     IPS_SetParent($variableID, $categoryID);
-                } 
-                else 
-                {
-                    $this->SendDebug("Variable gelöscht", "Variabel-ID: ".$variableID.", Position: ".$variablePosition."", 0);
-                }
+             
             
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
