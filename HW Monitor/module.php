@@ -206,6 +206,10 @@ class HWMonitor extends IPSModule
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
+                        else
+                        {
+                        $this->SendDebug("Test", "Variabel-ID: ".$variableID."", 0);
+                        }
                         elseif ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
@@ -235,12 +239,6 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
-
-
-                    if ($variableID === true)
-                    {
-                    $this->SendDebug("Test", "Variabel-ID: ".$variableID."", 0);
-                    }
 
 
                 }
