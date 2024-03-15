@@ -124,94 +124,95 @@ class HWMonitor extends IPSModule
     }
 
     public function Update()
+    {
+        // Libre Hardware Monitor abfragen
+        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+        $contentArray = json_decode($content, true);
+
+        //Debug senden
+        $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
+
+        // Gewählte ID's abfragen
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
+
+        // Alle vorhandenen Variablen speichern
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariableIDs = [];
+        foreach ($existingVariables as $existingVariableID) 
         {
-            // Libre Hardware Monitor abfragen
-            $content = @file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-            if ($content === false) {
-                $this->SendDebug("Fehler", "Fehler beim Abrufen der Daten von Libre Hardware Monitor", 0);
-                return;
-            }
+            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+        }
 
-            //Debug senden
-            $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
+        $existingObjects = IPS_GetChildrenIDs($this->InstanceID);
+        $newObjectIDs = [];
 
-            // Gewählte ID's abfragen
-            $idListeString = $this->ReadPropertyString('IDListe');
-            $idListe = json_decode($idListeString, true);
+        // Schleife für die ID-Liste
+        foreach ($idListe as $idItem) 
+        {
+            $gesuchteId = $idItem['id'];
 
-            // Überprüfen, ob die ID-Liste leer ist
-            if (empty($idListe)) {
-                $this->SendDebug("ID-Liste leer", "Die ID-Liste ist leer", 0);
-                return;
-            }
+            /// Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Alle vorhandenen Variablen speichern
-            $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-            $existingVariableIDs = [];
-            foreach ($existingVariables as $existingVariableID) 
+            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+            $categoryName = $foundValues['Text'][0];
+            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+            $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+            if ($categoryID === false) 
             {
-                $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+                // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
+                $categoryID = IPS_CreateCategory();
+                IPS_SetName($categoryID, $categoryName);
+                IPS_SetParent($categoryID, $this->InstanceID);
+                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
             }
 
-            // Schleife für die ID-Liste
-            foreach ($idListe as $idItem) 
-            {
-                $gesuchteId = $idItem['id'];
 
-                // Suche nach Werten für die gefundenen IDs
-                $foundValues = [];
-                $this->searchValueForId(json_decode($content, true), $gesuchteId, $foundValues);
+            // Variablen anlegen und einstellen für die gefundenen Werte
+            $counter = 0;
 
-                // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-                $categoryName = $foundValues['Text'][0];
-                $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-                if ($categoryID === false) 
+            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+
+                // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
+                foreach ($requiredKeys as $searchKey)
+                foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
-                    // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
-                    $categoryID = IPS_CreateCategory();
-                    IPS_SetName($categoryID, $categoryName);
-                    IPS_SetParent($categoryID, $this->InstanceID);
-                    $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
-                }
-
-                // Variablen anlegen und einstellen für die gefundenen Werte
-                $counter = 0;
-
-                // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-                $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-
-                    // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
-                    foreach ($requiredKeys as $searchKey) {
-                    foreach ($foundValues[$searchKey] as $gefundenerWert) {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
-
+            
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
                     if ($variableID === false) {
                         // Variable erstellen
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
+            
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        } elseif ($searchKey === 'id') {
+                        } 
+                        elseif ($searchKey === 'id') 
+                        {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                        } 
+                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                        {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
-
+                        
                         // Setze das Elternobjekt
                         IPS_SetParent($variableID, $categoryID);
-                    }
-
+                    } 
+            
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                     SetValue($variableID, $convertedValue);
                     //Debug senden
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
-
+            
                     $counter++;
                 }
             }
         }
     }
-}
