@@ -204,11 +204,12 @@ class HWMonitor extends IPSModule
                     }
                         
                     // Setze das Elternobjekt
-                    IPS_SetParent($variableID, $categoryID);
+                    //IPS_SetParent($variableID, $categoryID);
                 } 
             
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
+                IPS_SetParent($variableID, $categoryID);
                 //Debug senden
                 $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
