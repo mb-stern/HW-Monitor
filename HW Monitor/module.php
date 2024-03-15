@@ -148,6 +148,7 @@ class HWMonitor extends IPSModule
         $newObjectIDs = [];
 
         // Schleife für die ID-Liste
+        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
         foreach ($idListe as $idItem) 
         {
             $gesuchteId = $idItem['id'];
@@ -170,9 +171,6 @@ class HWMonitor extends IPSModule
             }
 
             $counter = 0;
-
-            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
 
                 // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
                 foreach ($requiredKeys as $searchKey)
