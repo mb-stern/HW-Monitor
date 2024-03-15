@@ -185,28 +185,36 @@ class HWMonitor extends IPSModule
             
             foreach ($requiredKeys as $searchKey) {
                 // Überprüfen, ob der Schlüssel in $foundValues vorhanden ist
-                if (!array_key_exists($searchKey, $foundValues)) {
+                if (!array_key_exists($searchKey, $foundValues)) 
+                {
                     // Schlüssel nicht vorhanden, Variablen löschen und zum nächsten Schlüssel gehen
+                    $this->SendDebug("Variable gelöscht", "Variabel-ID: , Position: ",0);
                     $this->DeleteVariablesInCategory($categoryID);
                     continue;
                 }
             
                 // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
-                foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                foreach ($foundValues[$searchKey] as $gefundenerWert) 
+                {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
             
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
                     if ($variableID === false) {
                         // Variable erstellen
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) {
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
             
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        } elseif ($searchKey === 'id') {
+                        } 
+                        elseif ($searchKey === 'id') 
+                        {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } elseif ($searchKey === 'Text' || $searchKey === 'Type') {
+                        } 
+                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                        {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                         
@@ -222,9 +230,7 @@ class HWMonitor extends IPSModule
                     $counter++;
                 }
             }
-            
-                }
-
-            }
         }
+    }
+}
 
