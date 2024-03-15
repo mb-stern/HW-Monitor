@@ -148,7 +148,6 @@ class HWMonitor extends IPSModule
         $newObjectIDs = [];
 
         // Schleife für die ID-Liste
-        $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
         foreach ($idListe as $idItem) 
         {
             $gesuchteId = $idItem['id'];
@@ -172,44 +171,48 @@ class HWMonitor extends IPSModule
 
             $counter = 0;
 
-                // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
-                foreach ($requiredKeys as $searchKey)
-                foreach ($foundValues[$searchKey] as $gefundenerWert) 
+            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+
+            // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
+            foreach ($requiredKeys as $searchKey)
+            foreach ($foundValues[$searchKey] as $gefundenerWert) 
+            {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
+            
+                // Variablen anlegen und einstellen für die gefundenen Werte
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
+                if ($variableID === false) 
                 {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                    $variablePosition = $gesuchteId * 10 + $counter;
+                    // Variable erstellen
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                    {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
             
-                    // Variablen anlegen und einstellen für die gefundenen Werte
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
-                    if ($variableID === false) {
-                        // Variable erstellen
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-            
-                            // Ersetzungen für Float-Variablen anwenden
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
-                        elseif ($searchKey === 'id') 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } 
-                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        }
-                        
-                        // Setze das Elternobjekt
-                        IPS_SetParent($variableID, $categoryID);
+                    elseif ($searchKey === 'id') 
+                    {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     } 
+                    elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                    {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
+                        
+                    // Setze das Elternobjekt
+                    IPS_SetParent($variableID, $categoryID);
+                } 
             
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-                    SetValue($variableID, $convertedValue);
-                    //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                SetValue($variableID, $convertedValue);
+                //Debug senden
+                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
-                    $counter++;
-                }
+                $counter++;
             }
         }
     }
+}
