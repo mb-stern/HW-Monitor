@@ -181,20 +181,9 @@ class HWMonitor extends IPSModule
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-            
-            /*
-            foreach ($requiredKeys as $searchKey) {
-                // Überprüfen, ob der Schlüssel in $foundValues vorhanden ist
-                if (!array_key_exists($searchKey, $foundValues)) 
-                {
-                    // Schlüssel nicht vorhanden, Variablen löschen und zum nächsten Schlüssel gehen
-                    $this->SendDebug("Variable gelöscht", "Variabel-ID: , Position: ", 0);
-                    //$this->DeleteVariablesInCategory($categoryID);
-                    continue;
-                }
-                */
-                foreach ($requiredKeys as $searchKey)
+
                 // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
+                foreach ($requiredKeys as $searchKey)
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
