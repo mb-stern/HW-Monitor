@@ -185,11 +185,7 @@ class HWMonitor extends IPSModule
             
             foreach ($requiredKeys as $searchKey) 
             {
-                if (!array_key_exists($searchKey, $foundValues)) 
-                {
-                    $this->SendDebug("Variablen löschen", "searchkey: ".$searchKey.", foundvalues: ".$foundValues."", 0);
-                }
-
+                
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
