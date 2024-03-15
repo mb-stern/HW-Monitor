@@ -183,27 +183,33 @@ class HWMonitor extends IPSModule
             
                 // Variablen anlegen und einstellen für die gefundenen Werte
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
- 
-                // Variable erstellen
-                if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                if ($variableID === false) 
                 {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                    // Variable erstellen
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                    {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
             
-                    // Ersetzungen für Float-Variablen anwenden
-                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        // Ersetzungen für Float-Variablen anwenden
+                        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        } 
+                    elseif ($searchKey === 'id') 
+                    {
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     } 
-                elseif ($searchKey === 'id') 
-                {
-                    $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                } 
-                elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                {
-                    $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                }
+                    elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                    {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
                         
-                // Setze das Elternobjekt
-                IPS_SetParent($variableID, $categoryID);
-  
+                    // Setze das Elternobjekt
+                    IPS_SetParent($variableID, $categoryID);
+                } 
+                else 
+                {
+                    $this->SendDebug("Variable gelöscht", "Variabel-ID: ".$variableID.", Position: ".$variablePosition."", 0);
+                }
+            
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
