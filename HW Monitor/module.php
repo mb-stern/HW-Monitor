@@ -186,6 +186,7 @@ class HWMonitor extends IPSModule
             foreach ($requiredKeys as $searchKey) {
                 // Überprüfen, ob der Schlüssel in $foundValues vorhanden ist
                 if (!array_key_exists($searchKey, $foundValues)) 
+                $this->SendDebug("Variabelprüfung", "Variabel-ID: ".$searchKey.", Position: ".$foundValues."", 0);
                 {
                     // Schlüssel nicht vorhanden, Variablen löschen und zum nächsten Schlüssel gehen
                     $this->SendDebug("Variable gelöscht", "Variabel-ID: , Position: ", 0);
