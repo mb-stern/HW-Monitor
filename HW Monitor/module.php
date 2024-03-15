@@ -211,9 +211,14 @@ class HWMonitor extends IPSModule
                     $counter++;
                 }
 
-            // Vorhandene Kategorie löschen, wenn keine Variablen mehr vorhanden sind
-            if (count(IPS_GetChildrenIDs($categoryID)) == 0) {
-                IPS_DeleteCategory($categoryID);
+            // Vorhandene Variablen löschen, die nicht mehr benötigt werden
+            $existingVariables = IPS_GetChildrenIDs($categoryID);
+            foreach ($existingVariables as $existingVariableID) {
+                $variable = IPS_GetObject($existingVariableID);
+                $objectIdent = $variable['ObjectIdent'];
+                if (!in_array($objectIdent, $requiredKeys)) {
+                    $this->UnregisterVariable($existingVariableID);
+                }
             }
         }
     }
