@@ -188,7 +188,7 @@ class HWMonitor extends IPSModule
                 if (!array_key_exists($searchKey, $foundValues)) 
                 {
                     // Schlüssel nicht vorhanden, Variablen löschen und zum nächsten Schlüssel gehen
-                    $this->SendDebug("Variable gelöscht", "Variabel-ID: , Position: ",0);
+                    $this->SendDebug("Variable gelöscht", "Variabel-ID: , Position: ", 0);
                     $this->DeleteVariablesInCategory($categoryID);
                     continue;
                 }
