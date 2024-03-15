@@ -235,37 +235,10 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
+                    if ($variableID === true)
+                    $this->SendDebug("Test", "Variabel-ID: ".$variableID."", 0);
 
                 }
-            }
-        }
-
-       // Lösche nicht mehr benötigte Variablen und Kategorien
-        foreach ($idListe as $idItem) 
-        {
-            if (!isset($idItem['Text']) || !isset($idItem['id'])) 
-            $this->SendDebug("Test 1", "".$idItem['Text']."", 0);
-            {
-                continue;
-            }
-            $gesuchteId = $idItem['id'];
-            $categoryName = $idItem['Text'];
-            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-            $this->SendDebug("Test 2", "", 0);
-            if ($categoryID !== false) 
-            {
-                $categoryChildren = IPS_GetChildrenIDs($categoryID);
-                // Lösche alle Variablen innerhalb der Kategorie
-                foreach ($categoryChildren as $childID) 
-                {
-                    IPS_DeleteVariable($childID);
-                    //Debug senden
-                    
-                }
-                // Lösche die Kategorie selbst
-                IPS_DeleteCategory($categoryID);
-                //Debug senden
-                
             }
         }
     }
