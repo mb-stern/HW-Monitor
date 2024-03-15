@@ -187,7 +187,7 @@ class HWMonitor extends IPSModule
             {
                 if (!array_key_exists($searchKey, $foundValues)) 
                 {
-                    continue; // Schlüssel nicht vorhanden, überspringen
+                    $this->SendDebug("Variablen löschen", "searchkey: ".$searchKey.", foundvalues: ".$foundValues."", 0);
                 }
 
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
