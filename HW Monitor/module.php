@@ -244,13 +244,14 @@ class HWMonitor extends IPSModule
         foreach ($idListe as $idItem) 
         {
             if (!isset($idItem['Text']) || !isset($idItem['id'])) 
-            $this->SendDebug("Test", "", 0);
+            $this->SendDebug("Test 1", "", 0);
             {
                 continue;
             }
             $gesuchteId = $idItem['id'];
             $categoryName = $idItem['Text'];
             $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+            $this->SendDebug("Test 2", "", 0);
             if ($categoryID !== false) 
             {
                 $categoryChildren = IPS_GetChildrenIDs($categoryID);
