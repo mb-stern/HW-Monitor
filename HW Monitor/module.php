@@ -193,7 +193,7 @@ class HWMonitor extends IPSModule
                     continue;
                 }
                 */
-            
+                foreach ($requiredKeys as $searchKey)
                 // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
