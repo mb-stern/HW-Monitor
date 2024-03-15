@@ -198,7 +198,7 @@ class HWMonitor extends IPSModule
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
                         
-                    // Setze das Elternobjekt
+                    // Setze die Kategorie als Elternobjekt
                     IPS_SetParent($variableID, $categoryID);
                 } 
             
