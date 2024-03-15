@@ -244,7 +244,7 @@ class HWMonitor extends IPSModule
         foreach ($idListe as $idItem) 
         {
             if (!isset($idItem['Text']) || !isset($idItem['id'])) 
-            $this->SendDebug("Test", "Text: "$idItem['Text']" ID: "$idItem['id']"", 0);
+            $this->SendDebug("Test", 0);
             {
                 continue;
             }
