@@ -189,10 +189,10 @@ class HWMonitor extends IPSModule
                     if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                     {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-            
+                        IPS_SetParent($variableID, $categoryID);
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                        } 
+                    } 
                     elseif ($searchKey === 'id') 
                     {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
@@ -204,7 +204,7 @@ class HWMonitor extends IPSModule
 
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
-                IPS_SetParent($variableID, $categoryID);
+                
                 //Debug senden
                 $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
