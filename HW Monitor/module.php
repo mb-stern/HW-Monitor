@@ -182,7 +182,7 @@ class HWMonitor extends IPSModule
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
             
-            
+            /*
             foreach ($requiredKeys as $searchKey) {
                 // Überprüfen, ob der Schlüssel in $foundValues vorhanden ist
                 if (!array_key_exists($searchKey, $foundValues)) 
@@ -192,6 +192,7 @@ class HWMonitor extends IPSModule
                     //$this->DeleteVariablesInCategory($categoryID);
                     continue;
                 }
+                */
             
                 // Durchlaufe die gefundenen Werte für den aktuellen Schlüssel
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
