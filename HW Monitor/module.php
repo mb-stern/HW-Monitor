@@ -163,6 +163,7 @@ class HWMonitor extends IPSModule
         foreach ($existingVariableIDs as $variableToRemove) 
         {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableIDToRemove."", 0);
             if ($variableIDToRemove !== false)
             {
                 $this->UnregisterVariable($variableToRemove);
