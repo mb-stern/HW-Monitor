@@ -3,7 +3,7 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
+    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
 {
     foreach ($jsonArray as $key => $value) {
         if ($key === 'id' && $value === $searchId) {
