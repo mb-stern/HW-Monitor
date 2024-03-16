@@ -186,7 +186,7 @@ class HWMonitor extends IPSModule
             $categories = IPS_GetChildrenIDs($this->InstanceID);
             foreach ($categories as $categoryID) 
             {
-                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
+                $variableIDToRemove = @IPS_GetObjectIDByName($variableToRemove, $categoryID);
                 if ($variableIDToRemove !== false) 
                 {
                     $this->UnregisterVariable($variableToRemove);
