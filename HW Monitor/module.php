@@ -180,6 +180,22 @@ class HWMonitor extends IPSModule
         // Versuche, die Variable mit der Identifikation zu finden
         $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
         
+        // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
+        if ($variableIDToRemove === false) 
+        {
+            $categories = IPS_GetChildrenIDs($this->InstanceID);
+            foreach ($categories as $categoryID) 
+            {
+                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
+                if ($variableIDToRemove !== false) 
+                {
+                    $this->UnregisterVariable($variableToRemove);
+                    $this->SendDebug("Löschen über Kategorie", "".$variableToRemove."", 0);
+                    break; // Wenn die Variable in einer Kategorie gefunden wurde, beende die Schleife
+                }
+            }
+        }
+        
         // Überprüfe, ob die Variable gefunden wurde und lösche sie
         if ($variableIDToRemove !== false) 
         {
