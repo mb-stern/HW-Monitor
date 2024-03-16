@@ -86,7 +86,7 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Alle vorhandenen Variablen in den Kategorien speichern für die Löschfunktion
+        // Alle vorhandenen Variablen speichern für die Löschfunktion
         $categories = IPS_GetChildrenIDs($this->InstanceID);
         $existingVariables = [];
 
@@ -95,11 +95,9 @@ class HWMonitor extends IPSModule
             $existingVariables = array_merge($existingVariables, $variablesInCategory);
         }
 
-// Konvertiere das Array in einen lesbaren String
-$variablesString = implode(", ", $existingVariables);
-
-// Debug-Ausgabe
-$this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesString, 0);
+        // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
+        $variablesString = implode(", ", $existingVariables);
+        $this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesString, 0);
 
 
         $existingVariableIDs = [];
@@ -177,7 +175,7 @@ $this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesS
         {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             $this->SendDebug("Löschfunktion", "Prüfung der Variabel-ID: ".$variableIDToRemove." und: ".$variableToRemove."  zum löschen", 0);
-            if ($variableIDToRemove !== false)
+            if ($variableIDToRemove !== true)
             {
                 $this->UnregisterVariable($variableToRemove);
                 //Debug senden
