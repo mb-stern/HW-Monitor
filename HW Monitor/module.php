@@ -86,9 +86,6 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        //Bereinigen nicht mehr vorhadner Varaiblen und Kategorien
-        $this->cleanupIdList();
-
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
@@ -223,7 +220,7 @@ class HWMonitor extends IPSModule
         }
 
         // Aktualisiere die ID-Liste in den Moduleigenschaften
-        $this->SetProperty('IDListe', json_encode($idListe));
+        $this->WritePropertyString('IDListe', json_encode($idListe));
     }
 
     protected function getExistingIds()
