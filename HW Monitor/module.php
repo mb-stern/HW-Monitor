@@ -151,13 +151,11 @@ class HWMonitor extends IPSModule
         
         
         
-      // Gewählte ID's abfragen
-$selectedIds = []; // Definieren Sie die Variable hier und initialisieren Sie sie mit einem leeren Array
+      // Gewählte ID's abfragen und in Array speichern
 $idListeString = $this->ReadPropertyString('IDListe');
 $idListe = json_decode($idListeString, true);
 
-        
-        // Schleife für die ID-Liste
+// Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
 
@@ -171,7 +169,19 @@ foreach ($idListe as $idItem) {
     $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
 
     // Überprüfen, ob die 'id' abgewählt wurde
-    if (!in_array($gesuchteId, $selectedIds)) {
+    if (in_array($gesuchteId, $selectedIds)) {
+        // Die 'id' wurde ausgewählt, daher die Kategorie erstellen oder aktualisieren
+        if ($categoryID === false) {
+            // Kategorie erstellen, wenn sie nicht existiert
+            $categoryID = IPS_CreateCategory();
+            IPS_SetName($categoryID, $categoryName);
+            IPS_SetParent($categoryID, $this->InstanceID);
+            $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+        } else {
+            $this->SendDebug("Kategorie vorhanden", "Die Kategorie existiert bereits.", 0);
+        }
+        // Weitere Logik für das Hinzufügen/Entfernen von Variablen in der Kategorie
+    } else {
         // Die 'id' wurde abgewählt, daher alle Variablen in der Kategorie löschen und die Kategorie entfernen
         if ($categoryID !== false) {
             // Alle Variablen in der Kategorie löschen
@@ -183,16 +193,12 @@ foreach ($idListe as $idItem) {
             // Kategorie löschen
             IPS_DeleteCategory($categoryID);
             $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryID."", 0);
+        } else {
+            $this->SendDebug("Kategorie nicht gefunden", "Die Kategorie wurde nicht gefunden.", 0);
         }
-    } else {
-        // Die 'id' wurde ausgewählt, daher die Kategorie erstellen oder aktualisieren
-        if ($categoryID === false) {
-            // Kategorie erstellen, wenn sie nicht existiert
-            $categoryID = IPS_CreateCategory();
-            IPS_SetName($categoryID, $categoryName);
-            IPS_SetParent($categoryID, $this->InstanceID);
-            $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
-        }
+    }
+}
+
 
 
 
