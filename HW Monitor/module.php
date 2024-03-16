@@ -193,20 +193,12 @@ class HWMonitor extends IPSModule
                     $this->SendDebug("Löschen über Kategorie", "".$variableToRemove."", 0);
                     break; // Wenn die Variable in einer Kategorie gefunden wurde, beende die Schleife
                 }
+                else 
+                {
+                    // Debug senden, wenn die Variable nicht gefunden wurde
+                    $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
+                }
             }
-        }
-        
-        // Überprüfe, ob die Variable gefunden wurde und lösche sie
-        if ($variableIDToRemove !== false) 
-        {
-            $this->UnregisterVariable($variableToRemove);
-            // Debug senden
-            $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-        } 
-        else 
-        {
-            // Debug senden, wenn die Variable nicht gefunden wurde
-            $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
         }
     }
 }
