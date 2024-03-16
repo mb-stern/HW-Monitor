@@ -148,8 +148,9 @@ class HWMonitor extends IPSModule
         $newObjectIDs = [];
 
         // Schleife für die ID-Liste
+        $this->SendDebug("Test 1", "Test 1", 0);
         foreach ($idListe as $idItem) 
-        $this->SendDebug("Test", "Test", 0);
+        $this->SendDebug("Test 2", "Test 2", 0);
         {
             $gesuchteId = $idItem['id'];
 
