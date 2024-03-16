@@ -196,8 +196,7 @@ foreach ($idListe as $idItem) {
         } else {
             $this->SendDebug("Kategorie nicht gefunden", "Die Kategorie wurde nicht gefunden.", 0);
         }
-    }
-}
+
 
 
 
