@@ -3,28 +3,25 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if ($key === 'id' && $value === $searchId) {
-                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
-                break;
-            } elseif (is_array($value)) {
-                $this->searchValueForId($value, $searchId, $foundValues);
-            }
-        }
-    }
-
     protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if (is_array($value)) {
-                $this->searchValuesForId($value, $searchId, $foundValues);
-            } else {
-                $foundValues[$key][] = $value;
+{
+    foreach ($jsonArray as $key => $value) {
+        if ($key === 'id' && $value === $searchId) {
+            // Wenn die ID gefunden wurde, speichere die gefundenen Werte
+            foreach ($jsonArray as $innerKey => $innerValue) {
+                if (is_array($innerValue)) {
+                    // Falls es sich um ein Array handelt, rekursiv durchsuchen
+                    $this->searchValuesForId($innerValue, $searchId, $foundValues);
+                } else {
+                    // Andernfalls speichern Sie den Wert mit dem entsprechenden Schlüssel
+                    $foundValues[$innerKey][] = $innerValue;
+                }
             }
+            break;
         }
     }
+}
+
 
     public function Create()
     {
@@ -136,18 +133,6 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        
-        /*
-        // Alle vorhandenen Variablen speichern
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) 
-        {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-        }
-
-        */
-        
         
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
