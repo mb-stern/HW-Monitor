@@ -177,8 +177,7 @@ class HWMonitor extends IPSModule
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) 
 
-        if ($variableIDToRemove === false) 
-        {
+
             $categories = IPS_GetChildrenIDs($this->InstanceID);
             foreach ($categories as $categoryID) 
             {
@@ -195,7 +194,7 @@ class HWMonitor extends IPSModule
                 }
             }
         }
-    }
+   
 
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
