@@ -86,6 +86,9 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
+        //Bereinigen nicht mehr vorhadner Varaiblen und Kategorien
+        $this->cleanupIdList();
+
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
@@ -201,5 +204,42 @@ class HWMonitor extends IPSModule
             default:
                 return '';
         }
+    }
+
+    protected function cleanupIdList()
+    {
+        // Aktuelle Liste der IDs aus den Modulobjekten abrufen
+        $existingIds = $this->getExistingIds();
+
+        // ID-Liste aus den Moduleigenschaften abrufen
+        $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
+
+        // Durchlaufe die ID-Liste und entferne nicht mehr vorhandene IDs
+        foreach ($idListe as $key => $idItem) {
+            $id = $idItem['id'];
+            if (!in_array($id, $existingIds)) {
+                unset($idListe[$key]);
+            }
+        }
+
+        // Aktualisiere die ID-Liste in den Moduleigenschaften
+        $this->WritePropertyString('IDListe', json_encode($idListe));
+    }
+
+    protected function getExistingIds()
+    {
+        $existingIds = [];
+
+        // Durchlaufe die Modulobjekte und sammle die IDs
+        $objects = IPS_GetChildrenIDs($this->InstanceID);
+        foreach ($objects as $objectID) {
+            $object = IPS_GetObject($objectID);
+            if ($object['ObjectIdent'] == '') {
+                // Variable oder Kategorie
+                $existingIds[] = $object['ObjectID'];
+            }
+        }
+
+        return $existingIds;
     }
 }
