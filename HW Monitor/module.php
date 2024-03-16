@@ -106,7 +106,7 @@ class HWMonitor extends IPSModule
             $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
             // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
             $variablesString = implode(", ", $existingVariableIDs);
-            $this->SendDebug("Löschfunktion 2", "Speicherung der Variabel-ID: " . $variablesString, 0);
+            $this->SendDebug("Löschfunktion 2", "Speicherung des Variablennamens: " . $variablesString, 0);
         }
 
         // Schleife für die ID-Liste
@@ -178,7 +178,7 @@ class HWMonitor extends IPSModule
         {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
             $this->SendDebug("Löschfunktion", "Prüfung der Variabel-ID: ".$variableIDToRemove." und: ".$variableToRemove."  zum löschen", 0);
-            if ($variableIDToRemove !== true)
+            if ($variableIDToRemove !== false)
             {
                 $this->UnregisterVariable($variableToRemove);
                 //Debug senden
