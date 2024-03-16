@@ -223,8 +223,7 @@ class HWMonitor extends IPSModule
         }
 
         // Aktualisiere die ID-Liste in den Moduleigenschaften
-        IPS_SetProperty($this->InstanceID, 'IDListe', json_encode($idListe));
-        IPS_ApplyChanges($this->InstanceID);
+        $this->WritePropertyString('IDListe', json_encode($idListe));
     }
 
     protected function getExistingIds()
