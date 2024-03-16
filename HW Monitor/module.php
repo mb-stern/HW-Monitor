@@ -186,7 +186,7 @@ foreach ($idListe as $idItem) {
 
 
 
-        
+
 
             $counter = 0;
 
@@ -230,4 +230,5 @@ foreach ($idListe as $idItem) {
             }
         }
     }
+}
 }
