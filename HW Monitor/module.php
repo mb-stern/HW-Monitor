@@ -168,6 +168,10 @@ class HWMonitor extends IPSModule
                 IPS_SetParent($categoryID, $this->InstanceID);
                 $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
             }
+            if ($categoryName !== $foundValues['Text'][0]) 
+            {
+                $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryName."", 0);
+            }
 
             $counter = 0;
 
