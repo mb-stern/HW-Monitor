@@ -156,11 +156,6 @@ $selectedIds = []; // Definieren Sie die Variable hier und initialisieren Sie si
 $idListeString = $this->ReadPropertyString('IDListe');
 $idListe = json_decode($idListeString, true);
 
-foreach ($idListe as $idItem) {
-    $selectedIds[] = $idItem['id'];
-}  
-        
-        
         
         // Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
