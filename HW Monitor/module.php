@@ -86,13 +86,22 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Alle vorhandenen Variablen speichern für die Löschfunktion
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        // Konvertiere das Array in einen lesbaren String
-        $variablesString = var_export($existingVariables, true);
+        // Alle vorhandenen Variablen in den Kategorien speichern für die Löschfunktion
+        $categories = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariables = [];
 
-        // Debug-Ausgabe
-        $this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesString, 0);
+        foreach ($categories as $categoryID) {
+            $variablesInCategory = IPS_GetChildrenIDs($categoryID);
+            $existingVariables = array_merge($existingVariables, $variablesInCategory);
+        }
+
+// Konvertiere das Array in einen lesbaren String
+$variablesString = implode(", ", $existingVariables);
+
+// Debug-Ausgabe
+$this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesString, 0);
+
+
         $existingVariableIDs = [];
         foreach ($existingVariables as $existingVariableID) 
         {
