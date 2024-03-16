@@ -177,44 +177,38 @@ class HWMonitor extends IPSModule
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) 
         {
-            // Versuche, die Variable mit der Identifikation zu finden
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            
-            // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
-            if ($variableIDToRemove === false) 
+        // Versuche, die Variable mit der Identifikation zu finden
+        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+        
+        // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
+        if ($variableIDToRemove === false) 
+        {
+            $categories = IPS_GetChildrenIDs($this->InstanceID);
+            foreach ($categories as $categoryID) 
             {
-                $categories = IPS_GetChildrenIDs($this->InstanceID);
-                foreach ($categories as $categoryID) 
+                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
+                if ($variableIDToRemove !== false) 
                 {
-                    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
-                    if ($variableIDToRemove !== false) 
-            {
-                $this->UnregisterVariable($variableToRemove);
-                // Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-            } 
-            else 
-            {
-                // Debug senden, wenn die Variable nicht gefunden wurde
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
-            }
+                    $this->SendDebug("Löschen über Kategorie", "".$variableToRemove."", 0);
+                    break; // Wenn die Variable in einer Kategorie gefunden wurde, beende die Schleife
                 }
             }
-            
-            // Überprüfe, ob die Variable gefunden wurde und lösche sie
-            if ($variableIDToRemove !== false) 
-            {
-                $this->UnregisterVariable($variableToRemove);
-                // Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
-            } 
-            else 
-            {
-                // Debug senden, wenn die Variable nicht gefunden wurde
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
-            }
+        }
+        
+        // Überprüfe, ob die Variable gefunden wurde und lösche sie
+        if ($variableIDToRemove !== false) 
+        {
+            $this->UnregisterVariable($variableToRemove);
+            // Debug senden
+            $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+        } 
+        else 
+        {
+            // Debug senden, wenn die Variable nicht gefunden wurde
+            $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
         }
     }
+}
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
