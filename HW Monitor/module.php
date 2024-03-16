@@ -170,6 +170,7 @@ class HWMonitor extends IPSModule
             }
             else {
                 IPS_DeleteCategory($categoryID);
+                $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryID."", 0);
             }
 
             $counter = 0;
