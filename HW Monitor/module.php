@@ -147,6 +147,21 @@ class HWMonitor extends IPSModule
         $existingObjects = IPS_GetChildrenIDs($this->InstanceID);
         $newObjectIDs = [];
 
+        
+        
+        
+        
+      // Gewählte ID's abfragen
+$selectedIds = []; // Definieren Sie die Variable hier und initialisieren Sie sie mit einem leeren Array
+$idListeString = $this->ReadPropertyString('IDListe');
+$idListe = json_decode($idListeString, true);
+
+foreach ($idListe as $idItem) {
+    $selectedIds[] = $idItem['id'];
+}  
+        
+        
+        
         // Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
