@@ -155,6 +155,9 @@ class HWMonitor extends IPSModule
 $idListeString = $this->ReadPropertyString('IDListe');
 $idListe = json_decode($idListeString, true);
 
+// Initialisierung des Arrays für ausgewählte IDs
+$selectedIds = [];
+
 // Schleife für die ID-Liste
 foreach ($idListe as $idItem) {
     $gesuchteId = $idItem['id'];
@@ -196,6 +199,8 @@ foreach ($idListe as $idItem) {
         } else {
             $this->SendDebug("Kategorie nicht gefunden", "Die Kategorie wurde nicht gefunden.", 0);
         }
+
+
 
 
 
