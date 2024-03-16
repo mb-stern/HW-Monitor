@@ -144,9 +144,6 @@ class HWMonitor extends IPSModule
             $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
         }
 
-        $existingObjects = IPS_GetChildrenIDs($this->InstanceID);
-        $newObjectIDs = [];
-
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
