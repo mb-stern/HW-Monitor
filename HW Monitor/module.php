@@ -73,33 +73,6 @@ class HWMonitor extends IPSModule
         }
     }
 
-    protected function getVariableProfileByType($type)
-    {
-        switch ($type) {
-            case 'Clock':
-                return 'HW.Clock';
-            case 'Load':
-                return '~Progress';
-            case 'Temperature':
-                return 'HW.Temp';
-            case 'Fan':
-                return 'HW.Fan';
-            case 'Voltage':
-                return '~Volt';
-            case 'Power':
-                return '~Watt';
-            case 'Data':
-                return 'HW.Data';
-            case 'Level':
-                return '~Progress';
-            case 'Throughput':
-                return 'HW.Rate';
-            // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
-            default:
-                return '';
-        }
-    }
-
     public function Update()
     {
         // Libre Hardware Monitor abfragen
@@ -201,6 +174,33 @@ class HWMonitor extends IPSModule
             } else {
                 $foundValues[$key][] = $value;
             }
+        }
+    }
+
+    protected function getVariableProfileByType($type)
+    {
+        switch ($type) {
+            case 'Clock':
+                return 'HW.Clock';
+            case 'Load':
+                return '~Progress';
+            case 'Temperature':
+                return 'HW.Temp';
+            case 'Fan':
+                return 'HW.Fan';
+            case 'Voltage':
+                return '~Volt';
+            case 'Power':
+                return '~Watt';
+            case 'Data':
+                return 'HW.Data';
+            case 'Level':
+                return '~Progress';
+            case 'Throughput':
+                return 'HW.Rate';
+            // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
+            default:
+                return '';
         }
     }
 }
