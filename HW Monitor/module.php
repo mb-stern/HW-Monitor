@@ -3,28 +3,7 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    protected function searchValueForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if ($key === 'id' && $value === $searchId) {
-                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
-                break;
-            } elseif (is_array($value)) {
-                $this->searchValueForId($value, $searchId, $foundValues);
-            }
-        }
-    }
-
-    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
-    {
-        foreach ($jsonArray as $key => $value) {
-            if (is_array($value)) {
-                $this->searchValuesForId($value, $searchId, $foundValues);
-            } else {
-                $foundValues[$key][] = $value;
-            }
-        }
-    }
+    
 
     public function Create()
     {
@@ -147,66 +126,48 @@ class HWMonitor extends IPSModule
         $existingObjects = IPS_GetChildrenIDs($this->InstanceID);
         $newObjectIDs = [];
 
-        
-        
-        
-        
-      // Gewählte ID's abfragen und in Array speichern
-$idListeString = $this->ReadPropertyString('IDListe');
-$idListe = json_decode($idListeString, true);
+        // Schleife für die ID-Liste
+        foreach ($idListe as $idItem) 
+        {
+            $gesuchteId = $idItem['id'];
 
-// Initialisierung des Arrays für ausgewählte IDs
-$selectedIds = [];
-
-// Schleife für die ID-Liste
-foreach ($idListe as $idItem) {
-    $gesuchteId = $idItem['id'];
-
-    // Suche nach Werten für die gefundenen IDs
-    $foundValues = [];
-    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-
-    // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-    $categoryName = $foundValues['Text'][0];
-    $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-    $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
-
-    // Überprüfen, ob die 'id' abgewählt wurde
-    if (in_array($gesuchteId, $selectedIds)) {
-        // Die 'id' wurde ausgewählt, daher die Kategorie erstellen oder aktualisieren
-        if ($categoryID === false) {
-            // Kategorie erstellen, wenn sie nicht existiert
-            $categoryID = IPS_CreateCategory();
-            IPS_SetName($categoryID, $categoryName);
-            IPS_SetParent($categoryID, $this->InstanceID);
-            $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
-        } else {
-            $this->SendDebug("Kategorie vorhanden", "Die Kategorie existiert bereits.", 0);
-        }
-        // Weitere Logik für das Hinzufügen/Entfernen von Variablen in der Kategorie
-    } else {
-        // Die 'id' wurde abgewählt, daher alle Variablen in der Kategorie löschen und die Kategorie entfernen
-        if ($categoryID !== false) {
-            // Alle Variablen in der Kategorie löschen
-            $categoryVariables = IPS_GetChildrenIDs($categoryID);
-            foreach ($categoryVariables as $variableID) {
-                IPS_DeleteVariable($variableID);
+            /// Suche nach Werten für die gefundenen IDs
+            $foundValues = [];
+            
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === 'id' && $value === $searchId) {
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
+                break;
+            } elseif (is_array($value)) {
+                $this->searchValueForId($value, $searchId, $foundValues);
             }
-
-            // Kategorie löschen
-            IPS_DeleteCategory($categoryID);
-            $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryID."", 0);
-        } else {
-            $this->SendDebug("Kategorie nicht gefunden", "Die Kategorie wurde nicht gefunden.", 0);
         }
+    }
 
+    
+    {
+        foreach ($jsonArray as $key => $value) {
+            if (is_array($value)) {
+                $this->searchValuesForId($value, $searchId, $foundValues);
+            } else {
+                $foundValues[$key][] = $value;
+            }
+        }
+    }
 
-
-
-
-
-
-
+            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+            $categoryName = $foundValues['Text'][0];
+            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+            $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+            if ($categoryID === false) 
+            {
+                // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
+                $categoryID = IPS_CreateCategory();
+                IPS_SetName($categoryID, $categoryName);
+                IPS_SetParent($categoryID, $this->InstanceID);
+                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+            }
 
             $counter = 0;
 
@@ -250,5 +211,4 @@ foreach ($idListe as $idItem) {
             }
         }
     }
-}
 }
