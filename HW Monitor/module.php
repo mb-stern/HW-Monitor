@@ -3,7 +3,25 @@ class HWMonitor extends IPSModule
 {
     private $updateTimer;
 
-    
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
+{
+    foreach ($jsonArray as $key => $value) {
+        if (is_array($value)) {
+            // Wenn $key 'id' und $value gleich $searchId ist, suche nach Werten
+            // Wenn $key nicht 'id' ist oder $value nicht gleich $searchId ist, setze rekursiv fort
+            if ($key === 'id' && $value === $searchId) {
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
+                break;
+            } else {
+                $this->searchValuesForId($value, $searchId, $foundValues);
+            }
+        } else {
+            // Füge den Wert zum entsprechenden Schlüssel in $foundValues hinzu
+            $foundValues[$key][] = $value;
+        }
+    }
+}
+
 
     public function Create()
     {
@@ -133,28 +151,7 @@ class HWMonitor extends IPSModule
 
             /// Suche nach Werten für die gefundenen IDs
             $foundValues = [];
-            
-    {
-        foreach ($jsonArray as $key => $value) {
-            if ($key === 'id' && $value === $searchId) {
-                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
-                break;
-            } elseif (is_array($value)) {
-                $this->searchValueForId($value, $searchId, $foundValues);
-            }
-        }
-    }
-
-    
-    {
-        foreach ($jsonArray as $key => $value) {
-            if (is_array($value)) {
-                $this->searchValuesForId($value, $searchId, $foundValues);
-            } else {
-                $foundValues[$key][] = $value;
-            }
-        }
-    }
+            $this->searchValuesForId($contentArray, $gesuchteId, $foundValues);
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
