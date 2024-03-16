@@ -154,6 +154,7 @@ class HWMonitor extends IPSModule
 
             /// Suche nach Werten für die gefundenen IDs
             $foundValues = [];
+            $this->SendDebug("Test", "Test", 0);
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
@@ -168,7 +169,7 @@ class HWMonitor extends IPSModule
                 IPS_SetParent($categoryID, $this->InstanceID);
                 $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
             }
-            $this->SendDebug("Test", "Die Kategorie: ".$categoryName."", 0);
+            
             if ($categoryName !== $foundValues['Text'][0]) 
             {
                 $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryName."", 0);
