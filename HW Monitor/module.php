@@ -15,7 +15,7 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Benötigte Variablen erstellen
+        // Benötigte Variablenprofile erstellen
         if (!IPS_VariableProfileExists("HW.Clock")) {
 			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
 			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
@@ -86,7 +86,6 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
