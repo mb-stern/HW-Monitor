@@ -4,24 +4,27 @@ class HWMonitor extends IPSModule
     private $updateTimer;
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
-{
-    foreach ($jsonArray as $key => $value) {
-        if ($key === 'id' && $value === $searchId) {
-            // Wenn die ID gefunden wurde, speichere die gefundenen Werte
-            foreach ($jsonArray as $innerKey => $innerValue) {
-                if (is_array($innerValue)) {
-                    // Falls es sich um ein Array handelt, rekursiv durchsuchen
-                    $this->searchValuesForId($innerValue, $searchId, $foundValues);
-                } else {
-                    // Andernfalls speichern Sie den Wert mit dem entsprechenden Schlüssel
-                    $foundValues[$innerKey][] = $innerValue;
-                }
+    {
+        foreach ($jsonArray as $key => $value) {
+            if ($key === 'id' && $value === $searchId) {
+                $this->searchValuesForId($jsonArray, $searchId, $foundValues);
+                break;
+            } elseif (is_array($value)) {
+                $this->searchValueForId($value, $searchId, $foundValues);
             }
-            break;
         }
     }
-}
 
+    protected function searchValuesForId($jsonArray, $searchId, &$foundValues)
+    {
+        foreach ($jsonArray as $key => $value) {
+            if (is_array($value)) {
+                $this->searchValuesForId($value, $searchId, $foundValues);
+            } else {
+                $foundValues[$key][] = $value;
+            }
+        }
+    }
 
     public function Create()
     {
