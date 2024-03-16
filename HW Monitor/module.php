@@ -150,11 +150,12 @@ class HWMonitor extends IPSModule
         // Schleife für die ID-Liste
         foreach ($idListe as $idItem) 
         {
+            $this->SendDebug("Test", "Test", 0);
             $gesuchteId = $idItem['id'];
 
             /// Suche nach Werten für die gefundenen IDs
             $foundValues = [];
-            $this->SendDebug("Test", "Test", 0);
+            
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
