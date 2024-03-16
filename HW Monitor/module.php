@@ -148,26 +148,45 @@ class HWMonitor extends IPSModule
         $newObjectIDs = [];
 
         // Schleife für die ID-Liste
-        foreach ($idListe as $idItem) 
-        {
-            $gesuchteId = $idItem['id'];
+foreach ($idListe as $idItem) {
+    $gesuchteId = $idItem['id'];
 
-            /// Suche nach Werten für die gefundenen IDs
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+    // Suche nach Werten für die gefundenen IDs
+    $foundValues = [];
+    $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Kategorie für diese ID erstellen, falls noch nicht vorhanden
-            $categoryName = $foundValues['Text'][0];
-            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-            $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
-            if ($categoryID === false) 
-            {
-                // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
-                $categoryID = IPS_CreateCategory();
-                IPS_SetName($categoryID, $categoryName);
-                IPS_SetParent($categoryID, $this->InstanceID);
-                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+    // Kategorie für diese ID erstellen, falls noch nicht vorhanden
+    $categoryName = $foundValues['Text'][0];
+    $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+    $this->SendDebug("Kategorie geprüft", "Kategorie mit ID: ".$categoryID." und Name: ".$categoryName."", 0);
+
+    // Überprüfen, ob die 'id' abgewählt wurde
+    if (!in_array($gesuchteId, $selectedIds)) {
+        // Die 'id' wurde abgewählt, daher alle Variablen in der Kategorie löschen und die Kategorie entfernen
+        if ($categoryID !== false) {
+            // Alle Variablen in der Kategorie löschen
+            $categoryVariables = IPS_GetChildrenIDs($categoryID);
+            foreach ($categoryVariables as $variableID) {
+                IPS_DeleteVariable($variableID);
             }
+
+            // Kategorie löschen
+            IPS_DeleteCategory($categoryID);
+            $this->SendDebug("Kategorie gelöscht", "Die Kategorie wurde gelöscht: ".$categoryID."", 0);
+        }
+    } else {
+        // Die 'id' wurde ausgewählt, daher die Kategorie erstellen oder aktualisieren
+        if ($categoryID === false) {
+            // Kategorie erstellen, wenn sie nicht existiert
+            $categoryID = IPS_CreateCategory();
+            IPS_SetName($categoryID, $categoryName);
+            IPS_SetParent($categoryID, $this->InstanceID);
+            $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID."", 0);
+        }
+
+
+
+        
 
             $counter = 0;
 
