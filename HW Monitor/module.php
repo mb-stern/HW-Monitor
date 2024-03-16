@@ -97,13 +97,16 @@ class HWMonitor extends IPSModule
 
         // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
         $variablesString = implode(", ", $existingVariables);
-        $this->SendDebug("Löschfunktion", "Speicherung der Variabel-ID: " . $variablesString, 0);
+        $this->SendDebug("Löschfunktion 1", "Speicherung der Variabel-ID: " . $variablesString, 0);
 
 
         $existingVariableIDs = [];
         foreach ($existingVariables as $existingVariableID) 
         {
             $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+            // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
+            $variablesString = implode(", ", $existingVariableIDs);
+            $this->SendDebug("Löschfunktion 2", "Speicherung der Variabel-ID: " . $variablesString, 0);
         }
 
         // Schleife für die ID-Liste
