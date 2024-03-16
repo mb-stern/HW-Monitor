@@ -190,7 +190,6 @@ class HWMonitor extends IPSModule
             }
         }
     }
-}
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
