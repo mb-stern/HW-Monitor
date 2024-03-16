@@ -132,7 +132,6 @@ class HWMonitor extends IPSModule
             
                 // Variablen erstellen
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
-                $this->SendDebug("Variable geprüft", "Variabel-ID: ".$variableID."", 0);
                 if ($variableID === false) 
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value', 'id'])) 
