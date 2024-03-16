@@ -153,7 +153,7 @@ class HWMonitor extends IPSModule
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
-                $this->SendDebug("Variable aktualisiert", "Ersellen oder aktualisieren der Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $this->SendDebug("Variable aktualisiert", "Erstellen oder aktualisieren der Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
                 $counter++;
             }
@@ -162,7 +162,7 @@ class HWMonitor extends IPSModule
         foreach ($existingVariableIDs as $variableToRemove) 
         {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            $this->SendDebug("Löschfunktion", "Prüfung der Variabel-ID zum löschen: ".$variableIDToRemove."", 0);
+            $this->SendDebug("Löschfunktion", "Prüfung der Variabel-ID zum löschen: ".$variableIDToRemove." ".$variableToRemove."", 0);
             if ($variableIDToRemove !== false)
             {
                 $this->UnregisterVariable($variableToRemove);
