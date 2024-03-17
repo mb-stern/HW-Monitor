@@ -182,22 +182,22 @@ class HWMonitor extends IPSModule
                         if ($searchKey === 'id') 
                         {
                             $variableName = ' ID ' .$gefundenerWert . ' - ' . ucfirst($searchKey);
-                            //$variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, "", $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, "", $variablePosition);
                         } 
                         
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
                         elseif ($searchKey === 'Type') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                         elseif ($searchKey === 'Text') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
                     } 
                     else 
