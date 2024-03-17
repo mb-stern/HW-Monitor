@@ -178,7 +178,7 @@ class HWMonitor extends IPSModule
                     if ($variableID === false) 
                     {
                         //$prefix = ' ID ' . $gefundenerWert . ' - ' . ucfirst($searchKey);
-                        $prefix = ($searchKey === 'id') ? ($gefundenerWert : '');
+                        $prefix = ($searchKey === 'id') ? ($gefundenerWert = '');
                         $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
 
                         if ($searchKey === 'id') 
