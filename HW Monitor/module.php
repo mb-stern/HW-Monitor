@@ -174,7 +174,7 @@ class HWMonitor extends IPSModule
                 $counter++;
             }
         }
-        / Lösche nicht mehr benötigte Variablen
+        // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) 
         {
         // Versuche, die Variable mit der Identifikation zu finden
