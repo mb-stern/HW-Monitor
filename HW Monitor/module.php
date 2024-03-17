@@ -174,23 +174,32 @@ class HWMonitor extends IPSModule
                 $counter++;
             }
         }
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            // Versuche, die Variable mit der Identifikation zu finden
-            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            
-            // Wenn die Variable gefunden wurde, lösche sie
-            if ($variableIDToRemove !== false) {
-                $this->UnregisterVariable($variableIDToRemove);
-                // Debug senden
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." wurde gelöscht", 0);
-            } else {
-                // Debug senden, wenn die Variable nicht gefunden wurde
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
+        / Lösche nicht mehr benötigte Variablen
+        foreach ($existingVariableIDs as $variableToRemove) 
+        {
+        // Versuche, die Variable mit der Identifikation zu finden
+        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+        
+        // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
+        if ($variableIDToRemove === false) 
+        {
+            $categories = IPS_GetChildrenIDs($this->InstanceID);
+            foreach ($categories as $categoryID) 
+            {
+                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
+                if ($variableIDToRemove !== false) 
+                {
+                    $this->UnregisterVariable($variableToRemove);
+                    $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." wurde gelöscht", 0);
+                }
+                else 
+                {
+                    // Debug senden, wenn die Variable nicht gefunden wurde
+                    $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
+                }
             }
         }
     }
-
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
