@@ -181,7 +181,7 @@ class HWMonitor extends IPSModule
                     {
                         if ($searchKey === 'id') 
                         {
-                            $variableName = $gefundenerWert . ucfirst($searchKey);
+                            $variableName = $gefundenerWert . ' - ' . ucfirst($searchKey);
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, "", $variablePosition);
                             $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                         } 
