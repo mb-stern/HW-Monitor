@@ -189,7 +189,7 @@ class HWMonitor extends IPSModule
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
+                            $prefix = $gefundenerWert;
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
