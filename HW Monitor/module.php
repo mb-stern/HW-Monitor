@@ -86,15 +86,13 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        //zu löschende Varaiblen prüfen
+        //auf zu löschende Kategorien und Variablen prüfen
         $this->DeleteVariables($contentArray);
 
-        // Schleife für die ID-Liste
-        $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
+        // Schleife für die ID-Liste, Start der Erstellung von Kategorien und Variablen
         foreach ($idListe as $idItem) 
         {
             $gesuchteId = $idItem['id'];
-            $this->SendDebug("Test 2", "Schleife ID-Liste mit gesuchter ID gestartet: ".$gesuchteId."", 0);
 
             /// Suche nach Werten für die gefundenen IDs
             $foundValues = [];
@@ -187,8 +185,10 @@ class HWMonitor extends IPSModule
                 $variables = IPS_GetChildrenIDs($categoryId);
                 foreach ($variables as $variableID) {
                     IPS_DeleteVariable($variableID);
+                    $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
                 IPS_DeleteCategory($categoryId);
+                $this->SendDebug("Löschfunktion", "Die Kategorie: ".$categoryId." wurde gelöscht", 0);
             }
         }
     }
