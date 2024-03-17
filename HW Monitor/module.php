@@ -174,28 +174,7 @@ class HWMonitor extends IPSModule
                 $counter++;
             }
         }
-        // Funktion zum rekursiven Durchlaufen aller Elemente
-        function searchVariableInTree($parentId, $variableToRemove)
-        {
-            $objectIds = IPS_GetChildrenIDs($parentId);
-            foreach ($objectIds as $objectId) {
-                $object = IPS_GetObject($objectId);
-                // Überprüfen, ob das Objekt eine Variable ist
-                if ($object['ObjectType'] == 2 /* Variable */) {
-                    // Überprüfen, ob die Variable den zu entfernenden Identifikator hat
-                    if ($object['ObjectIdent'] == $variableToRemove) {
-                        return $objectId; // Variable gefunden
-                    }
-                } elseif ($object['ObjectType'] == 3 /* Kategorie */) {
-                    // Wenn es sich um eine Kategorie handelt, rekursiv in dieser Kategorie suchen
-                    $foundObjectId = searchVariableInTree($objectId, $variableToRemove);
-                    if ($foundObjectId !== false) {
-                        return $foundObjectId; // Variable in der Kategorie gefunden
-                    }
-                }
-            }
-            return false; // Variable nicht gefunden
-        }
+        
 
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
@@ -213,6 +192,31 @@ class HWMonitor extends IPSModule
         }
     }
 
+    // Funktion zum rekursiven Durchlaufen aller Elemente
+    function searchVariableInTree($parentId, $variableToRemove)
+    {
+        $objectIds = IPS_GetChildrenIDs($parentId);
+        foreach ($objectIds as $objectId) {
+            $object = IPS_GetObject($objectId);
+            // Überprüfen, ob das Objekt eine Variable ist
+            if ($object['ObjectType'] == 2 /* Variable */) {
+                // Überprüfen, ob die Variable den zu entfernenden Identifikator hat
+                if ($object['ObjectIdent'] == $variableToRemove) {
+                    return $objectId; // Variable gefunden
+                }
+            } elseif ($object['ObjectType'] == 3 /* Kategorie */) {
+                // Wenn es sich um eine Kategorie handelt, rekursiv in dieser Kategorie suchen
+                $foundObjectId = searchVariableInTree($objectId, $variableToRemove);
+                if ($foundObjectId !== false) {
+                    return $foundObjectId; // Variable in der Kategorie gefunden
+                }
+            }
+        }
+        return false; // Variable nicht gefunden
+    }
+    
+    
+    
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
