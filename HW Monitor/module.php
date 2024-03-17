@@ -176,7 +176,7 @@ class HWMonitor extends IPSModule
                 'Text' => 'Name',
                 'Min' => 'Minimum',
                 'Max' => 'Maximum',
-                'Value' => 'Aktueller Wert',
+                'Value' => 'Istwert',
                 // Weitere Ersetzungen nach Bedarf hinzufügen
             ];
 
