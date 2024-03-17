@@ -161,22 +161,31 @@ class HWMonitor extends IPSModule
     $idListe = json_decode($idListeString, true);
 
     foreach ($idListe as $idItem) {
-        $categoryId = $idItem['id'];
+        $gesuchteId = $idItem['id'];
 
-        // Versuche, die Kategorie mit der gegebenen ID zu finden
-        $categoryExists = @IPS_ObjectExists($categoryId);
+        /// Suche nach Werten für die gefundenen IDs, einschließlich des Kategorienamens
+        $foundValues = [];
+        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-        if ($categoryExists) {
+        // Extrahiere den Kategorienamen aus 'Text'
+        $categoryName = $foundValues['Text'][0];
+
+        // Versuche, die Kategorie mit dem extrahierten Namen zu finden
+        $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+
+        // Überprüfe, ob die Kategorie existiert
+        if ($categoryID !== false) {
             // Lösche alle Variablen unterhalb der Kategorie
-            $variables = IPS_GetChildrenIDs($categoryId);
+            $variables = IPS_GetChildrenIDs($categoryID);
             foreach ($variables as $variableID) {
                 IPS_DeleteVariable($variableID);
             }
             // Lösche die Kategorie selbst
-            IPS_DeleteCategory($categoryId);
+            IPS_DeleteCategory($categoryID);
         }
     }
 }
+
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
