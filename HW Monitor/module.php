@@ -87,7 +87,7 @@ class HWMonitor extends IPSModule
         $idListe = json_decode($idListeString, true);
 
         //zu löschende Varaiblen prüfen
-        $this->DeleteVariables($contentArray);
+        $this->DeleteVariables();
 
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
@@ -155,7 +155,7 @@ class HWMonitor extends IPSModule
         }
     }
 
-    public function DeleteVariables($contentArray)
+    public function DeleteVariables()
 {
     // Holen Sie sich die ID-Liste aus den Eigenschaften
     $idListeString = $this->ReadPropertyString('IDListe');
@@ -175,9 +175,30 @@ class HWMonitor extends IPSModule
                 $this->UnregisterVariable($variableID);
             }
             // Lösche die Kategorie selbst
-            IPS_DeleteCategory($categoryId);
+            $this->DeleteCategoryRecursive($categoryId);
         }
     }
+}
+
+// Rekursive Funktion zum Löschen von Kategorien und ihren untergeordneten Objekten
+private function DeleteCategoryRecursive($categoryId)
+{
+    // Holen Sie sich alle untergeordneten Objekte der Kategorie
+    $objects = IPS_GetChildrenIDs($categoryId);
+
+    // Durchlaufen Sie die untergeordneten Objekte
+    foreach ($objects as $objectId) {
+        // Wenn das Objekt eine Kategorie ist, rufen Sie diese Funktion rekursiv auf
+        if (IPS_ObjectIsCategory($objectId)) {
+            $this->DeleteCategoryRecursive($objectId);
+        } else {
+            // Andernfalls handelt es sich um eine Variable und wir löschen sie
+            $this->UnregisterVariable($objectId);
+        }
+    }
+
+    // Löschen Sie die Kategorie selbst
+    IPS_DeleteCategory($categoryId);
 }
 
 
