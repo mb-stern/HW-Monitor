@@ -164,17 +164,14 @@ class HWMonitor extends IPSModule
     // Holen Sie sich alle Kategorien unterhalb des aktuellen Moduls
     $allCategories = IPS_GetChildrenIDs($this->InstanceID);
 
-    // Durchlaufen Sie die ID-Liste und entfernen Sie die Kategorien, die nicht in der Liste enthalten sind
+    // Durchlaufen Sie die Kategorien und überprüfen Sie, ob sie in der ID-Liste enthalten sind
     foreach ($allCategories as $categoryId) {
         $categoryName = IPS_GetObject($categoryId)['ObjectName'];
 
         // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
         $foundInList = false;
         foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
-            $categoryNameInList = $idItem['name']; // Namen aus der ID-Liste erhalten
-
-            if ($categoryName === $categoryNameInList) {
+            if (isset($idItem['name']) && $idItem['name'] === $categoryName) {
                 $foundInList = true;
                 break;
             }
@@ -186,10 +183,21 @@ class HWMonitor extends IPSModule
             foreach ($variables as $variableID) {
                 $this->UnregisterVariable($variableID);
             }
-            IPS_DeleteCategory($categoryId);
+
+            // Prüfen Sie, ob die Kategorie Unterobjekte hat
+            $categoryObjects = IPS_GetObject($categoryId);
+            if ($categoryObjects['ObjectHasChildren']) {
+                // Kategorie hat Unterobjekte, kann nicht gelöscht werden
+                $this->SendDebug("Kategorie löschen", "Kann Kategorie mit ID $categoryId nicht löschen, da sie Unterobjekte hat.", 0);
+            } else {
+                // Kategorie hat keine Unterobjekte, kann gelöscht werden
+                IPS_DeleteCategory($categoryId);
+                $this->SendDebug("Kategorie löschen", "Kategorie mit ID $categoryId erfolgreich gelöscht.", 0);
+            }
         }
     }
 }
+
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
