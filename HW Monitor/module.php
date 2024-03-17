@@ -156,49 +156,42 @@ class HWMonitor extends IPSModule
     }
 
     public function DeleteVariables()
-{
-    // Holen Sie sich die ID-Liste aus den Eigenschaften
-    $idListeString = $this->ReadPropertyString('IDListe');
-    $idListe = json_decode($idListeString, true);
+    {
+        // Holen Sie sich die ID-Liste aus den Eigenschaften
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
 
-    // Holen Sie sich alle Kategorien unterhalb des aktuellen Moduls
-    $allCategories = IPS_GetChildrenIDs($this->InstanceID);
+        // Holen Sie sich alle Kategorien unterhalb des aktuellen Moduls
+        $allCategories = IPS_GetChildrenIDs($this->InstanceID);
 
-    // Durchlaufen Sie die Kategorien und überprüfen Sie, ob sie in der ID-Liste enthalten sind
-    foreach ($allCategories as $categoryId) {
-        $categoryName = IPS_GetObject($categoryId)['ObjectName'];
+        // Durchlaufen Sie die ID-Liste und entfernen Sie die Kategorien, die nicht in der Liste enthalten sind
+        foreach ($allCategories as $categoryId) {
+            $categoryName = IPS_GetObject($categoryId)['ObjectName'];
 
-        // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
-        $foundInList = false;
-        $this->SendDebug("Kategorie löschen", "Kategorie in Liste gefunden ".$foundInList."", 0);
-        foreach ($idListe as $idItem) {
-            if (isset($idItem['name']) && $idItem['name'] === $categoryName) {
-                $foundInList = true;
-                break;
-            }
-        }
+            // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
+            $foundInList = false;
+            foreach ($idListe as $idItem) {
+                $gesuchteId = $idItem['id'];
+                $foundValues = [];
+                $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+                $categoryNameInList = $foundValues['Text'][0];
 
-        // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
-        if (!$foundInList) {
-            $variables = IPS_GetChildrenIDs($categoryId);
-            foreach ($variables as $variableID) {
-                $this->UnregisterVariable($variableID);
+                if ($categoryName === $categoryNameInList) {
+                    $foundInList = true;
+                    break;
+                }
             }
 
-            // Prüfen Sie, ob die Kategorie Unterobjekte hat
-            $categoryObjects = IPS_GetObject($categoryId);
-            if ($categoryObjects['ObjectHasChildren']) {
-                // Kategorie hat Unterobjekte, kann nicht gelöscht werden
-                $this->SendDebug("Kategorie löschen", "Kann Kategorie mit ID $categoryId nicht löschen, da sie Unterobjekte hat.", 0);
-            } else {
-                // Kategorie hat keine Unterobjekte, kann gelöscht werden
+            // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
+            if (!$foundInList) {
+                $variables = IPS_GetChildrenIDs($categoryId);
+                foreach ($variables as $variableID) {
+                    IPS_DeleteVariable($variableID);
+                }
                 IPS_DeleteCategory($categoryId);
-                $this->SendDebug("Kategorie löschen", "Kategorie mit ID $categoryId erfolgreich gelöscht.", 0);
             }
         }
     }
-}
-
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
