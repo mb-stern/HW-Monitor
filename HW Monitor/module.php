@@ -128,14 +128,14 @@ class HWMonitor extends IPSModule
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value', 'id'])) 
                     {
-                        $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
             
                         // Ersetzungen für Float-Variablen anwenden
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                     } 
                     elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                     {
-                        $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
                         
                     // Setze die Kategorie als Elternobjekt
