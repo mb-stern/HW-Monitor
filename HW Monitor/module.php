@@ -86,6 +86,9 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
+        //zu löschende Varaiblen prüfen
+        $this->DeleteVariables();
+
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
@@ -152,6 +155,28 @@ class HWMonitor extends IPSModule
             }
         }
     }
+
+    public function DeleteVariables()
+    {
+        $idListeString = $this->ReadPropertyString('IDListe');
+        $idListe = json_decode($idListeString, true);
+
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
+
+            $categoryName = $gesuchteId['Text'][0];
+            $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
+
+            if ($categoryID !== false) {
+                $variables = IPS_GetChildrenIDs($categoryID);
+                foreach ($variables as $variableID) {
+                    IPS_DeleteVariable($variableID);
+                }
+                IPS_DeleteCategory($categoryID);
+            }
+        }
+    }
+
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
