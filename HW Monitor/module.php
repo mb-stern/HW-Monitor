@@ -186,7 +186,7 @@ class HWMonitor extends IPSModule
                 foreach ($variables as $variableID) 
                 {
 
-                    $this->UnregisterVariable($variableIdent);
+                    $this->UnregisterVariable($variableID);
                     $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
                 IPS_DeleteCategory($categoryId);
