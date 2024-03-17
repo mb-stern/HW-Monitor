@@ -197,10 +197,11 @@ class HWMonitor extends IPSModule
                     // Debug senden, wenn die Variable nicht gefunden wurde
                     $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
                 }
+                }
             }
         }
     }
-    
+
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
