@@ -169,9 +169,6 @@ class HWMonitor extends IPSModule
                     continue; // Schlüssel nicht vorhanden, überspringen
                 }
 
-                $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
-                $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
-
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
@@ -186,6 +183,8 @@ class HWMonitor extends IPSModule
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
+                        $prefix = $gefundenerWert;
+                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
@@ -201,7 +200,6 @@ class HWMonitor extends IPSModule
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
-                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                     } 
                     else 
                     {
