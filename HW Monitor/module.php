@@ -157,36 +157,42 @@ class HWMonitor extends IPSModule
 
     public function DeleteVariables()
 {
+    // Holen Sie sich die ID-Liste aus den Eigenschaften
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
-    $this->SendDebug("ID-Liste", print_r($idListe, true), 0); // Debug-Ausgabe der ID-Liste
+    // Holen Sie sich alle Kategorien unterhalb des aktuellen Moduls
+    $allCategories = IPS_GetChildrenIDs($this->InstanceID);
 
-    foreach ($idListe as $idItem) {
-        $gesuchteId = $idItem['id'];
+    // Durchlaufen Sie die ID-Liste und entfernen Sie die Kategorien, die nicht in der Liste enthalten sind
+    foreach ($allCategories as $categoryId) {
+        $categoryName = IPS_GetObject($categoryId)['ObjectName'];
 
-        /// Suche nach Werten für die gefundenen IDs, einschließlich des Kategorienamens
-        $foundValues = [];
-        $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+        // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
+        $foundInList = false;
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
+            $foundValues = [];
+            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
+            $categoryNameInList = $foundValues['Text'][0];
 
-        // Extrahiere den Kategorienamen aus 'Text'
-        $categoryName = $foundValues['Text'][0];
+            if ($categoryName === $categoryNameInList) {
+                $foundInList = true;
+                break;
+            }
+        }
 
-        // Versuche, die Kategorie mit dem extrahierten Namen zu finden
-        $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-
-        // Überprüfe, ob die Kategorie existiert
-        if ($categoryID !== false) {
-            // Lösche alle Variablen unterhalb der Kategorie
-            $variables = IPS_GetChildrenIDs($categoryID);
+        // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
+        if (!$foundInList) {
+            $variables = IPS_GetChildrenIDs($categoryId);
             foreach ($variables as $variableID) {
                 IPS_DeleteVariable($variableID);
             }
-            // Lösche die Kategorie selbst
-            IPS_DeleteCategory($categoryID);
+            IPS_DeleteCategory($categoryId);
         }
     }
 }
+
 
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
