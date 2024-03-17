@@ -165,7 +165,7 @@ class HWMonitor extends IPSModule
             
                 // Verwende den Wert von 'id' als Präfix
                 $prefix = $idValue;
-                $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
+                $this->SendDebug("Pràfix", "Pràfix: ".$prefix." für ".$prefixKey."", 0);
             }
             
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
