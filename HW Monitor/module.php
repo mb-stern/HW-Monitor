@@ -193,7 +193,7 @@ class HWMonitor extends IPSModule
     }
 
     // Funktion zum rekursiven Durchlaufen aller Elemente
-    function searchVariableInTree($parentId, $variableToRemove)
+    function searchVariableInTree(int $parentId, string $variableToRemove)
     {
         $objectIds = IPS_GetChildrenIDs($parentId);
         foreach ($objectIds as $objectId) {
