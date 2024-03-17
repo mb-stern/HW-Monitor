@@ -157,7 +157,7 @@ class HWMonitor extends IPSModule
             $counter = 0;
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+            $requiredKeys = ['Text', 'Min', 'Max', 'Value', 'Type'];
            
             //Präfix definieren
             if (in_array('id', $requiredKeys)) 
@@ -187,11 +187,7 @@ class HWMonitor extends IPSModule
 
                     if ($variableID === false) 
                     {
-                        if ($searchKey === 'id') 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } 
-                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' .ucfirst($searchKey)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
