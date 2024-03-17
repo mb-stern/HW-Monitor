@@ -178,6 +178,7 @@ class HWMonitor extends IPSModule
                     if ($variableID === false) 
                     {
                         $prefix = isset($searchKey) ? '' : 'id'; // Präfix festlegen, wenn $searchKey 'id' ist oder nicht definiert ist
+                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
 
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
