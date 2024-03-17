@@ -172,40 +172,43 @@ class HWMonitor extends IPSModule
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-$variablePosition = $gesuchteId * 10 + $counter;
+                    $variablePosition = $gesuchteId * 10 + $counter;
 
-$variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-if ($variableID === false) 
-{
-    // Den Wert von 'id' voranstellen
-    $idValue = GetValue($this->GetIDForIdent("Variable_id")); // Hier die entsprechende ID für 'id' einsetzen
-    $variableNamePrefix = $idValue;
+                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                    if ($variableID === false) 
+                    {
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        {
+                            $präfix = ($searchKey === 'id')
+                            $this->SendDebug("Präfix", "Präfix: ".$präfix."", 0);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
-    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
-    {
-        $variableName = $variableNamePrefix . ucfirst($searchKey);
-        $variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
-        // Ersetzungen für Float-Variablen anwenden
-        $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-    } 
-    elseif ($searchKey === 'id') 
-    {
-        $variableName = $variableNamePrefix . ucfirst($searchKey);
-        $variableID = $this->RegisterVariableFloat($variableIdentValue, $variableName, "", $variablePosition);
-    } 
-    elseif ($searchKey === 'Type') 
-    {
-        $variableName = $variableNamePrefix . ucfirst($searchKey);
-        $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
-    }
-    elseif ($searchKey === 'Text') 
-    {
-        $variableName = $variableNamePrefix . ucfirst($searchKey);
-        $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
-    }
-}
-
+                            // Ersetzungen für Float-Variablen anwenden
+                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                        } 
+                        
+                        elseif ($searchKey === 'id') 
+                        {
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        } 
+                        
+                        elseif ($searchKey === 'Type') 
+                        {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        }
+                        elseif ($searchKey === 'Text') 
+                        {
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        }
+                    } 
+                    else 
+                    {
+                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                        if ($keyIndex !== false) 
+                        {
+                            unset($existingVariableIDs[$keyIndex]);
+                        }
+                    }
 
                     $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
