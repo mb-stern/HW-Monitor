@@ -175,6 +175,8 @@ class HWMonitor extends IPSModule
                     $variablePosition = $gesuchteId * 10 + $counter;
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                    $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
+                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                     if ($variableID === false) 
                     {
                         if ($searchKey === 'id') 
@@ -197,9 +199,6 @@ class HWMonitor extends IPSModule
                         {
                             $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         }
-
-                        $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
-                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                     } 
                     else 
                     {
