@@ -180,7 +180,7 @@ class HWMonitor extends IPSModule
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $prefix = ($searchKey === 'id') ? 'prefix_for_id_' : '';
-                            $this->SendDebug("Präfix", "Präfix: ".$präfix."", 0);
+                            $this->SendDebug("Präfix", "Präfix: ".$prefix."", 0);
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
 
                             // Ersetzungen für Float-Variablen anwenden
