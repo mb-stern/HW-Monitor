@@ -162,7 +162,7 @@ class HWMonitor extends IPSModule
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
            
             
-            if ($requiredKeys === 'id')
+            if (in_array('id', $requiredKeys))
             {
             $prefix = $gefundenerWert;
             $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
