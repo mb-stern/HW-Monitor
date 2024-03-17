@@ -167,7 +167,8 @@ class HWMonitor extends IPSModule
 
             // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
             $foundInList = false;
-            foreach ($idListe as $idItem) {
+            foreach ($idListe as $idItem) 
+            {
                 $gesuchteId = $idItem['id'];
                 $foundValues = [];
                 $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
@@ -183,7 +184,8 @@ class HWMonitor extends IPSModule
             if (!$foundInList) {
                 $variables = IPS_GetChildrenIDs($categoryId);
                 foreach ($variables as $variableID) {
-                    $this->UnregisterVariable($variableID);
+                    $variableIdent = IPS_GetObject($variableID)['ObjectIdent'];
+                    $this->UnregisterVariable($variableIdent);
                     $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
                 IPS_DeleteCategory($categoryId);
