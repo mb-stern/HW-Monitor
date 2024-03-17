@@ -170,6 +170,7 @@ class HWMonitor extends IPSModule
 
         // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
         $foundInList = false;
+        $this->SendDebug("Kategorie löschen", "Kategorie in Liste gefunden ".$foundInList."", 0);
         foreach ($idListe as $idItem) {
             if (isset($idItem['name']) && $idItem['name'] === $categoryName) {
                 $foundInList = true;
