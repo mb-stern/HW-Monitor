@@ -127,7 +127,6 @@ class HWMonitor extends IPSModule
             
                 // Variablen erstellen
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
-                $this->SendDebug("Variable geprüft", "Variabel-ID: ".$variableID."", 0);
                 if ($variableID === false) 
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value', 'id'])) 
@@ -165,6 +164,7 @@ class HWMonitor extends IPSModule
             // Überprüfen, ob der Schlüssel "Text" vorhanden ist, bevor darauf zugegriffen wird
             if (isset($idItem['Text'])) {
                 $categoryName = $idItem['Text'][0];
+                $this->SendDebug("Löschfunktion", "Kategorie-Name: ".$categoryName."", 0);
 
                 $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
 
