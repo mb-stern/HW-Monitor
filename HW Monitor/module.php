@@ -200,6 +200,7 @@ class HWMonitor extends IPSModule
             }
         }
     }
+    
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
