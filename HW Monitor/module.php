@@ -160,6 +160,8 @@ class HWMonitor extends IPSModule
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
+    $this->SendDebug("Löschfunktion", "ID-Liste: " . print_r($idListe, true), 0);
+    
     foreach ($idListe as $idItem) {
         // Überprüfen, ob der Schlüssel "Text" vorhanden ist, bevor darauf zugegriffen wird
         if (isset($idItem['Text'])) {
