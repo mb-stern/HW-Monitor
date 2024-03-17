@@ -186,7 +186,7 @@ class HWMonitor extends IPSModule
             if (!$foundInList) {
                 $variables = IPS_GetChildrenIDs($categoryId);
                 foreach ($variables as $variableID) {
-                    IPS_DeleteVariable($variableID);
+                    $this->UnregisterVariable($variableID);
                 }
                 IPS_DeleteCategory($categoryId);
             }
