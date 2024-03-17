@@ -160,13 +160,17 @@ class HWMonitor extends IPSModule
 
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+           
+            
+            if ($requiredKeys === 'id')
+            {
+            $prefix = $gefundenerWert;
+            $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
+            }
             
             
             foreach ($requiredKeys as $searchKey) 
             {
-                $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
-                $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
-                
                 if (!array_key_exists($searchKey, $foundValues)) 
                 {
                     continue; // Schlüssel nicht vorhanden, überspringen
@@ -179,15 +183,12 @@ class HWMonitor extends IPSModule
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
 
-                    
-
                     if ($variableID === false) 
                     {
                         if ($searchKey === 'id') 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
-                        
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
