@@ -176,7 +176,7 @@ class HWMonitor extends IPSModule
         }
         
 
-        / Lösche nicht mehr benötigte Variablen
+        // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
             // Versuche, die Variable mit der Identifikation zu finden
             $variableIDToRemove = self::searchVariableInTree($this->InstanceID, $variableToRemove);
