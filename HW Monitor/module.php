@@ -169,14 +169,15 @@ class HWMonitor extends IPSModule
                     continue; // Schlüssel nicht vorhanden, überspringen
                 }
 
+                $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
+                $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
+
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-                    $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
-                        $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                     if ($variableID === false) 
                     {
                         if ($searchKey === 'id') 
