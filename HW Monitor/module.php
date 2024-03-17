@@ -169,15 +169,14 @@ class HWMonitor extends IPSModule
             }
             
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'Min', 'Max', 'Value', 'Type'];
+            $requiredKeys = ['Text', 'Min', 'Max', 'Value'];
             
             // Definition der Ersetzungstabelle für Variablennamen
             $variableNameReplacements = [
                 'Text' => 'Name',
                 'Min' => 'Minimum',
                 'Max' => 'Maximum',
-                'Value' => 'Wert',
-                'Type' => 'Typ',
+                'Value' => 'Aktueller Wert',
                 // Weitere Ersetzungen nach Bedarf hinzufügen
             ];
 
@@ -212,11 +211,6 @@ class HWMonitor extends IPSModule
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
-                        elseif ($searchKey === 'Type') 
-                        {
-                            // Ersetze den Variablennamen basierend auf der Ersetzungstabelle
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), "", $variablePosition);
-                        }
                         elseif ($searchKey === 'Text') 
                         {
                             // Ersetze den Variablennamen basierend auf der Ersetzungstabelle
