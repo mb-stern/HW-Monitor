@@ -86,30 +86,6 @@ class HWMonitor extends IPSModule
         $idListeString = $this->ReadPropertyString('IDListe');
         $idListe = json_decode($idListeString, true);
 
-        // Alle vorhandenen Variablen speichern für die Löschfunktion
-        $categories = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariables = [];
-
-        foreach ($categories as $categoryID) 
-        {
-            $variablesInCategory = IPS_GetChildrenIDs($categoryID);
-            $existingVariables = array_merge($existingVariables, $variablesInCategory);
-        }
-
-        // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
-        $variablesString = implode(", ", $existingVariables);
-        $this->SendDebug("Löschfunktion 1", "Speicherung der Variabel-ID: " . $variablesString, 0);
-
-
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) 
-        {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
-            // Konvertiere das Array in einen lesbaren String für die Debug Ausgabe
-            $variablesString = implode(", ", $existingVariableIDs);
-            $this->SendDebug("Löschfunktion 2", "Speicherung des Variablennamens: " . $variablesString, 0);
-        }
-
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
         foreach ($idListe as $idItem) 
@@ -124,14 +100,14 @@ class HWMonitor extends IPSModule
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
             $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-            $this->SendDebug("Kategorie geprüft", "Kategorie vor Prüfung auf Vorhandensein mit Kategorie-ID: ".$categoryID." und Name: ".$categoryName."", 0);
+            $this->SendDebug("Kategorie geprüft", "Kategorie vor Prüfung auf Vorhandensein mit Variablen-ID: ".$categoryID." und Name: ".$categoryName."", 0);
             if ($categoryID === false) 
             {
                 // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
                 $categoryID = IPS_CreateCategory();
                 IPS_SetName($categoryID, $categoryName);
                 IPS_SetParent($categoryID, $this->InstanceID);
-                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt mit Kategorie-ID: ".$categoryID." und Name: ".$categoryName."", 0);
+                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID." und Name: ".$categoryName."", 0);
             }
 
             $counter = 0;
@@ -148,6 +124,7 @@ class HWMonitor extends IPSModule
             
                 // Variablen erstellen
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
+                $this->SendDebug("Variable geprüft", "Variabel-ID: ".$variableID."", 0);
                 if ($variableID === false) 
                 {
                     if (in_array($searchKey, ['Min', 'Max', 'Value', 'id'])) 
@@ -169,55 +146,13 @@ class HWMonitor extends IPSModule
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
-                $this->SendDebug("Variable aktualisiert", "Erstellen oder aktualisieren von Ident: ".$variableIdentValue.", Name: ".ucfirst($searchKey).", Position: ".$variablePosition."", 0);
+                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
             
                 $counter++;
             }
         }
-        
-
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) {
-            // Versuche, die Variable mit der Identifikation zu finden
-            $variableIDToRemove = self::searchVariableInTree($this->InstanceID, $variableToRemove);
-            $this->SendDebug("Löschfunktion", "Die Ident ".$variableIDToRemove." wurde gefunden.", 0);
-            
-            if ($variableIDToRemove !== false) {
-                $this->UnregisterVariable($variableIDToRemove);
-                // Debug senden
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." wurde gelöscht", 0);
-            } else {
-                // Debug senden, wenn die Variable nicht gefunden wurde
-                $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
-            }
-        }
     }
 
-    // Statische Methode, um Variablen rekursiv in der Baumstruktur zu suchen
-    public static function searchVariableInTree(int $parentId, string $variableToRemove)
-    {
-        $objectIds = IPS_GetChildrenIDs($parentId);
-        foreach ($objectIds as $objectId) {
-            $object = IPS_GetObject($objectId);
-            // Überprüfen, ob das Objekt eine Variable ist
-            if ($object['ObjectType'] == 2 /* Variable */) {
-                // Überprüfen, ob die Variable den zu entfernenden Identifikator hat
-                if ($object['ObjectIdent'] == $variableToRemove) {
-                    return $objectId; // Variable gefunden
-                }
-            } elseif ($object['ObjectType'] == 3 /* Kategorie */) {
-                // Wenn es sich um eine Kategorie handelt, rekursiv in dieser Kategorie suchen
-                $foundObjectId = self::searchVariableInTree($objectId, $variableToRemove);
-                if ($foundObjectId !== false) {
-                    return $foundObjectId; // Variable in der Kategorie gefunden
-                }
-            }
-        }
-        return false; // Variable nicht gefunden
-    }
-    
-    
-    
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
         foreach ($jsonArray as $key => $value) {
@@ -267,4 +202,4 @@ class HWMonitor extends IPSModule
                 return '';
         }
     }
-}   
+}
