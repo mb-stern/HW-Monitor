@@ -176,10 +176,10 @@ class HWMonitor extends IPSModule
         }
         
 
-        // Lösche nicht mehr benötigte Variablen
+        / Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) {
             // Versuche, die Variable mit der Identifikation zu finden
-            $variableIDToRemove = searchVariableInTree($this->InstanceID, $variableToRemove);
+            $variableIDToRemove = self::searchVariableInTree($this->InstanceID, $variableToRemove);
             
             if ($variableIDToRemove !== false) {
                 $this->UnregisterVariable($variableIDToRemove);
@@ -192,8 +192,8 @@ class HWMonitor extends IPSModule
         }
     }
 
-    // Funktion zum rekursiven Durchlaufen aller Elemente
-    function searchVariableInTree(int $parentId, string $variableToRemove)
+    // Statische Methode, um Variablen rekursiv in der Baumstruktur zu suchen
+    public static function searchVariableInTree(int $parentId, string $variableToRemove)
     {
         $objectIds = IPS_GetChildrenIDs($parentId);
         foreach ($objectIds as $objectId) {
@@ -206,7 +206,7 @@ class HWMonitor extends IPSModule
                 }
             } elseif ($object['ObjectType'] == 3 /* Kategorie */) {
                 // Wenn es sich um eine Kategorie handelt, rekursiv in dieser Kategorie suchen
-                $foundObjectId = searchVariableInTree($objectId, $variableToRemove);
+                $foundObjectId = self::searchVariableInTree($objectId, $variableToRemove);
                 if ($foundObjectId !== false) {
                     return $foundObjectId; // Variable in der Kategorie gefunden
                 }
