@@ -155,7 +155,7 @@ class HWMonitor extends IPSModule
         }
     }
 
-    public function DeleteVariables(array$contentArray)
+    public function DeleteVariables(array $contentArray)
     {
         // Holen Sie sich die ID-Liste aus den Eigenschaften
         $idListeString = $this->ReadPropertyString('IDListe');
