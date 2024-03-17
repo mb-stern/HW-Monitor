@@ -161,50 +161,25 @@ class HWMonitor extends IPSModule
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
-    // Holen Sie sich alle Kategorien unterhalb des aktuellen Moduls
-    $allCategories = IPS_GetChildrenIDs($this->InstanceID);
-
     // Durchlaufen Sie die ID-Liste und entfernen Sie die Kategorien, die nicht in der Liste enthalten sind
-    foreach ($allCategories as $categoryId) {
-        $categoryName = IPS_GetObject($categoryId)['ObjectName'];
+    foreach ($idListe as $idItem) {
+        $categoryId = $idItem['id'];
 
-        // Überprüfen Sie, ob die Kategorie in der ID-Liste enthalten ist
-        $foundInList = false;
-        foreach ($idListe as $idItem) {
-            $gesuchteId = $idItem['id'];
-            $foundValues = [];
-            $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
-            $categoryNameInList = $foundValues['Text'][0];
+        // Versuche, die Kategorie mit der gegebenen ID zu finden
+        $categoryExists = @IPS_ObjectExists($categoryId);
 
-            if ($categoryName === $categoryNameInList) {
-                $foundInList = true;
-                break;
+        if ($categoryExists) {
+            // Lösche alle Variablen unterhalb der Kategorie
+            $variables = IPS_GetChildrenIDs($categoryId);
+            foreach ($variables as $variableID) {
+                $this->UnregisterVariable($variableID);
             }
-        }
-
-        // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
-        if (!$foundInList) {
-            // Überprüfen, ob die Kategorie untergeordnete Objekte hat
-            $childrenCount = IPS_GetObject($categoryId)['ChildrenIDs'];
-
-            // Wenn die Kategorie untergeordnete Objekte hat, entfernen Sie diese zuerst
-            if (!empty($childrenCount)) {
-                foreach ($childrenCount as $childId) {
-                    if (IPS_ObjectExists($childId)) {
-                        if (IPS_GetObject($childId)['ObjectType'] == 2) { // 2 steht für Variable
-                            $this->UnregisterVariable($childId);
-                        } elseif (IPS_GetObject($childId)['ObjectType'] == 3) { // 3 steht für Kategorie
-                            IPS_DeleteCategory($childId);
-                        }
-                    }
-                }
-            }
-
-            // Löschen Sie dann die Kategorie selbst
+            // Lösche die Kategorie selbst
             IPS_DeleteCategory($categoryId);
         }
     }
 }
+
 
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
