@@ -156,11 +156,9 @@ class HWMonitor extends IPSModule
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
 
-            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
-           
             //Präfix definieren
-            if (in_array('id', $requiredKeys)) 
+            $prefixKey = ['id'];
+            if (in_array('id', $prefixKey)) 
             {
                 // Extrahiere den Wert von 'id' aus $foundValues
                 $idValue = isset($foundValues['id']) ? $foundValues['id'][0] : '';
@@ -170,6 +168,8 @@ class HWMonitor extends IPSModule
                 $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
             }
             
+            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+            $requiredKeys = ['Text', 'Min', 'Max', 'Value', 'Type'];
             
             foreach ($requiredKeys as $searchKey) 
             {
@@ -186,12 +186,8 @@ class HWMonitor extends IPSModule
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
 
                     if ($variableID === false) 
-                    {
-                        if ($searchKey === 'id') 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ((ucfirst($searchKey). ' ' . $prefix)), "", $variablePosition);
-                        } 
-                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                    { 
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' .ucfirst($searchKey)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
