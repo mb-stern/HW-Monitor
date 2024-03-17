@@ -182,11 +182,12 @@ class HWMonitor extends IPSModule
 
             // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
             if (!$foundInList) {
-                $variables = IPS_GetChildrenIDs($categoryId);
-                foreach ($variables as $variableID) {
+                $variables = @IPS_GetObjectIDByIdent($categoryId);
+                foreach ($variables as $variableID) 
+                {
                     $variableIdent = IPS_GetObject($variableID)['ObjectIdent'];
-                    $this->UnregisterVariable($variableIdent);
-                    IPS_DeleteVariable($variableID);
+                    $this->UnregisterVariable($variableID);
+                    //IPS_DeleteVariable($variableID);
                     $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
                 IPS_DeleteCategory($categoryId);
