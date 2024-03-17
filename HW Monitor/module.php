@@ -101,14 +101,13 @@ class HWMonitor extends IPSModule
             // Kategorie für diese ID erstellen, falls noch nicht vorhanden
             $categoryName = $foundValues['Text'][0];
             $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
-            $this->SendDebug("Kategorie geprüft", "Kategorie vor Prüfung auf Vorhandensein mit Variablen-ID: ".$categoryID." und Name: ".$categoryName."", 0);
             if ($categoryID === false) 
             {
                 // Kategorie erstellen, wenn sie nicht existiert oder kein Kategorieobjekt ist
                 $categoryID = IPS_CreateCategory();
                 IPS_SetName($categoryID, $categoryName);
                 IPS_SetParent($categoryID, $this->InstanceID);
-                $this->SendDebug("Kategorie erstellt", "Die Kategorie wurde erstellt: ".$categoryID." und Name: ".$categoryName."", 0);
+                $this->SendDebug("Kategorie erstellt", "Die Kategorie mit ID: ".$categoryID." und Name: ".$categoryName." wurde erstellt", 0);
             }
 
             $counter = 0;
@@ -146,7 +145,7 @@ class HWMonitor extends IPSModule
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
-                $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $this->SendDebug("Variable erstellt", "Die Variable mit der ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue." wurder erstellt oder aktualisiert", 0);
             
                 $counter++;
             }
