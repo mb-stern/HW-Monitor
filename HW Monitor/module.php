@@ -179,13 +179,14 @@ class HWMonitor extends IPSModule
         {
             $objectIds = IPS_GetChildrenIDs($parentId);
             foreach ($objectIds as $objectId) {
+                $object = IPS_GetObject($objectId);
                 // Überprüfen, ob das Objekt eine Variable ist
-                if (IPS_ObjectGetType($objectId) == 2 /* Variable */) {
+                if ($object['ObjectType'] == 2 /* Variable */) {
                     // Überprüfen, ob die Variable den zu entfernenden Identifikator hat
-                    if (IPS_GetObject($objectId)['ObjectIdent'] == $variableToRemove) {
+                    if ($object['ObjectIdent'] == $variableToRemove) {
                         return $objectId; // Variable gefunden
                     }
-                } elseif (IPS_ObjectGetType($objectId) == 3 /* Kategorie */) {
+                } elseif ($object['ObjectType'] == 3 /* Kategorie */) {
                     // Wenn es sich um eine Kategorie handelt, rekursiv in dieser Kategorie suchen
                     $foundObjectId = searchVariableInTree($objectId, $variableToRemove);
                     if ($foundObjectId !== false) {
