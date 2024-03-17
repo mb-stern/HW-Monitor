@@ -180,6 +180,7 @@ class HWMonitor extends IPSModule
         foreach ($existingVariableIDs as $variableToRemove) {
             // Versuche, die Variable mit der Identifikation zu finden
             $variableIDToRemove = self::searchVariableInTree($this->InstanceID, $variableToRemove);
+            $this->SendDebug("Löschfunktion", "Die Ident ".$variableIDToRemove." wurde gefunden.", 0);
             
             if ($variableIDToRemove !== false) {
                 $this->UnregisterVariable($variableIDToRemove);
