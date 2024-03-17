@@ -177,7 +177,7 @@ class HWMonitor extends IPSModule
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                     if ($variableID === false) 
                     {
-                        $prefix = ($searchKey === 'id') ? $gefundenerWert;
+                        $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
                         $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                         if ($searchKey === 'id') 
                         {
