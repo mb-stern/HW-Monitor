@@ -169,7 +169,7 @@ class HWMonitor extends IPSModule
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
-                $this->SendDebug("Variable aktualisiert", "Erstellen oder aktualisieren der Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                $this->SendDebug("Variable aktualisiert", "Erstellen oder aktualisieren der Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Suchschlüssel: ".$searchKey.",Name: ".$variableIdentValue.", Wert: ".$convertedValue."", 0);
             
                 $counter++;
             }
@@ -177,26 +177,26 @@ class HWMonitor extends IPSModule
         // Lösche nicht mehr benötigte Variablen
         foreach ($existingVariableIDs as $variableToRemove) 
         {
-        // Versuche, die Variable mit der Identifikation zu finden
-        $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-        
-        // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
-        if ($variableIDToRemove === false) 
-        {
-            $categories = IPS_GetChildrenIDs($this->InstanceID);
-            foreach ($categories as $categoryID) 
+            // Versuche, die Variable mit der Identifikation zu finden
+            $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
+            
+            // Wenn die Variable nicht direkt unterhalb der Instanz gefunden wurde, versuche in den Kategorien zu suchen
+            if ($variableIDToRemove === false) 
             {
-                $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
-                if ($variableIDToRemove !== false) 
+                $categories = IPS_GetChildrenIDs($this->InstanceID);
+                foreach ($categories as $categoryID) 
                 {
-                    $this->UnregisterVariable($variableToRemove);
-                    $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." wurde gelöscht", 0);
-                }
-                else 
-                {
-                    // Debug senden, wenn die Variable nicht gefunden wurde
-                    $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
-                }
+                    $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $categoryID);
+                    if ($variableIDToRemove !== false) 
+                    {
+                        $this->UnregisterVariable($variableToRemove);
+                        $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." wurde gelöscht", 0);
+                    }
+                    else 
+                    {
+                        // Debug senden, wenn die Variable nicht gefunden wurde
+                        $this->SendDebug("Löschfunktion", "Die Variable ".$variableToRemove." konnte nicht gefunden werden.", 0);
+                    }
                 }
             }
         }
