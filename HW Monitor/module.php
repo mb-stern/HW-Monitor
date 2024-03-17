@@ -193,17 +193,17 @@ class HWMonitor extends IPSModule
                         } 
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID' . $prefix . ' - ' .ucfirst($searchKey)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' .ucfirst($searchKey)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
                         elseif ($searchKey === 'Type') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' .ucfirst($searchKey)), "", $variablePosition);
                         }
                         elseif ($searchKey === 'Text') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' .ucfirst($searchKey)), "", $variablePosition);
                         }
                     } 
                     else 
