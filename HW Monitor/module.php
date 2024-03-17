@@ -164,6 +164,9 @@ class HWMonitor extends IPSModule
             
             foreach ($requiredKeys as $searchKey) 
             {
+                $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
+                $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
+                
                 if (!array_key_exists($searchKey, $foundValues)) 
                 {
                     continue; // Schlüssel nicht vorhanden, überspringen
@@ -176,9 +179,8 @@ class HWMonitor extends IPSModule
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
 
-                    $prefix = ($searchKey === 'id') ? $gefundenerWert : '';
-                    $this->SendDebug("Prefix", "Prefix: ".$prefix."", 0);
                     
+
                     if ($variableID === false) 
                     {
                         if ($searchKey === 'id') 
