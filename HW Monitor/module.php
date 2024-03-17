@@ -155,7 +155,7 @@ class HWMonitor extends IPSModule
         }
     }
 
-    public function DeleteVariables(array $contentArray)
+    public function DeleteVariables($contentArray)
 {
     // Holen Sie sich die ID-Liste aus den Eigenschaften
     $idListeString = $this->ReadPropertyString('IDListe');
@@ -184,10 +184,23 @@ class HWMonitor extends IPSModule
 
         // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
         if (!$foundInList) {
-            $variables = IPS_GetChildrenIDs($categoryId);
-            foreach ($variables as $variableID) {
-                $this->UnregisterVariable($variableID);
+            // Überprüfen, ob die Kategorie untergeordnete Objekte hat
+            $childrenCount = IPS_GetObject($categoryId)['ChildrenIDs'];
+
+            // Wenn die Kategorie untergeordnete Objekte hat, entfernen Sie diese zuerst
+            if (!empty($childrenCount)) {
+                foreach ($childrenCount as $childId) {
+                    if (IPS_ObjectExists($childId)) {
+                        if (IPS_GetObject($childId)['ObjectType'] == 2) { // 2 steht für Variable
+                            $this->UnregisterVariable($childId);
+                        } elseif (IPS_GetObject($childId)['ObjectType'] == 3) { // 3 steht für Kategorie
+                            IPS_DeleteCategory($childId);
+                        }
+                    }
+                }
             }
+
+            // Löschen Sie dann die Kategorie selbst
             IPS_DeleteCategory($categoryId);
         }
     }
