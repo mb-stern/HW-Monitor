@@ -126,7 +126,7 @@ class HWMonitor extends IPSModule
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $categoryID);
                 if ($variableID === false) 
                 {
-                    if (in_array($searchKey, ['Min', 'Max', 'Value', 'id'])) 
+                    if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                     {
                         $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
             
@@ -134,6 +134,10 @@ class HWMonitor extends IPSModule
                         $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                     } 
                     elseif ($searchKey === 'Text' || $searchKey === 'Type') 
+                    {
+                        $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                    }
+                    elseif ($searchKey === 'id') 
                     {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                     }
