@@ -193,11 +193,13 @@ class HWMonitor extends IPSModule
                         } 
                         elseif ($searchKey === 'Type') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableName = ' ID ' .$gefundenerWert . ' - ' . ucfirst($searchKey);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
                         }
                         elseif ($searchKey === 'Text') 
                         {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableName = ' ID ' .$gefundenerWert . ' - ' . ucfirst($searchKey);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, $variableName, "", $variablePosition);
                         }
                     } 
                     else 
