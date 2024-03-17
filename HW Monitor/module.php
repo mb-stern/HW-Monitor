@@ -189,7 +189,7 @@ class HWMonitor extends IPSModule
                     {
                         if ($searchKey === 'id') 
                         {
-                            //$variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
                         } 
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
