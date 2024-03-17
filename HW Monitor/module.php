@@ -215,7 +215,7 @@ class HWMonitor extends IPSModule
                         }
                     }
 
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
+                    //$convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
 
                     SetValue($variableID, $convertedValue);
 
