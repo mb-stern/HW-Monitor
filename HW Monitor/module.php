@@ -136,6 +136,7 @@ class HWMonitor extends IPSModule
                     elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                     {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                        $this->UnregisterVariable($variableIdentValue);
                     }
                         
                     // Setze die Kategorie als Elternobjekt
