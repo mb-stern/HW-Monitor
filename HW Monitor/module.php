@@ -136,7 +136,6 @@ class HWMonitor extends IPSModule
                     elseif ($searchKey === 'Text' || $searchKey === 'Type') 
                     {
                         $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        $this->UnregisterVariable($variableIdentValue);
                     }
                         
                     // Setze die Kategorie als Elternobjekt
@@ -185,7 +184,8 @@ class HWMonitor extends IPSModule
             if (!$foundInList) {
                 $variables = IPS_GetChildrenIDs($categoryId);
                 foreach ($variables as $variableID) {
-                    IPS_DeleteVariable($variableID);
+                    $variableIdent = IPS_GetObject($variableID)['ObjectIdent'];
+                $this->UnregisterVariable($variableIdent);
                     $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
                 IPS_DeleteCategory($categoryId);
