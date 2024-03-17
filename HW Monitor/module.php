@@ -163,8 +163,8 @@ class HWMonitor extends IPSModule
 
         foreach ($idListe as $idItem) {
             $gesuchteId = $idItem['id'];
+            $categoryName = $idItem['Text'][0]; // Korrigierte Zeile
 
-            $categoryName = $gesuchteId['Text'][0];
             $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
 
             if ($categoryID !== false) {
@@ -176,6 +176,7 @@ class HWMonitor extends IPSModule
             }
         }
     }
+
 
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
