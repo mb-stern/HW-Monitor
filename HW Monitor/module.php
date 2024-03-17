@@ -220,7 +220,7 @@ class HWMonitor extends IPSModule
                     SetValue($variableID, $gefundenerWert);
 
                     //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                    //$this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
 
                     $counter++;
 
