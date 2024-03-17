@@ -160,6 +160,8 @@ class HWMonitor extends IPSModule
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
+    $this->SendDebug("ID-Liste", print_r($idListe, true), 0); // Debug-Ausgabe der ID-Liste
+
     foreach ($idListe as $idItem) {
         $gesuchteId = $idItem['id'];
 
