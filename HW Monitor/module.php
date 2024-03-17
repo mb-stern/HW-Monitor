@@ -149,8 +149,6 @@ class HWMonitor extends IPSModule
         {
             $gesuchteId = $idItem['id'];
 
-
-
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
@@ -161,8 +159,9 @@ class HWMonitor extends IPSModule
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
             $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
            
-            
-            if (in_array('id', $requiredKeys)) {
+            //Präfix definieren
+            if (in_array('id', $requiredKeys)) 
+            {
                 // Extrahiere den Wert von 'id' aus $foundValues
                 $idValue = isset($foundValues['id']) ? $foundValues['id'][0] : '';
             
@@ -194,7 +193,7 @@ class HWMonitor extends IPSModule
                         } 
                         elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ($prefix . ucfirst($searchKey)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
