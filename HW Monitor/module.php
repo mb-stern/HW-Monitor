@@ -87,7 +87,7 @@ class HWMonitor extends IPSModule
         $idListe = json_decode($idListeString, true);
 
         //zu löschende Varaiblen prüfen
-        $this->DeleteVariables();
+        $this->DeleteVariables($contentArray);
 
         // Schleife für die ID-Liste
         $this->SendDebug("Test 1", "Start der Schleife ID-Liste", 0);
@@ -155,7 +155,7 @@ class HWMonitor extends IPSModule
         }
     }
 
-    public function DeleteVariables()
+    public function DeleteVariables($contentArray)
     {
         // Holen Sie sich die ID-Liste aus den Eigenschaften
         $idListeString = $this->ReadPropertyString('IDListe');
