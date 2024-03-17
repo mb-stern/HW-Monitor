@@ -160,26 +160,45 @@ class HWMonitor extends IPSModule
     $idListeString = $this->ReadPropertyString('IDListe');
     $idListe = json_decode($idListeString, true);
 
-    $this->SendDebug("Löschfunktion", "ID-Liste: " . print_r($idListe, true), 0);
-    
     foreach ($idListe as $idItem) {
-        // Überprüfen, ob der Schlüssel "Text" vorhanden ist, bevor darauf zugegriffen wird
-        if (isset($idItem['Text'])) {
-            $categoryName = $idItem['Text'][0];
+        $gesuchteId = $idItem['id'];
+
+        // Versuche, den Kategorienamen mit der entsprechenden ID zu finden
+        $categoryName = $this->GetCategoryNameById($gesuchteId);
+
+        if ($categoryName !== false) {
             $this->SendDebug("Löschfunktion", "Kategorie-Name: ".$categoryName."", 0);
 
+            // Versuche, die Kategorie mit dem Namen zu finden und zu löschen
             $categoryID = @IPS_GetObjectIDByName($categoryName, $this->InstanceID);
 
             if ($categoryID !== false) {
+                // Lösche alle Variablen unterhalb der Kategorie
                 $variables = IPS_GetChildrenIDs($categoryID);
                 foreach ($variables as $variableID) {
                     IPS_DeleteVariable($variableID);
                 }
+                // Lösche die Kategorie selbst
                 IPS_DeleteCategory($categoryID);
             }
         }
     }
 }
+
+private function GetCategoryNameById($id)
+{
+    $idListeString = $this->ReadPropertyString('IDListe');
+    $idListe = json_decode($idListeString, true);
+
+    foreach ($idListe as $idItem) {
+        if ($idItem['id'] == $id) {
+            return $idItem['Text'][0];
+        }
+    }
+
+    return false; // Wenn die Kategorie nicht gefunden wurde
+}
+
 
 
 
