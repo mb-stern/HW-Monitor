@@ -145,7 +145,7 @@ class HWMonitor extends IPSModule
                 $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
                 SetValue($variableID, $convertedValue);
                 //Debug senden
-                $this->SendDebug("Variable erstellt", "Die Variable mit der ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue." wurder erstellt oder aktualisiert", 0);
+                $this->SendDebug("Variable erstellt", "Die Variable mit dem Ident: ".$variableIdentValue.", Name: ".ucfirst($searchKey).", ID: ".$variableID.", Position: ".$variablePosition.",  Wert: ".$convertedValue." wurder erstellt oder aktualisiert", 0);
             
                 $counter++;
             }
@@ -183,9 +183,9 @@ class HWMonitor extends IPSModule
             // Wenn die Kategorie nicht in der Liste enthalten ist, löschen Sie sie und alle ihre Variablen
             if (!$foundInList) {
                 $variables = IPS_GetChildrenIDs($categoryId);
-                foreach ($variables as $variableID) {
-                    $variableIdent = IPS_GetObject($variableID)['ObjectIdent'];
-                    $this->SendDebug("Löschfunktion", "Ident: ".$variableIdent." lokalisiert", 0);
+                foreach ($variables as $variableID) 
+                {
+
                     $this->UnregisterVariable($variableIdent);
                     $this->SendDebug("Löschfunktion", "Die Variable: ".$variableID." wurde gelöscht", 0);
                 }
