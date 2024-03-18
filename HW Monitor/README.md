@@ -88,7 +88,7 @@ Beispiel:
 ### 8. Versionen
 
 Version 1.4 (18.03.2024)
-* Die Variablen werden nun mit dem Präfix (ID XX) übersichtlicher dargestellt
+* Die Variablen werden nun mit dem Präfix (ID XX) übersichtlicher dargestellt. Die ID muss dazu entfernt und wieder hinzugefügt werden, um durchgehend die neue Struktur zu erhalten
 * Es werden nur noch vier Variabeln pro ID angelegt (vorher sechs)
 
 Version 1.3 (17.02.2024)
