@@ -201,14 +201,11 @@ class HWMonitor extends IPSModule
                     {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            // Ersetze den Variablennamen basierend auf der Ersetzungstabelle
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                            // Ersetzungen für Float-Variablen anwenden
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
                         elseif ($searchKey === 'Text') 
                         {
-                            // Ersetze den Variablennamen basierend auf der Ersetzungstabelle
                             $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), "", $variablePosition);
                         }
                     } 
