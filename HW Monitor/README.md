@@ -45,7 +45,7 @@ Intervall  		|  Intervall für das Update der Werte
 
 ![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/d107d460-658c-4279-bcd2-681bf1cba80b)
 
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
+![2024-03-18 18_38_21-Entwicklung — IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/90f3d0f4-7684-4b4c-ac52-76152d864dbf)
 
 ### 5. Statusvariablen und Profile
 
