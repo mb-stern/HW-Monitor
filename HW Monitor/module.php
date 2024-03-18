@@ -212,14 +212,6 @@ class HWMonitor extends IPSModule
                             $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), "", $variablePosition);
                         }
                     } 
-                    else 
-                    {
-                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) 
-                        {
-                            unset($existingVariableIDs[$keyIndex]);
-                        }
-                    }
 
                     SetValue($variableID, $gefundenerWert);
 
