@@ -55,12 +55,10 @@ Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzeln
 
 Name   | Typ     | Beschreibung
 ------ | ------- | ------------
-Id     |   Float    |	ID des Wertes
-Text   |   String   |	Name des Wertes
-Min    |   Float    |	Minimum des Wertes
-Value  |   Float    |	Aktueller Wert
-Max    |   Float    |	Maximum des Wertes
-Type   |   String   |	Profil des Wertes
+ID XX - Name    |   String   |	Name des Wertes
+ID XX - Minimum |   Float    |	Minimum des Wertes
+ID XX - Maximum |   Float    |	Aktueller Wert
+ID XX - Istwert |   Float    |	Maximum des Wertes
 
 
 #### Profile
