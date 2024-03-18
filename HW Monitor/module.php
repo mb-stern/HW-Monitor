@@ -199,12 +199,7 @@ class HWMonitor extends IPSModule
 
                     if ($variableID === false) 
                     {
-                        if ($searchKey === 'id') 
-                        {
-                            // Verwende den Wert von 'id' als Präfix
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ((ucfirst($searchKey). ' ' . $prefix)), "", $variablePosition);
-                        } 
-                        elseif (in_array($searchKey, ['Min', 'Max', 'Value'])) 
+                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             // Ersetze den Variablennamen basierend auf der Ersetzungstabelle
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
