@@ -1,7 +1,7 @@
 # Libre Hardware Monitor Modul für IP-Symcon
 Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
 Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
-Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen.
+Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen. Es werden vier Variablen pro gewählter ID erstellt
 
 ### Inhaltsverzeichnis
 
@@ -17,7 +17,7 @@ Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt 
 ### 1. Funktionsumfang
 
 * Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
-* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen.
+* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen. Ebenfalls ist über den Präfix ID XX eine übersichtliche Strukturierung vorhanden
 
 ### 2. Voraussetzungen
 
@@ -26,8 +26,8 @@ Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt 
 
 ### 3. Software-Installation
 
-* Über den Module Store kann das 'HW Monitor'-Modul noch nicht installiert werden.
-* Download des Moduls via Module Control https://github.com/mb-stern/HW-Monitor
+* Über den Module Store kann das 'Hardware Monitor'-Modul installiert werden.
+* Download des Moduls auch über den Module Control https://github.com/mb-stern/HW-Monitor
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
@@ -86,6 +86,10 @@ Beispiel:
 `HW_Update(12345);`
 
 ### 8. Versionen
+
+Version 1.4 (18.03.2024)
+* Die Variablen werden nun mit dem Präfix (ID XX) übersichtlicher dargestellt
+* Es werden nur noch vier Variabeln pro ID angelegt (vorher sechs)
 
 Version 1.3 (17.02.2024)
 * Anpassung des Codes um die Store Kompatibilät zu erlangen
