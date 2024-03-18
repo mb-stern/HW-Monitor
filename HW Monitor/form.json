@@ -6,11 +6,11 @@
         "items": [
           {
             "type": "Label",
-            "label": "Dieses Modul ermöglicht, auf den Libre Hardware Monitor zuzugreifen."
+            "label": "Dieses Modul ermöglicht, auf den Libre Hardware Monitor zuzugreifen. Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
           },
           {
             "type": "Label",
-            "label": "Dazu muss sichergestellt werden, dass der Port 8085 am jeweiligen Rechner geöffnet ist."
+            "label": "Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen. Pro ID werden 4 Variablen angelegt."
           },
           {
             "type": "Label",
@@ -40,6 +40,10 @@
         "rowCount": 15,
         "add": true,
         "delete": true,
+        "sort": {
+          "column": "id",
+          "direction": "ascending"
+      },
         "columns": 
         [
             {
