@@ -43,8 +43,7 @@ Port       		|  Port des Rechners (Standard ist 8085). Der Port muss in der Fire
 Intervall  		|  Intervall für das Update der Werte
 Überwachte ID's	|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
 
-![2024-03-18 18_46_24-IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/d32d8f43-0875-4937-ab21-e89b34af2109)
-
+![2024-03-18 18_46_24-IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/c8472a43-d642-40ff-8edf-531ed633da82)
 
 ![2024-03-18 18_38_21-Entwicklung — IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/90f3d0f4-7684-4b4c-ac52-76152d864dbf)
 
