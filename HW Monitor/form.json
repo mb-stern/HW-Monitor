@@ -10,7 +10,7 @@
           },
           {
             "type": "Label",
-            "label": "Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen."
+            "label": "Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen. Pro ID werden 4 Variablen angelegt."
           },
           {
             "type": "Label",

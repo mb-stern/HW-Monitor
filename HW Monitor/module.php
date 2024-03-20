@@ -149,8 +149,6 @@ class HWMonitor extends IPSModule
         {
             $gesuchteId = $idItem['id'];
 
-
-
             // Suche nach Werten für die gefundenen IDs
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
@@ -158,10 +156,30 @@ class HWMonitor extends IPSModule
             // Variablen anlegen und einstellen für die gefundenen Werte
             $counter = 0;
 
+            //Präfix definieren
+            $prefixKey = ['id'];
+            if (in_array('id', $prefixKey)) 
+            {
+                // Extrahiere den Wert von 'id' aus $foundValues
+                $idValue = isset($foundValues['id']) ? $foundValues['id'][0] : '';
+            
+                // Verwende den Wert von 'id' als Präfix
+                $prefix = $idValue;
+                $this->SendDebug("Präfix", "Präfix für ID: ".$prefix." erstellt", 0);
+            }
+            
             // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
-            $requiredKeys = ['Text', 'id', 'Min', 'Max', 'Value', 'Type'];
+            $requiredKeys = ['Text', 'Min', 'Max', 'Value'];
             
-            
+            // Definition der Ersetzungstabelle für Variablennamen
+            $variableNameReplacements = [
+                'Text' => 'Name',
+                'Min' => 'Minimum',
+                'Max' => 'Maximum',
+                'Value' => 'Istwert',
+                // Weitere Ersetzungen nach Bedarf hinzufügen
+            ];
+
             foreach ($requiredKeys as $searchKey) 
             {
                 if (!array_key_exists($searchKey, $foundValues)) 
@@ -169,30 +187,27 @@ class HWMonitor extends IPSModule
                     continue; // Schlüssel nicht vorhanden, überspringen
                 }
 
+                // Ermittle den Namen für die Variable basierend auf der Ersetzungstabelle
+                $variableName = isset($variableNameReplacements[$searchKey]) ? $variableNameReplacements[$searchKey] : ucfirst($searchKey);
+
+                //Variablen erstellen
                 foreach ($foundValues[$searchKey] as $gefundenerWert) 
                 {
                     $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
                     $variablePosition = $gesuchteId * 10 + $counter;
 
                     $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+
                     if ($variableID === false) 
                     {
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-
-                            // Ersetzungen für Float-Variablen anwenden
+                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
                             $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                         } 
-                        
-                        elseif ($searchKey === 'id') 
+                        elseif ($searchKey === 'Text') 
                         {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
-                        } 
-                        
-                        elseif ($searchKey === 'Text' || $searchKey === 'Type') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ucfirst($searchKey), "", $variablePosition);
+                            $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), "", $variablePosition);
                         }
                     } 
                     else 
@@ -204,12 +219,8 @@ class HWMonitor extends IPSModule
                         }
                     }
 
-                    $convertedValue = ($searchKey === 'Text' || $searchKey === 'Type') ? (string)$gefundenerWert : (float)$gefundenerWert;
-
-                    SetValue($variableID, $convertedValue);
-
-                    //Debug senden
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$searchKey.", Wert: ".$convertedValue."", 0);
+                    SetValue($variableID, $gefundenerWert);
+                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$variableName.", Wert: ".$gefundenerWert."", 0);
 
                     $counter++;
 
