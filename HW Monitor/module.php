@@ -168,7 +168,7 @@ class HWMonitor extends IPSModule
                 $this->SendDebug("Präfix", "Präfix für ID: ".$prefix." erstellt", 0);
             }
             
-            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'id', 'Min', 'Max', 'Value', 'Type'
+            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'Min', 'Max', 'Value'
             $requiredKeys = ['Text', 'Min', 'Max', 'Value'];
             
             // Definition der Ersetzungstabelle für Variablennamen
