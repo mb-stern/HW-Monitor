@@ -203,7 +203,7 @@ class HWMonitor extends IPSModule
                         if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
                         {
                             $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                            $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                            
                         } 
                         elseif ($searchKey === 'Text') 
                         {
@@ -219,6 +219,7 @@ class HWMonitor extends IPSModule
                         }
                     }
 
+                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                     SetValue($variableID, $gefundenerWert);
                     $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$variableName.", Wert: ".$gefundenerWert."", 0);
 
