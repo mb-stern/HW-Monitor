@@ -158,7 +158,7 @@ class HWMonitor extends IPSModule
 
                 $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
                 if ($variableID === false) {
-                    $variableID = $this->createVariable($variableIdentValue, $variableName, $foundValues['Type'][0], $variablePosition, $searchKey);
+                    $variableID = $this->createVariable($variableIdentValue, $variableName, $foundValues['Type'][0], $variablePosition, $searchKey, $prefix);
                 } else {
                     $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
                     if ($keyIndex !== false) {
@@ -176,7 +176,7 @@ class HWMonitor extends IPSModule
     }
 
     // Neue Methode zur Variablenerstellung
-    private function createVariable($ident, $name, $type, $position, $key)
+    private function createVariable($ident, $name, $type, $position, $key, $prefix)
     {
         if (in_array($key, ['Min', 'Max', 'Value'])) {
             return $this->RegisterVariableFloat($ident, "ID $prefix - $name", $this->getVariableProfileByType($type), $position);
