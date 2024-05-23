@@ -38,205 +38,162 @@ class HWMonitor extends IPSModule
         // Timer für Aktualisierung registrieren
         $this->RegisterTimer('UpdateTimer', 0, 'HW_Update(' . $this->InstanceID . ');');
 
-        // Benötigte Variablen erstellen
-        if (!IPS_VariableProfileExists("HW.Clock")) {
-			IPS_CreateVariableProfile("HW.Clock", 2); //2 für Float
-			IPS_SetVariableProfileValues("HW.Clock", 0, 5000, 1); //Min, Max, Schritt
-            IPS_SetVariableProfileDigits("HW.Clock", 0); //Nachkommastellen
-			IPS_SetVariableProfileText("HW.Clock", "", " Mhz"); //Präfix, Suffix
-		}
-        if (!IPS_VariableProfileExists("HW.Data")) {
-			IPS_CreateVariableProfile("HW.Data", 2);
-			IPS_SetVariableProfileValues("HW.Data", 0, 100, 1);
-            IPS_SetVariableProfileDigits("HW.Data", 1);
-			IPS_SetVariableProfileText("HW.Data", "", " GB");
-		}
-        if (!IPS_VariableProfileExists("HW.Temp")) {
-			IPS_CreateVariableProfile("HW.Temp", 2);
-			IPS_SetVariableProfileValues("HW.Temp", 0, 100, 1);
-            IPS_SetVariableProfileDigits("HW.Temp", 0);
-			IPS_SetVariableProfileText("HW.Temp", "", " °C");
-		}
-        if (!IPS_VariableProfileExists("HW.Fan")) {
-			IPS_CreateVariableProfile("HW.Fan", 2);
-			IPS_SetVariableProfileValues("HW.Fan", 0, 1000, 1);
-            IPS_SetVariableProfileDigits("HW.Fan", 0);
-			IPS_SetVariableProfileText("HW.Fan", "", " RPM");
-		}
-        if (!IPS_VariableProfileExists("HW.Rate")) {
-			IPS_CreateVariableProfile("HW.Rate", 2);
-			IPS_SetVariableProfileValues("HW.Rate", 0, 1000, 1);
-            IPS_SetVariableProfileDigits("HW.Rate", 0);
-			IPS_SetVariableProfileText("HW.Rate", "", " KB/s");
-		}
+        // VariableProfile-Erstellung ausgelagert
+        $this->createVariableProfiles();
+    }
+
+    // Neue Methode für die Erstellung der VariableProfiles
+    private function createVariableProfiles()
+    {
+        $profiles = [
+            "HW.Clock" => [2, 0, 5000, 1, 0, " Mhz"],
+            "HW.Data" => [2, 0, 100, 1, 1, " GB"],
+            "HW.Temp" => [2, 0, 100, 1, 0, " °C"],
+            "HW.Fan" => [2, 0, 1000, 1, 0, " RPM"],
+            "HW.Rate" => [2, 0, 1000, 1, 0, " KB/s"],
+        ];
+
+        foreach ($profiles as $name => [$type, $min, $max, $step, $digits, $suffix]) {
+            if (!IPS_VariableProfileExists($name)) {
+                IPS_CreateVariableProfile($name, $type);
+                IPS_SetVariableProfileValues($name, $min, $max, $step);
+                IPS_SetVariableProfileDigits($name, $digits);
+                IPS_SetVariableProfileText($name, "", $suffix);
+            }
+        }
     }
 
     public function ApplyChanges()
     {
         parent::ApplyChanges();
 
-        // Timer für Aktualisierung aktualisieren
         $this->SetTimerInterval('UpdateTimer', $this->ReadPropertyInteger('UpdateInterval') * 1000);
 
-        // Überprüfen, ob die erforderlichen Konfigurationsparameter gesetzt sind
         $ipAddress = $this->ReadPropertyString('IPAddress');
-        $port = $this->ReadPropertyInteger('Port');
-        $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
-
-        // Überprüfe, ob die IP-Adresse nicht die Muster-IP ist
-        if ($ipAddress == '0.0.0.0') 
-        {
-            $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);   
+        if ($ipAddress == '0.0.0.0') {
+            $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);
             $this->LogMessage("IP-Adresse ist nicht konfiguriert", KL_ERROR);
-        } 
-        else 
-        {
-            // Bei Änderungen am Konfigurationsformular oder bei der Initialisierung auslösen
+        } else {
             $this->Update();
         }
     }
 
     protected function getVariableProfileByType($type)
     {
-        switch ($type) {
-            case 'Clock':
-                return 'HW.Clock';
-            case 'Load':
-                return '~Progress';
-            case 'Temperature':
-                return 'HW.Temp';
-            case 'Fan':
-                return 'HW.Fan';
-            case 'Voltage':
-                return '~Volt';
-            case 'Power':
-                return '~Watt';
-            case 'Data':
-                return 'HW.Data';
-            case 'Level':
-                return '~Progress';
-            case 'Throughput':
-                return 'HW.Rate';
-            // Weitere Zuordnungen für andere 'Type'-Werte hier ergänzen
-            default:
-                return '';
-        }
+        $profiles = [
+            'Clock' => 'HW.Clock',
+            'Load' => '~Progress',
+            'Temperature' => 'HW.Temp',
+            'Fan' => 'HW.Fan',
+            'Voltage' => '~Volt',
+            'Power' => '~Watt',
+            'Data' => 'HW.Data',
+            'Level' => '~Progress',
+            'Throughput' => 'HW.Rate'
+        ];
+
+        return $profiles[$type] ?? '';
     }
 
     public function Update()
     {
-        // Libre Hardware Monitor abfragen
-        $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
-        $contentArray = json_decode($content, true);
-
-        //Debug senden
-        $this->SendDebug("Verbindungseinstellung", "".$this->ReadPropertyString('IPAddress')." : ".$this->ReadPropertyInteger('Port')."", 0);
-
-        // Gewählte ID's abfragen
-        $idListeString = $this->ReadPropertyString('IDListe');
-        $idListe = json_decode($idListeString, true);
-
-        // Alle vorhandenen Variablen speichern
-        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
-        $existingVariableIDs = [];
-        foreach ($existingVariables as $existingVariableID) 
-        {
-            $existingVariableIDs[] = IPS_GetObject($existingVariableID)['ObjectIdent'];
+        try {
+            // Fehlerbehandlung für JSON-Abfrage
+            $content = file_get_contents("http://{$this->ReadPropertyString('IPAddress')}:{$this->ReadPropertyInteger('Port')}/data.json");
+            $contentArray = json_decode($content, true);
+            if ($contentArray === null) {
+                throw new Exception('Invalid JSON data');
+            }
+        } catch (Exception $e) {
+            $this->SendDebug("Fehler", $e->getMessage(), 0);
+            $this->LogMessage($e->getMessage(), KL_ERROR);
+            return;
         }
 
-        // Schleife für die ID-Liste
-        foreach ($idListe as $idItem) 
-        {
-            $gesuchteId = $idItem['id'];
+        $this->SendDebug("Verbindungseinstellung", "{$this->ReadPropertyString('IPAddress')} : {$this->ReadPropertyInteger('Port')}", 0);
 
-            // Suche nach Werten für die gefundenen IDs
+        $idListe = json_decode($this->ReadPropertyString('IDListe'), true);
+        $existingVariables = IPS_GetChildrenIDs($this->InstanceID);
+        $existingVariableIDs = array_map(function($id) {
+            return IPS_GetObject($id)['ObjectIdent'];
+        }, $existingVariables);
+
+        foreach ($idListe as $idItem) {
+            $gesuchteId = $idItem['id'];
             $foundValues = [];
             $this->searchValueForId($contentArray, $gesuchteId, $foundValues);
 
-            // Variablen anlegen und einstellen für die gefundenen Werte
-            $counter = 0;
+            $prefix = $foundValues['id'][0] ?? '';
+            $this->SendDebug("Präfix", "Präfix für ID: $prefix erstellt", 0);
 
-            //Präfix definieren
-            $prefixKey = ['id'];
-            if (in_array('id', $prefixKey)) 
-            {
-                // Extrahiere den Wert von 'id' aus $foundValues
-                $idValue = isset($foundValues['id']) ? $foundValues['id'][0] : '';
-            
-                // Verwende den Wert von 'id' als Präfix
-                $prefix = $idValue;
-                $this->SendDebug("Präfix", "Präfix für ID: ".$prefix." erstellt", 0);
-            }
-            
-            // Prüfe auf das Vorhandensein der Schlüssel 'Text', 'Min', 'Max', 'Value'
-            $requiredKeys = ['Text', 'Min', 'Max', 'Value'];
-            
-            // Definition der Ersetzungstabelle für Variablennamen
-            $variableNameReplacements = [
-                'Text' => 'Name',
-                'Min' => 'Minimum',
-                'Max' => 'Maximum',
-                'Value' => 'Istwert',
-                // Weitere Ersetzungen nach Bedarf hinzufügen
-            ];
-
-            foreach ($requiredKeys as $searchKey) 
-            {
-                if (!array_key_exists($searchKey, $foundValues)) 
-                {
-                    continue; // Schlüssel nicht vorhanden, überspringen
-                }
-
-                // Ermittle den Namen für die Variable basierend auf der Ersetzungstabelle
-                $variableName = isset($variableNameReplacements[$searchKey]) ? $variableNameReplacements[$searchKey] : ucfirst($searchKey);
-
-                //Variablen erstellen
-                foreach ($foundValues[$searchKey] as $gefundenerWert) 
-                {
-                    $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
-                    $variablePosition = $gesuchteId * 10 + $counter;
-
-                    $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
-
-                    if ($variableID === false) 
-                    {
-                        if (in_array($searchKey, ['Min', 'Max', 'Value'])) 
-                        {
-                            $variableID = $this->RegisterVariableFloat($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), ($this->getVariableProfileByType($foundValues['Type'][0])), $variablePosition);
-                        } 
-                        elseif ($searchKey === 'Text') 
-                        {
-                            $variableID = $this->RegisterVariableString($variableIdentValue, ('ID ' . $prefix . ' - ' . ucfirst($variableName)), "", $variablePosition);
-                        }
-                    } 
-                    else 
-                    {
-                        $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
-                        if ($keyIndex !== false) 
-                        {
-                            unset($existingVariableIDs[$keyIndex]);
-                        }
-                    }
-
-                    $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
-                    SetValue($variableID, $gefundenerWert);
-                    $this->SendDebug("Variable aktualisiert", "Variabel-ID: ".$variableID.", Position: ".$variablePosition.", Name: ".$variableName.", Wert: ".$gefundenerWert."", 0);
-
-                    $counter++;
-
-                }
-            }
+            // Neue Methode zur Erstellung und Aktualisierung der Variablen
+            $this->createAndUpdateVariables($gesuchteId, $prefix, $foundValues, $existingVariableIDs);
         }
 
-        // Lösche nicht mehr benötigte Variablen
-        foreach ($existingVariableIDs as $variableToRemove) 
-        {
+        // Löschen nicht mehr benötigter Variablen
+        $this->deleteUnusedVariables($existingVariableIDs);
+    }
+
+    // Neue Methode zur Erstellung und Aktualisierung der Variablen
+    private function createAndUpdateVariables($gesuchteId, $prefix, $foundValues, &$existingVariableIDs)
+    {
+        $variableNameReplacements = [
+            'Text' => 'Name',
+            'Min' => 'Minimum',
+            'Max' => 'Maximum',
+            'Value' => 'Istwert',
+        ];
+
+        $counter = 0;
+        foreach (['Text', 'Min', 'Max', 'Value'] as $searchKey) {
+            if (!isset($foundValues[$searchKey])) {
+                continue;
+            }
+
+            $variableName = $variableNameReplacements[$searchKey] ?? ucfirst($searchKey);
+
+            foreach ($foundValues[$searchKey] as $gefundenerWert) {
+                $variableIdentValue = "Variable_" . ($gesuchteId * 10 + $counter) . "_$searchKey";
+                $variablePosition = $gesuchteId * 10 + $counter;
+
+                $variableID = @IPS_GetObjectIDByIdent($variableIdentValue, $this->InstanceID);
+                if ($variableID === false) {
+                    $variableID = $this->createVariable($variableIdentValue, $variableName, $foundValues['Type'][0], $variablePosition, $searchKey);
+                } else {
+                    $keyIndex = array_search($variableIdentValue, $existingVariableIDs);
+                    if ($keyIndex !== false) {
+                        unset($existingVariableIDs[$keyIndex]);
+                    }
+                }
+
+                $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                SetValue($variableID, $gefundenerWert);
+                $this->SendDebug("Variable aktualisiert", "Variabel-ID: $variableID, Position: $variablePosition, Name: $variableName, Wert: $gefundenerWert", 0);
+
+                $counter++;
+            }
+        }
+    }
+
+    // Neue Methode zur Variablenerstellung
+    private function createVariable($ident, $name, $type, $position, $key)
+    {
+        if (in_array($key, ['Min', 'Max', 'Value'])) {
+            return $this->RegisterVariableFloat($ident, "ID $prefix - $name", $this->getVariableProfileByType($type), $position);
+        } elseif ($key === 'Text') {
+            return $this->RegisterVariableString($ident, "ID $prefix - $name", "", $position);
+        }
+        return false;
+    }
+
+    // Neue Methode zum Löschen nicht mehr benötigter Variablen
+    private function deleteUnusedVariables($existingVariableIDs)
+    {
+        foreach ($existingVariableIDs as $variableToRemove) {
             $variableIDToRemove = @IPS_GetObjectIDByIdent($variableToRemove, $this->InstanceID);
-            if ($variableIDToRemove !== false)
-            {
+            if ($variableIDToRemove !== false) {
                 $this->UnregisterVariable($variableToRemove);
-                //Debug senden
-                $this->SendDebug("Variable gelöscht", "".$variableToRemove."", 0);
+                $this->SendDebug("Variable gelöscht", $variableToRemove, 0);
             }
         }
     }
