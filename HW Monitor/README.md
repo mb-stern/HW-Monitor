@@ -85,6 +85,10 @@ Beispiel:
 
 ### 8. Versionen
 
+Version 1.6 (07.07.2024)
+* Spenden-Button hinzugefügt.
+* Dokumentationslink hinzugefügt.
+
 Version 1.5 (05.05.2024)
 * Der Fehler wurde behoben, dass alle Variablen gelöscht wurden, wenn die Verbindung zum Hardwaremonitor unterbrochen wurde. So bleiben nun auch die aufgezeichneten Variablen erhalten.
 
