@@ -43,9 +43,9 @@ Port       		|  Port des Rechners (Standard ist 8085). Der Port muss in der Fire
 Intervall  		|  Intervall für das Update der Werte
 Überwachte ID's	|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
 
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/d107d460-658c-4279-bcd2-681bf1cba80b)
+![2024-03-18 18_46_24-IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/c8472a43-d642-40ff-8edf-531ed633da82)
 
-![image](https://github.com/mb-stern/HW-Monitor/assets/95777848/058973b0-92b8-4098-a073-61ec2f315058)
+![2024-03-18 18_38_21-Entwicklung — IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/90f3d0f4-7684-4b4c-ac52-76152d864dbf)
 
 ### 5. Statusvariablen und Profile
 
@@ -89,7 +89,7 @@ Version 1.6 (07.07.2024)
 * Spenden-Button hinzugefügt.
 * Dokumentationslink hinzugefügt.
 
-Version 1.5 (23.05.2024)
+Version 1.5 (05.05.2024)
 * Der Fehler wurde behoben, dass alle Variablen gelöscht wurden, wenn die Verbindung zum Hardwaremonitor unterbrochen wurde. So bleiben nun auch die aufgezeichneten Variablen erhalten.
 
 Version 1.4 (18.03.2024)
