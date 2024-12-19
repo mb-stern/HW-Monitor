@@ -165,6 +165,7 @@ class HWMonitor extends IPSModule
                         unset($existingVariableIDs[$keyIndex]);
                     }
                 }
+                $this->SendDebug("gefundener Wert", "Wert: $gefundenerWert", 0);
 
                 $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
                 SetValue($variableID, $gefundenerWert);
