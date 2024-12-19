@@ -167,7 +167,12 @@ class HWMonitor extends IPSModule
                 }
                 $this->SendDebug("gefundener Wert", "Wert: $gefundenerWert", 0);
 
-                $gefundenerWert = (float)str_replace([',', '%', '°C'], ['.', '', ''], $gefundenerWert);
+                // Prüfen, ob der Wert numerisch ist
+                if (is_numeric($gefundenerWert)) {
+                    $gefundenerWert = (float)$gefundenerWert; // Nur bei numerischen Werten umwandeln
+                }
+                
+                // Wert speichern
                 SetValue($variableID, $gefundenerWert);
                 $this->SendDebug("Variable aktualisiert", "Variabel-ID: $variableID, Position: $variablePosition, Name: $variableName, Wert: $gefundenerWert", 0);
 
