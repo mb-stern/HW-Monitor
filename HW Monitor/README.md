@@ -85,6 +85,10 @@ Beispiel:
 
 ### 8. Versionen
 
+Version 1.8 (22.12.2024)
+* Anpassung Modulname
+* Anpassung Readme mit geänderter URL
+
 Version 1.7 (19.12.2024)
 * Der Name des Wertes wird wieder angezeigt.
 
