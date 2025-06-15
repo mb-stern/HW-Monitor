@@ -1,7 +1,7 @@
 # Libre Hardware Monitor Modul für IP-Symcon
-Dieses Modul greift die JSON Daten des Libre Harware Monitor ab und liefert die gewünscheten Werte als Variablen in IP-Symcon.
+Dieses Modul greift die JSON Daten des Libre Hardware Monitor ab und liefert die gewünschten Werte als Variablen in IP-Symcon.
 Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
-Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontollierter Erstellung von Variablen. Es werden vier Variablen pro gewählter ID erstellt
+Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontrollierter Erstellung von Variablen. Es werden vier Variablen pro gewählter ID erstellt
 
 ### Inhaltsverzeichnis
 
@@ -73,17 +73,22 @@ HW.Rate   | Float
 
 ### 6. WebFront
 
-Anzeige der gewünschten Variabeln oder Grafiken in der Visualisierung.
+Anzeige der gewünschten Variablen oder Grafiken in der Visualisierung.
 
 ### 7. PHP-Befehlsreferenz
 
 `boolean HW_Update(integer $InstanzID);`
-Aktualisierung der Daten.
+Aktualisierung der Daten. Gibt bei erfolgreichem Einlesen der JSON-Daten `true`
+zurück, andernfalls `false`.
 
 Beispiel:
 `HW_Update(12345);`
 
 ### 8. Versionen
+
+Version 1.9 (15.06.2025)
+* Variablen bleiben erhalten, wenn keine Daten vom Hardware Monitor verfügbar sind.
+* Einige Codeoptimierungen
 
 Version 1.8 (22.12.2024)
 * Anpassung Modulname
@@ -101,10 +106,10 @@ Version 1.5 (05.05.2024)
 
 Version 1.4 (18.03.2024)
 * Die Variablen werden nun mit dem Präfix (ID XX) übersichtlicher dargestellt. Die ID muss dazu entfernt und wieder hinzugefügt werden, um durchgehend die neue Struktur zu erhalten
-* Es werden nur noch vier Variabeln pro ID angelegt (vorher sechs)
+* Es werden nur noch vier Variablen pro ID angelegt (vorher sechs)
 
 Version 1.3 (17.02.2024)
-* Anpassung des Codes um die Store Kompatibilät zu erlangen
+* Anpassung des Codes um die Store Kompatibilität zu erlangen
 * Anpassung von Debug und Fehlermeldung
 
 Version 1.2 (05.02.2024)
@@ -113,7 +118,7 @@ Version 1.2 (05.02.2024)
 * Fenster für ID's im Konfigurationsformular vergrössert.
 
 Version 1.1 (23.01.2024)
-* Variabelprofile werden erstellt und zugeordnet
+* Variablenprofile werden erstellt und zugeordnet
 
 Version 1.0 (21.1.2024)
 * Initiale Version

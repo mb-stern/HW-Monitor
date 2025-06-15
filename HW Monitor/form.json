@@ -1,10 +1,10 @@
 {
-    "elements": 
+    "elements":
     [
       {
         "type": "ExpansionPanel",
         "caption": "Info zum Modul",
-        "items": 
+        "items":
         [
           {
             "type": "Label",
@@ -46,14 +46,14 @@
           "column": "id",
           "direction": "ascending"
       },
-        "columns": 
+        "columns":
         [
             {
                 "name": "id",
                 "caption": "ID des Wertes",
                 "width": "150",
                 "add": 0,
-                "edit": 
+                "edit":
                 {
                     "type": "NumberSpinner"
                 }
@@ -66,7 +66,7 @@
     },
     {
       "type": "RowLayout",
-      "items": 
+      "items":
       [
         {
           "type": "Image",
@@ -81,4 +81,3 @@
     }
   ]
 }
-  
