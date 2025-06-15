@@ -74,7 +74,9 @@ class HWMonitor extends IPSModule
             $this->SendDebug("Konfiguration", "IP-Adresse ist nicht konfiguriert", 0);
             $this->LogMessage("IP-Adresse ist nicht konfiguriert", KL_ERROR);
         } else {
-            $this->Update();
+            if (!$this->Update()) {
+                $this->SendDebug("Update", "Initiale Datenabfrage fehlgeschlagen", 0);
+            }
         }
     }
 
@@ -107,7 +109,7 @@ class HWMonitor extends IPSModule
         } catch (Exception $e) {
             $this->SendDebug("Fehler", $e->getMessage(), 0);
             $this->LogMessage($e->getMessage(), KL_ERROR);
-            return;
+            return false;
         }
 
         $this->SendDebug("Verbindungseinstellung", "{$this->ReadPropertyString('IPAddress')} : {$this->ReadPropertyInteger('Port')}", 0);
@@ -132,11 +134,22 @@ class HWMonitor extends IPSModule
 
         // Löschen nicht mehr benötigter Variablen
         $this->deleteUnusedVariables($existingVariableIDs);
+
+        return true;
     }
 
     // Neue Methode zur Erstellung und Aktualisierung der Variablen
     private function createAndUpdateVariables($gesuchteId, $prefix, $foundValues, &$existingVariableIDs)
     {
+        // Bestehende Variablen für diese ID aus der Löschliste entfernen
+        foreach (['Text', 'Min', 'Max', 'Value'] as $index => $key) {
+            $ident = "Variable_" . ($gesuchteId * 10 + $index) . "_" . $key;
+            $pos = array_search($ident, $existingVariableIDs);
+            if ($pos !== false) {
+                unset($existingVariableIDs[$pos]);
+            }
+        }
+
         $variableNameReplacements = [
             'Text' => 'Name',
             'Min' => 'Minimum',
