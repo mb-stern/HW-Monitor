@@ -140,6 +140,15 @@ class HWMonitor extends IPSModule
     // Neue Methode zur Erstellung und Aktualisierung der Variablen
     private function createAndUpdateVariables($gesuchteId, $prefix, $foundValues, &$existingVariableIDs)
     {
+        // Bestehende Variablen für diese ID aus der Löschliste entfernen
+        foreach (['Text', 'Min', 'Max', 'Value'] as $index => $key) {
+            $ident = "Variable_" . ($gesuchteId * 10 + $index) . "_" . $key;
+            $pos = array_search($ident, $existingVariableIDs);
+            if ($pos !== false) {
+                unset($existingVariableIDs[$pos]);
+            }
+        }
+
         $variableNameReplacements = [
             'Text' => 'Name',
             'Min' => 'Minimum',

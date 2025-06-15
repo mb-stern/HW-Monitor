@@ -87,6 +87,7 @@ Beispiel:
 ### 8. Versionen
 
 Version 1.9 (15.06.2025)
+* Variablen bleiben erhalten, wenn keine Daten vom Hardware Monitor verfügbar sind.
 * Einige Codeoptimierungen
 
 Version 1.8 (22.12.2024)
