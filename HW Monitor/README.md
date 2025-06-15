@@ -86,6 +86,9 @@ Beispiel:
 
 ### 8. Versionen
 
+Version 1.9 (15.06.2025)
+* Einige Codeoptimierungen
+
 Version 1.8 (22.12.2024)
 * Anpassung Modulname
 * Anpassung Readme mit geänderter URL
