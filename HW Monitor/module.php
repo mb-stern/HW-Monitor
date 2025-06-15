@@ -1,7 +1,6 @@
 <?php
 class HWMonitor extends IPSModule
 {
-    private $updateTimer;
 
     protected function searchValueForId($jsonArray, $searchId, &$foundValues)
     {
