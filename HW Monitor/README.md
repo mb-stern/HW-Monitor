@@ -78,7 +78,8 @@ Anzeige der gewünschten Variabeln oder Grafiken in der Visualisierung.
 ### 7. PHP-Befehlsreferenz
 
 `boolean HW_Update(integer $InstanzID);`
-Aktualisierung der Daten.
+Aktualisierung der Daten. Gibt bei erfolgreichem Einlesen der JSON-Daten `true`
+zurück, andernfalls `false`.
 
 Beispiel:
 `HW_Update(12345);`
