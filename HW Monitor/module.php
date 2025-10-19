@@ -198,13 +198,32 @@ class HWMonitor extends IPSModule
     {
         // Auswahl lesen
         $rows = $this->loadSelectedRows();
+        // Nur aktive Zeilen berücksichtigen
         $activeRows = array_values(array_filter($rows, fn($r) =>
-            !empty($r['active']) && !empty($r['uid']) && !empty($r['pos'])
+            !empty($r['active']) && !empty($r['uid'])
         ));
         if (empty($activeRows)) {
             $this->SendDebug('Update', 'Keine aktive Auswahl – nichts zu tun.', 0);
             return true;
         }
+
+        // Auto-Pos-Vergabe: fehlende/0-Positionen on-the-fly auffüllen
+        $nextPos = 1;
+        $usedPos = [];
+        foreach ($activeRows as &$r) {
+            $p = (int)($r['pos'] ?? 0);
+            if ($p <= 0) {
+                // freie nächste Position suchen
+                while (isset($usedPos[$nextPos])) {
+                    $nextPos++;
+                }
+                $p = $nextPos++;
+                $r['pos'] = $p;
+                $this->SendDebug('AutoPos', "UID {$r['uid']} → pos={$p}", 0);
+            }
+            $usedPos[$p] = true;
+        }
+        unset($r);
 
         // Daten holen
         try {
@@ -230,34 +249,25 @@ class HWMonitor extends IPSModule
             }
         }
 
-        // Doppelte Positionen warnen (wir benutzen dann die Reihenfolge)
-        $posSeen = [];
-        foreach ($activeRows as $r) {
-            $p = (int)$r['pos'];
-            if (isset($posSeen[$p])) {
-                $this->SendDebug('Warnung', "Position {$p} ist mehrfach vergeben.", 0);
-            }
-            $posSeen[$p] = true;
-        }
-
-        $seen = [];
+        $seen    = [];
         $created = 0;
 
         // Für jede aktive Zeile 4 Variablen anlegen/aktualisieren
         foreach ($activeRows as $r) {
             $uid     = (string)$r['uid'];
             $pos     = (int)$r['pos'];
-            $caption = (string)($r['caption'] ?? '');
-            $type    = (string)($r['type'] ?? '');
+            if ($pos <= 0) { continue; } // failsafe
 
             if (!isset($points[$uid])) {
                 $this->SendDebug('Missing', "UID nicht gefunden: {$uid}", 0);
                 continue;
             }
-
             $payload = $points[$uid]; // ['Text','Type','Min','Value','Max','SensorId']
-            $profile = $this->getVariableProfileByType($payload['Type'] ?? $type);
+            $type    = (string)($payload['Type'] ?? ($r['type'] ?? ''));
+            $profile = $this->getVariableProfileByType($type);
 
+            $caption = (string)($r['caption'] ?? '');
+            $nameValue = $caption !== '' ? $caption : ($payload['Text'] ?? '');
             $basePos = $pos * 10;
 
             // Name
@@ -267,7 +277,6 @@ class HWMonitor extends IPSModule
                 $varText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0);
                 $created++;
             }
-            $nameValue = $caption !== '' ? $caption : ($payload['Text'] ?? '');
             if ((string)GetValue($varText) !== (string)$nameValue) {
                 SetValue($varText, (string)$nameValue);
             }
@@ -289,7 +298,7 @@ class HWMonitor extends IPSModule
                     }
                     $seen[$ident] = true;
                 } else {
-                    // Kein numerischer Wert: nicht setzen → wird ggf. beim Cleanup entfernt
+                    // kein numerischer Wert → Variable bleibt bestehen, wird aber nicht als gesehen markiert
                 }
             }
         }
@@ -303,7 +312,7 @@ class HWMonitor extends IPSModule
             }
         }
 
-        $this->SendDebug('Update', "Fertig. Neu/aktualisiert: {$created} Variablen (in Vierergruppen).", 0);
+        $this->SendDebug('Update', "Fertig. Neu/aktualisiert: {$created} Variablen (Vierergruppen).", 0);
         return true;
     }
 
