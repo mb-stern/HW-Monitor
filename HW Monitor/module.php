@@ -109,13 +109,46 @@ class HWMonitor extends IPSModule
                     'add'     => false,
                     'delete'  => false,
                     'sort'    => ['column' => 'pos', 'direction' => 'ascending'],
-                    'columns' => [
-                        ['caption' => 'Aktiv', 'name' => 'active', 'width' => '70px', 'align' => 'center', 'edit' => ['type' => 'CheckBox']],
-                        ['caption' => 'Pos.',  'name' => 'pos',    'width' => '70px', 'align' => 'center', 'edit' => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]],
-                        ['caption' => 'Name',  'name' => 'caption', 'width' => 'auto'],
-                        ['caption' => 'Type',  'name' => 'type',    'width' => '120px'],
-                        ['caption' => 'UID',   'name' => 'uid',     'width' => '420px'],
+                'columns' => [
+                    // editierbare Spalten -> werden gespeichert
+                    [
+                        'caption' => 'Aktiv',
+                        'name'    => 'active',
+                        'width'   => '70px',
+                        'align'   => 'center',
+                        'edit'    => ['type' => 'CheckBox']
                     ],
+                    [
+                        'caption' => 'Pos.',
+                        'name'    => 'pos',
+                        'width'   => '70px',
+                        'align'   => 'center',
+                        'edit'    => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]
+                    ],
+
+                    // NICHT editierbar, ABER explizit speicherbar!
+                    [
+                        'caption' => 'Name',
+                        'name'    => 'caption',
+                        'width'   => 'auto',
+                        'save'    => true,
+                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                    ],
+                    [
+                        'caption' => 'Type',
+                        'name'    => 'type',
+                        'width'   => '120px',
+                        'save'    => true,
+                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                    ],
+                    [
+                        'caption' => 'UID',
+                        'name'    => 'uid',
+                        'width'   => '420px',
+                        'save'    => true,
+                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                    ],
+                ],
                     'values'  => $values
                 ],
 
