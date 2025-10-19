@@ -158,7 +158,7 @@ class HWMonitor extends IPSModule
                     'type'    => 'Button',
                     'caption' => 'Jetzt aktualisieren (ausgewählte Daten)',
                     'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
-                ]
+                ],
             'status'  => []
         ];
 
