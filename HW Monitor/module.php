@@ -242,7 +242,7 @@ class HWMonitor extends IPSModule
 
         $seen = [];
 
-        // JEDE aktive Zeile → Vierergruppe
+        // JEDE aktive Zeile → Vierergruppe (mit Quell-Namen als sichtbarem Variablennamen)
         foreach ($activeRows as $r) {
             $uidSel  = $r['uid'];
             $pos     = (int)$r['pos'];
@@ -264,27 +264,49 @@ class HWMonitor extends IPSModule
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
-            $type    = (string)($payload['Type'] ?? $typeSel);
-            $profile = $this->getVariableProfileByType($type);
-            $basePos = $pos * 10;
-            $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+            // Profil & "schöner" Präfix für sichtbare Variable-Namen
+            $type        = (string)($payload['Type'] ?? $typeSel);
+            $profile     = $this->getVariableProfileByType($type);
+            $basePos     = $pos * 10;
+            $nameVal     = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+            $prettyPrefix= trim($nameVal . ($type !== '' ? " [{$type}]" : '')); // z.B. "Memory › Load [Load]"
 
-            // Name
+            // --- Name (immer anlegen/setzen + sichtbaren Namen aktualisieren) ---
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            if ($vText === false) { $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0); }
-            if ((string)GetValue($vText) !== $nameVal) { SetValue($vText, $nameVal); }
+            if ($vText === false) {
+                $vText = $this->RegisterVariableString($idText, "{$prettyPrefix} - Name", '', $basePos + 0);
+            } else {
+                $currentName = IPS_GetObject($vText)['ObjectName'] ?? '';
+                $targetName  = "{$prettyPrefix} - Name";
+                if ($currentName !== $targetName) {
+                    IPS_SetName($vText, $targetName);
+                }
+            }
+            if ((string)GetValue($vText) !== $nameVal) {
+                SetValue($vText, $nameVal);
+            }
             $seen[$idText] = true;
 
-            // Min/Value/Max
+            // --- Min / Value / Max (immer anlegen; Werte setzen wenn numerisch; sichtbare Namen aktualisieren) ---
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                if ($vid === false) { $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset); }
+                $targetName = "{$prettyPrefix} - {$field}";
+                if ($vid === false) {
+                    $vid = $this->RegisterVariableFloat($ident, $targetName, $profile, $basePos + $offset);
+                } else {
+                    $currentName = IPS_GetObject($vid)['ObjectName'] ?? '';
+                    if ($currentName !== $targetName) {
+                        IPS_SetName($vid, $targetName);
+                    }
+                }
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null) {
-                    if ((float)GetValue($vid) !== (float)$num) { SetValue($vid, $num); }
+                    if ((float)GetValue($vid) !== (float)$num) {
+                        SetValue($vid, $num);
+                    }
                 }
                 $seen[$ident] = true;
             }
