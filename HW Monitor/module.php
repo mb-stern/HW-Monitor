@@ -112,9 +112,9 @@ class HWMonitor extends IPSModule
                     'columns' => [
                         ['caption' => 'Aktiv', 'name' => 'active', 'width' => '70px', 'align' => 'center', 'edit' => ['type' => 'CheckBox']],
                         ['caption' => 'Pos.',  'name' => 'pos',    'width' => '70px', 'align' => 'center', 'edit' => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]],
-                        ['caption' => 'Name',  'name' => 'caption', 'width' => 'auto', 'save' => false],
-                        ['caption' => 'Type',  'name' => 'type',    'width' => '120px', 'save' => false],
-                        ['caption' => 'UID',   'name' => 'uid',     'width' => '420px', 'save' => false],
+                        ['caption' => 'Name',  'name' => 'caption', 'width' => 'auto'],
+                        ['caption' => 'Type',  'name' => 'type',    'width' => '120px'],
+                        ['caption' => 'UID',   'name' => 'uid',     'width' => '420px'],
                     ],
                     'values'  => $values
                 ],
