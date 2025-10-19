@@ -86,6 +86,11 @@ Beispiel:
 
 ### 8. Versionen
 
+Version 2.0 (20.10.2025)
+* Komplette Überarbeitung des Codes. Die bestehenden Varaiblen können nicht mehr weiterverwendet werden.
+* Die Datanpunkte können nun via Checkboxen über den Namen gewählt werden
+* Es sollte keine unplausiblen Werte mehr geben, wenn sich Datenpunkte im Hardware Monitor ändern.
+
 Version 1.9 (15.06.2025)
 * Variablen bleiben erhalten, wenn keine Daten vom Hardware Monitor verfügbar sind.
 * Einige Codeoptimierungen
