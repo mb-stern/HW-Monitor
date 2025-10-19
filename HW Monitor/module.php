@@ -269,7 +269,7 @@ class HWMonitor extends IPSModule
             $profile     = $this->getVariableProfileByType($type);
             $basePos     = $pos * 10;
             $nameVal     = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
-            $prettyPrefix= trim($nameVal . ($type !== '' ? " [{$type}]" : '')); // z.B. "Memory › Load [Load]"
+            $prettyPrefix = $nameVal;
 
             // --- Name (immer anlegen/setzen + sichtbaren Namen aktualisieren) ---
             $idText = $this->identFor($pos, 'Text');
