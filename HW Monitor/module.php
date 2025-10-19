@@ -10,14 +10,11 @@ class HWMonitor extends IPSModule
         // Eigenschaften
         $this->RegisterPropertyString('IPAddress', '0.0.0.0');
         $this->RegisterPropertyInteger('Port', 8085);
-        $this->RegisterPropertyInteger('UpdateInterval', 30); // Sekunden
-        // Auswahl-Liste: [{active:bool, pos:int, uid:string, caption:string, type:string, icon:string}]
+        $this->RegisterPropertyInteger('UpdateInterval', 30);
         $this->RegisterPropertyString('SelectedSensors', '[]');
 
-        // Timer
         $this->RegisterTimer('UpdateTimer', 0, 'IPS_RequestAction(' . $this->InstanceID . ', "DoUpdate", 0);');
 
-        // Profile
         $this->createVariableProfiles();
     }
 
@@ -139,25 +136,52 @@ class HWMonitor extends IPSModule
     // ------------------------ Update ------------------------
     public function Update(): bool
     {
-        // Auswahl lesen
-        $rows = $this->loadSelectedRows();
-        $activeRows = array_values(array_filter($rows, fn($r) =>
-            !empty($r['active']) && !empty($r['uid'])
-        ));
-        $this->SendDebug('Update', 'Aktive Zeilen: ' . count($activeRows), 0);
+        // --- Debug: Rohinhalt der Property zeigen
+        $raw = $this->ReadPropertyString('SelectedSensors');
+        $this->SendDebug('SelectedSensors.raw', $raw === '' ? '(empty)' : $raw, 0);
 
-        // Auto-Pos für pos<=0
+        // Auswahl lesen & robust casten
+        $rows = json_decode($raw, true);
+        if (!is_array($rows)) { $rows = []; }
+
+        // aktiv = true | 1 | "1"; pos als int
+        $activeRows = [];
+        foreach ($rows as $r) {
+            $uid = (string)($r['uid'] ?? '');
+            $pos = (int)($r['pos'] ?? 0);
+            $activeFlag = $r['active'] ?? false;
+            $active = ($activeFlag === true) || ($activeFlag === 1) || ($activeFlag === '1');
+
+            if ($active && $uid !== '') {
+                if ($pos <= 0) { $pos = 0; } // wird gleich automatisch vergeben
+                $activeRows[] = [
+                    'uid'     => $uid,
+                    'pos'     => $pos,
+                    'caption' => (string)($r['caption'] ?? ''),
+                    'type'    => (string)($r['type'] ?? '')
+                ];
+            }
+        }
+        $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
+        if (empty($activeRows)) {
+            $this->SendDebug('Update', 'Keine aktiven Zeilen -> nichts zu tun.', 0);
+            return true;
+        }
+
+        // Auto-Pos für fehlende/0
         $nextPos = 1;
         $usedPos = [];
         foreach ($activeRows as &$r) {
-            $p = (int)($r['pos'] ?? 0);
+            $p = (int)$r['pos'];
             if ($p <= 0) {
                 while (isset($usedPos[$nextPos])) { $nextPos++; }
-                $p = $nextPos++;
-                $r['pos'] = $p;
-                $this->SendDebug('AutoPos', "{$r['uid']} -> pos={$p}", 0);
+                $r['pos'] = $nextPos;
+                $this->SendDebug('AutoPos', $r['uid'] . ' -> pos=' . $nextPos, 0);
+                $usedPos[$nextPos] = true;
+                $nextPos++;
+            } else {
+                $usedPos[$p] = true;
             }
-            $usedPos[$p] = true;
         }
         unset($r);
 
@@ -165,15 +189,15 @@ class HWMonitor extends IPSModule
         try {
             $data = $this->getData();
         } catch (Exception $e) {
-            $this->SendDebug('Update', 'Fehler: ' . $e->getMessage(), 0);
+            $this->SendDebug('Update.Error', $e->getMessage(), 0);
             $this->LogMessage($e->getMessage(), KL_ERROR);
             return false;
         }
 
-        // Sensoren sammeln
+        // Sensoren sammeln (mit kodiert + dekodiert indexiert)
         $points = [];
         $this->collectSensors($data, [], $points);
-        $this->SendDebug('Update', 'Sensoren im JSON: ' . count($points), 0);
+        $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
 
         // vorhandene Idents
         $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
@@ -181,57 +205,67 @@ class HWMonitor extends IPSModule
         foreach ($existingIDs as $vid) {
             $obj = IPS_GetObject($vid);
             $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') $existingIdents[$ident] = true;
+            if ($ident !== '') { $existingIdents[$ident] = true; }
         }
 
         $seen = [];
 
         // JEDE aktive Zeile → Vierergruppe
         foreach ($activeRows as $r) {
-            $uid     = (string)$r['uid'];
+            $uidSel  = $r['uid'];
             $pos     = (int)$r['pos'];
-            $caption = (string)($r['caption'] ?? '');
-            $fallbackType = (string)($r['type'] ?? '');
+            $caption = (string)$r['caption'];
+            $typeSel = (string)$r['type'];
 
-            $payload = $points[$uid] ?? [
-                'Text' => $caption, 'Type' => $fallbackType,
-                'Min' => null, 'Value' => null, 'Max' => null, 'SensorId' => ''
-            ];
+            // UID-Treffer: direkt oder als (de)kodierte Variante
+            $payload = $points[$uidSel]
+                ?? $points[$this->normalizeUid($uidSel)]
+                ?? null;
 
-            $type    = (string)($payload['Type'] ?? $fallbackType);
+            if ($payload === null) {
+                // trotzdem anlegen (mit Caption/Type aus Auswahl)
+                $payload = [
+                    'Text' => $caption,
+                    'Type' => $typeSel,
+                    'Min' => null, 'Value' => null, 'Max' => null
+                ];
+                $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
+            }
+
+            $type    = (string)($payload['Type'] ?? $typeSel);
             $profile = $this->getVariableProfileByType($type);
             $basePos = $pos * 10;
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // Name (immer)
+            // Name
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            if ($vText === false) $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0);
-            if ((string)GetValue($vText) !== $nameVal) SetValue($vText, $nameVal);
+            if ($vText === false) { $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0); }
+            if ((string)GetValue($vText) !== $nameVal) { SetValue($vText, $nameVal); }
             $seen[$idText] = true;
 
-            // Min/Value/Max (immer anlegen; Wert nur setzen wenn numerisch)
+            // Min/Value/Max
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                if ($vid === false) $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset);
-
-                $unit = null;
-                $num  = $this->parseNumberWithUnit($payload[$field] ?? null, $unit);
-                if ($num !== null && (float)GetValue($vid) !== (float)$num) SetValue($vid, $num);
-
+                if ($vid === false) { $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset); }
+                $u = null;
+                $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
+                if ($num !== null) {
+                    if ((float)GetValue($vid) !== (float)$num) { SetValue($vid, $num); }
+                }
                 $seen[$ident] = true;
             }
         }
 
-        // Cleanup: ALLES löschen, was nicht (mehr) ausgewählt ist (nur unsere Idents)
+        // Cleanup: ALLES, was nicht gesehen wurde (nur unsere Idents), löschen
         foreach (array_keys($existingIdents) as $ident) {
             if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
                 $this->UnregisterVariable($ident);
             }
         }
 
-        $this->SendDebug('Update', 'Fertig', 0);
+        $this->SendDebug('Update.Done', 'ok', 0);
         return true;
     }
 
@@ -263,17 +297,20 @@ class HWMonitor extends IPSModule
         $currentAnc = array_merge($ancestors, [$node]);
 
         if ($this->isSensorLeaf($node)) {
-            $uid = $this->buildUID($node, $ancestors);
-            if (!isset($map[$uid])) {
-                $map[$uid] = [
-                    'Text'     => $node['Text']     ?? '',
-                    'Type'     => $node['Type']     ?? '',
-                    'Min'      => $node['Min']      ?? null,
-                    'Value'    => $node['Value']    ?? null,
-                    'Max'      => $node['Max']      ?? null,
-                    'SensorId' => $node['SensorId'] ?? ''
-                ];
-            }
+            // UID in Roh- und Normalform
+            $uidRaw = $this->buildUID($node, $ancestors);
+            $uidNor = $this->normalizeUid($uidRaw);
+
+            $payload = [
+                'Text'     => $node['Text']     ?? '',
+                'Type'     => $node['Type']     ?? '',
+                'Min'      => $node['Min']      ?? null,
+                'Value'    => $node['Value']    ?? null,
+                'Max'      => $node['Max']      ?? null,
+                'SensorId' => $node['SensorId'] ?? ''
+            ];
+            if (!isset($map[$uidRaw])) $map[$uidRaw] = $payload;
+            if (!isset($map[$uidNor])) $map[$uidNor] = $payload;
         }
 
         if (!empty($node['Children']) && is_array($node['Children'])) {
@@ -309,6 +346,7 @@ class HWMonitor extends IPSModule
     private function buildUID(array $node, array $ancestors): string
     {
         if (!empty($node['SensorId'])) {
+            // Roh behalten (kann %7B ... %7D usw. enthalten)
             return 'sensor:' . (string)$node['SensorId'];
         }
         $parts = [];
@@ -316,8 +354,21 @@ class HWMonitor extends IPSModule
             if (!empty($a['Text'])) { $parts[] = (string)$a['Text']; }
         }
         if (!empty($node['Text'])) { $parts[] = (string)$node['Text']; }
-        $type = $node['Type'] ?? '';
-        return 'path:' . implode('/', $parts) . ($type ? '|' . $type : '');
+        $type = (string)($node['Type'] ?? '');
+        return 'path:' . implode('/', $parts) . ($type !== '' ? '|' . $type : '');
+    }
+
+    private function normalizeUid(string $uid): string
+    {
+        // sowohl 'sensor:' als auch 'path:' belassen, nur den sensor-Teil rawurldecoden
+        if (strpos($uid, 'sensor:') === 0) {
+            $sid = substr($uid, 7); // hinter 'sensor:'
+            // doppelt kodierte Anteile ebenfalls entschärfen
+            $dec1 = rawurldecode($sid);
+            $dec2 = rawurldecode($dec1);
+            return 'sensor:' . $dec2;
+        }
+        return $uid;
     }
 
     // ------------------------ Helfer ------------------------
