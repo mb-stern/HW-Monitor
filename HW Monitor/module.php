@@ -299,10 +299,18 @@ class HWMonitor extends IPSModule
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+
                 if ($vid === false) {
-                    // Name nur beim Anlegen setzen, danach nie mehr umbenennen
+                    // Sichtbarer Name nur beim Anlegen vergeben
                     $vid = $this->RegisterVariableFloat($ident, "{$prettyPrefix} - {$field}", $profile, $basePos + $offset);
+                } else {
+                    // NIE umbenennen; optional nur Position aktualisieren (harmlos)
+                    IPS_SetPosition($vid, $basePos + $offset);
+                    // Profil NICHT überschreiben, sonst verliert der Nutzer seine Anpassung
+                    // (Wenn du unbedingt ein Standardprofil setzen willst, dann nur beim Anlegen!)
                 }
+
+                // Wert aktualisieren (das ist OK, Messwerte dürfen überschrieben werden)
                 $u   = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null && (float)GetValue($vid) !== (float)$num) {
