@@ -100,15 +100,17 @@ class HWMonitor extends IPSModule
                 ['type' => 'NumberSpinner',     'name' => 'Port',      'caption' => 'Port', 'minimum' => 1, 'maximum' => 65535],
                 ['type' => 'NumberSpinner',     'name' => 'UpdateInterval', 'caption' => 'Updateintervall (Sek.)', 'minimum' => 0, 'suffix' => 's'],
 
+                ['type' => 'Label', 'caption' => 'Auswahl & Positionen (Übernehmen speichert die Häkchen!)'],
                 [
                     'type'    => 'List',
-                    'name'    => 'SelectedSensors',   
+                    'name'    => 'SelectedSensors',   // muss exakt der Property entsprechen
                     'caption' => 'Sensoren',
                     'rowCount'=> 16,
                     'add'     => false,
                     'delete'  => false,
                     'sort'    => ['column' => 'pos', 'direction' => 'ascending'],
                 'columns' => [
+                    // editierbare Spalten -> werden gespeichert
                     [
                         'caption' => 'Aktiv',
                         'name'    => 'active',
@@ -123,6 +125,8 @@ class HWMonitor extends IPSModule
                         'align'   => 'center',
                         'edit'    => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]
                     ],
+
+                    // NICHT editierbar, ABER explizit speicherbar!
                     [
                         'caption' => 'Name',
                         'name'    => 'caption',
