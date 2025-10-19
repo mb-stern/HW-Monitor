@@ -25,21 +25,34 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
-        $this->SetTimerInterval('UpdateTimer', max(0, $this->ReadPropertyInteger('UpdateInterval')) * 1000);
+        $this->SendDebug('ApplyChanges', 'Start', 0);
 
-        // Nach jedem Übernehmen sofort aktualisieren (Variablen anlegen/aktualisieren & Cleanup)
-        if ($this->ReadPropertyString('IPAddress') !== '' && $this->ReadPropertyString('IPAddress') !== '0.0.0.0') {
-            $this->Update();
+        $intervalMs = max(0, $this->ReadPropertyInteger('UpdateInterval')) * 1000;
+        $this->SetTimerInterval('UpdateTimer', $intervalMs);
+        $this->SendDebug('ApplyChanges', 'Timer gesetzt: ' . $intervalMs . ' ms', 0);
+
+        $ip = $this->ReadPropertyString('IPAddress');
+        if ($ip === '' || $ip === '0.0.0.0') {
+            $this->SendDebug('ApplyChanges', 'Abbruch: IP nicht gesetzt', 0);
+            return;
         }
+
+        $ok = $this->Update();
+        $this->SendDebug('ApplyChanges', 'Update() -> ' . ($ok ? 'OK' : 'FEHLER'), 0);
     }
 
     public function RequestAction($Ident, $Value)
     {
-        if ($Ident === 'DoUpdate') {
-            $this->Update();
-            return;
+        switch ($Ident) {
+            case 'DoUpdate':       // Timer
+            case 'ManualUpdate':   // Button
+                $this->SendDebug('RequestAction', $Ident . ' -> Update()', 0);
+                $this->Update();
+                return;
+
+            default:
+                throw new Exception('Invalid Ident: ' . $Ident);
         }
-        throw new Exception('Invalid Ident: ' . $Ident);
     }
 
     // ------------------------ Formular ------------------------
@@ -109,7 +122,12 @@ class HWMonitor extends IPSModule
                     'values'  => $values
                 ],
 
-                ['type' => 'Label', 'caption' => ($error ?: 'Bereit.')]
+                ['type' => 'Label', 'caption' => ($error ?: 'Bereit.')],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Jetzt aktualisieren (ausgewählte Daten)',
+                    'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
+                ]
             ],
             'actions' => [],
             'status'  => []
@@ -121,13 +139,14 @@ class HWMonitor extends IPSModule
     // ------------------------ Update ------------------------
     public function Update(): bool
     {
-        // Auswahl lesen (nur aktive)
+        // Auswahl lesen
         $rows = $this->loadSelectedRows();
         $activeRows = array_values(array_filter($rows, fn($r) =>
             !empty($r['active']) && !empty($r['uid'])
         ));
+        $this->SendDebug('Update', 'Aktive Zeilen: ' . count($activeRows), 0);
 
-        // Auto-Positionsvergabe on-the-fly für pos<=0
+        // Auto-Pos für pos<=0
         $nextPos = 1;
         $usedPos = [];
         foreach ($activeRows as &$r) {
@@ -136,6 +155,7 @@ class HWMonitor extends IPSModule
                 while (isset($usedPos[$nextPos])) { $nextPos++; }
                 $p = $nextPos++;
                 $r['pos'] = $p;
+                $this->SendDebug('AutoPos', "{$r['uid']} -> pos={$p}", 0);
             }
             $usedPos[$p] = true;
         }
@@ -145,29 +165,28 @@ class HWMonitor extends IPSModule
         try {
             $data = $this->getData();
         } catch (Exception $e) {
-            $this->SendDebug('Fehler', $e->getMessage(), 0);
+            $this->SendDebug('Update', 'Fehler: ' . $e->getMessage(), 0);
             $this->LogMessage($e->getMessage(), KL_ERROR);
             return false;
         }
 
-        // aktuelle Sensoren (nur echte Blatt-Knoten)
+        // Sensoren sammeln
         $points = [];
-        $this->collectSensors($data, [], $points); // uid => ['Text','Type','Min','Value','Max','SensorId']
+        $this->collectSensors($data, [], $points);
+        $this->SendDebug('Update', 'Sensoren im JSON: ' . count($points), 0);
 
-        // vorhandene Idents erfassen
+        // vorhandene Idents
         $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
         $existingIdents = [];
         foreach ($existingIDs as $vid) {
             $obj = IPS_GetObject($vid);
             $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') {
-                $existingIdents[$ident] = true;
-            }
+            if ($ident !== '') $existingIdents[$ident] = true;
         }
 
         $seen = [];
 
-        // JEDE aktive Zeile → Vierergruppe anlegen/aktualisieren
+        // JEDE aktive Zeile → Vierergruppe
         foreach ($activeRows as $r) {
             $uid     = (string)$r['uid'];
             $pos     = (int)$r['pos'];
@@ -175,42 +194,33 @@ class HWMonitor extends IPSModule
             $fallbackType = (string)($r['type'] ?? '');
 
             $payload = $points[$uid] ?? [
-                // UID nicht (mehr) im JSON? → trotzdem anlegen, Namen aus caption
-                'Text' => $caption,
-                'Type' => $fallbackType,
+                'Text' => $caption, 'Type' => $fallbackType,
                 'Min' => null, 'Value' => null, 'Max' => null, 'SensorId' => ''
             ];
 
             $type    = (string)($payload['Type'] ?? $fallbackType);
             $profile = $this->getVariableProfileByType($type);
-
             $basePos = $pos * 10;
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // Name (immer anlegen/setzen)
+            // Name (immer)
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            if ($vText === false) {
-                $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0);
-            }
-            if ((string)GetValue($vText) !== $nameVal) {
-                SetValue($vText, $nameVal);
-            }
+            if ($vText === false) $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0);
+            if ((string)GetValue($vText) !== $nameVal) SetValue($vText, $nameVal);
             $seen[$idText] = true;
 
-            // Min/Value/Max (Variablen IMMER anlegen; Wert nur setzen, wenn numerisch)
+            // Min/Value/Max (immer anlegen; Wert nur setzen wenn numerisch)
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                if ($vid === false) {
-                    $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset);
-                }
+                if ($vid === false) $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset);
+
                 $unit = null;
                 $num  = $this->parseNumberWithUnit($payload[$field] ?? null, $unit);
-                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
-                    SetValue($vid, $num);
-                }
-                $seen[$ident] = true; // gesehen, damit Cleanup sie NICHT löscht
+                if ($num !== null && (float)GetValue($vid) !== (float)$num) SetValue($vid, $num);
+
+                $seen[$ident] = true;
             }
         }
 
@@ -221,6 +231,7 @@ class HWMonitor extends IPSModule
             }
         }
 
+        $this->SendDebug('Update', 'Fertig', 0);
         return true;
     }
 
