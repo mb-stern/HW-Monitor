@@ -242,7 +242,7 @@ class HWMonitor extends IPSModule
 
         $seen = [];
 
-        // JEDE aktive Zeile → Vierergruppe (sichtbare Namen nur mit letztem Knoten)
+        // JEDE aktive Zeile → Vierergruppe
         foreach ($activeRows as $r) {
             $uidSel  = $r['uid'];
             $pos     = (int)$r['pos'];
@@ -264,60 +264,27 @@ class HWMonitor extends IPSModule
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
-            // Profil & Anzeigepräfix: NUR letztes Caption-Segment + Typ (ohne Pfad/ohne Klammern)
             $type    = (string)($payload['Type'] ?? $typeSel);
             $profile = $this->getVariableProfileByType($type);
             $basePos = $pos * 10;
-
-            // nameVal: gespeicherte Caption oder Text aus Payload
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // Nur das letzte Segment aus "A › B › C" verwenden
-            $leaf = $nameVal;
-            if (strpos($leaf, '›') !== false) {
-                $parts = array_map('trim', explode('›', $leaf));
-                $leaf  = end($parts) ?: $leaf;
-            }
-            // Präfix z. B. "Memory Load" (ohne Klammern, ohne Pfad)
-            $prettyPrefix = trim($leaf . ($type !== '' ? ' ' . $type : ''));
-
-            // --- Name (immer anlegen/setzen + sichtbaren Namen aktualisieren) ---
+            // Name
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            $targetNameText = "{$prettyPrefix} - Name";
-            if ($vText === false) {
-                $vText = $this->RegisterVariableString($idText, $targetNameText, '', $basePos + 0);
-            } else {
-                $currentName = IPS_GetObject($vText)['ObjectName'] ?? '';
-                if ($currentName !== $targetNameText) {
-                    IPS_SetName($vText, $targetNameText);
-                }
-            }
-            // Inhalt: nur der Leaf-Name (ohne Typ)
-            if ((string)GetValue($vText) !== (string)$leaf) {
-                SetValue($vText, (string)$leaf);
-            }
+            if ($vText === false) { $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0); }
+            if ((string)GetValue($vText) !== $nameVal) { SetValue($vText, $nameVal); }
             $seen[$idText] = true;
 
-            // --- Min / Value / Max (immer anlegen; Werte setzen wenn numerisch; sichtbare Namen aktualisieren) ---
+            // Min/Value/Max
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                $targetName = "{$prettyPrefix} - {$field}";
-                if ($vid === false) {
-                    $vid = $this->RegisterVariableFloat($ident, $targetName, $profile, $basePos + $offset);
-                } else {
-                    $currentName = IPS_GetObject($vid)['ObjectName'] ?? '';
-                    if ($currentName !== $targetName) {
-                        IPS_SetName($vid, $targetName);
-                    }
-                }
+                if ($vid === false) { $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset); }
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null) {
-                    if ((float)GetValue($vid) !== (float)$num) {
-                        SetValue($vid, $num);
-                    }
+                    if ((float)GetValue($vid) !== (float)$num) { SetValue($vid, $num); }
                 }
                 $seen[$ident] = true;
             }
