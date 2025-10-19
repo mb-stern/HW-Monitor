@@ -242,7 +242,7 @@ class HWMonitor extends IPSModule
 
         $seen = [];
 
-        // JEDE aktive Zeile → Vierergruppe (mit Quell-Namen als sichtbarem Variablennamen)
+        // JEDE aktive Zeile → Vierergruppe (sichtbare Namen nur mit letztem Knoten)
         foreach ($activeRows as $r) {
             $uidSel  = $r['uid'];
             $pos     = (int)$r['pos'];
@@ -264,27 +264,38 @@ class HWMonitor extends IPSModule
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
-            // Profil & "schöner" Präfix für sichtbare Variable-Namen
-            $type        = (string)($payload['Type'] ?? $typeSel);
-            $profile     = $this->getVariableProfileByType($type);
-            $basePos     = $pos * 10;
-            $nameVal     = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
-            $prettyPrefix = $nameVal;
+            // Profil & Anzeigepräfix: NUR letztes Caption-Segment + Typ (ohne Pfad/ohne Klammern)
+            $type    = (string)($payload['Type'] ?? $typeSel);
+            $profile = $this->getVariableProfileByType($type);
+            $basePos = $pos * 10;
+
+            // nameVal: gespeicherte Caption oder Text aus Payload
+            $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+
+            // Nur das letzte Segment aus "A › B › C" verwenden
+            $leaf = $nameVal;
+            if (strpos($leaf, '›') !== false) {
+                $parts = array_map('trim', explode('›', $leaf));
+                $leaf  = end($parts) ?: $leaf;
+            }
+            // Präfix z. B. "Memory Load" (ohne Klammern, ohne Pfad)
+            $prettyPrefix = trim($leaf . ($type !== '' ? ' ' . $type : ''));
 
             // --- Name (immer anlegen/setzen + sichtbaren Namen aktualisieren) ---
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
+            $targetNameText = "{$prettyPrefix} - Name";
             if ($vText === false) {
-                $vText = $this->RegisterVariableString($idText, "{$prettyPrefix} - Name", '', $basePos + 0);
+                $vText = $this->RegisterVariableString($idText, $targetNameText, '', $basePos + 0);
             } else {
                 $currentName = IPS_GetObject($vText)['ObjectName'] ?? '';
-                $targetName  = "{$prettyPrefix} - Name";
-                if ($currentName !== $targetName) {
-                    IPS_SetName($vText, $targetName);
+                if ($currentName !== $targetNameText) {
+                    IPS_SetName($vText, $targetNameText);
                 }
             }
-            if ((string)GetValue($vText) !== $nameVal) {
-                SetValue($vText, $nameVal);
+            // Inhalt: nur der Leaf-Name (ohne Typ)
+            if ((string)GetValue($vText) !== (string)$leaf) {
+                SetValue($vText, (string)$leaf);
             }
             $seen[$idText] = true;
 
