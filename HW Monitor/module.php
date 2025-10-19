@@ -62,6 +62,23 @@ class HWMonitor extends IPSModule
                 $this->UpdateFormField('DummyInfo', 'caption', 'Positionsvorschlag gesetzt (1..N). Bitte Übernehmen.');
                 break;
 
+            case 'Diag':
+                $rows = $this->loadSelectedRows();
+                $active = array_values(array_filter($rows, fn($r) => !empty($r['active']) && !empty($r['uid'])));
+                $this->SendDebug('Diag.Selected.ActiveRows', json_encode($active, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), 0);
+                try {
+                    $data = $this->getData();
+                    $points = [];
+                    $this->traverseSensors($data, [], $points);
+                    $this->SendDebug('Diag.JSON.SensorCount', strval(count($points)), 0);
+                    // zeige mal die ersten 5 UIDs
+                    $uids = array_slice(array_keys($points), 0, 5);
+                    $this->SendDebug('Diag.JSON.SampleUIDs', json_encode($uids, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), 0);
+                } catch (Exception $e) {
+                    $this->SendDebug('Diag.Error', $e->getMessage(), 0);
+                }
+                break;
+
             default:
                 throw new Exception('Invalid Ident: ' . $Ident);
         }
@@ -120,6 +137,12 @@ class HWMonitor extends IPSModule
                 ['type' => 'ValidationTextBox', 'name' => 'IPAddress', 'caption' => 'IP-Adresse'],
                 ['type' => 'NumberSpinner', 'name' => 'Port', 'caption' => 'Port', 'minimum' => 1, 'maximum' => 65535],
                 ['type' => 'NumberSpinner', 'name' => 'UpdateInterval', 'caption' => 'Updateintervall (Sek.)', 'minimum' => 0, 'suffix' => 's'],
+
+                [
+                    'type' => 'Button',
+                    'caption' => 'Diagnose: aktive Auswahl + JSON-Überblick ins Debug loggen',
+                    'onClick' => 'IPS_RequestAction($id, "Diag", 0);'
+                ],
 
                 ['type' => 'Label', 'caption' => 'Sensor-Auswahl (wie Goodwe: Name + manuelle Positionierung)'],
                 [
