@@ -269,19 +269,28 @@ class HWMonitor extends IPSModule
             $basePos = $pos * 10;
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // --- Nur den letzten Teil der Caption ohne [Klammern] für den sichtbaren Namen verwenden ---
+            // --- letzten Teil der Caption ziehen ---
             $leaf = $nameVal;
             if (strpos($leaf, '›') !== false) {
                 $parts = array_map('trim', explode('›', $leaf));
                 $leaf  = end($parts) ?: $leaf;
             }
-            // Klammerteil am Ende wie " [Load]" entfernen
+            // --- Klammerteil am Ende (z. B. " [Load]") entfernen ---
             $leafClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $leaf));
 
-            // -------- Name (sichtbarer Name = "<LeafClean> - Name"; Wert bleibt = $nameVal) --------
+            // --- Typ OHNE Klammern anhängen, aber nur falls noch nicht enthalten ---
+            $prettyPrefix = $leafClean;
+            if ($type !== '') {
+                // vermeidet Duplikate wie "Memory Load Load"
+                if (stripos(' ' . $leafClean . ' ', ' ' . $type . ' ') === false) {
+                    $prettyPrefix = trim($leafClean . ' ' . $type);
+                }
+            }
+
+            // -------- Name (sichtbarer Name = "<LeafClean [ + Type ]> - Name"; Wert bleibt = $nameVal) --------
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            $targetNameText = "{$leafClean} - Name";
+            $targetNameText = "{$prettyPrefix} - Name";
             if ($vText === false) {
                 $vText = $this->RegisterVariableString($idText, $targetNameText, '', $basePos + 0);
             } else {
@@ -290,17 +299,17 @@ class HWMonitor extends IPSModule
                     IPS_SetName($vText, $targetNameText);
                 }
             }
-            // WICHTIG: den gespeicherten Wert NICHT ändern – so wie bisher
+            // Wert NICHT verändern
             if ((string)GetValue($vText) !== $nameVal) {
                 SetValue($vText, $nameVal);
             }
             $seen[$idText] = true;
 
-            // -------- Min / Value / Max (sichtbarer Name = "<LeafClean> - <Field>"; Werte bleiben) --------
+            // -------- Min / Value / Max (sichtbarer Name = "<LeafClean [ + Type ]> - <Field>"; Werte bleiben) --------
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                $targetName = "{$leafClean} - {$field}";
+                $targetName = "{$prettyPrefix} - {$field}";
                 if ($vid === false) {
                     $vid = $this->RegisterVariableFloat($ident, $targetName, $profile, $basePos + $offset);
                 } else {
@@ -311,10 +320,8 @@ class HWMonitor extends IPSModule
                 }
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
-                if ($num !== null) {
-                    if ((float)GetValue($vid) !== (float)$num) {
-                        SetValue($vid, $num);
-                    }
+                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
+                    SetValue($vid, $num);
                 }
                 $seen[$ident] = true;
             }
