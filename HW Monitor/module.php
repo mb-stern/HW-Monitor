@@ -260,46 +260,56 @@ class HWMonitor extends IPSModule
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
+            // Profil, Pos-Basis, Caption/Leaf vorbereiten
             $type    = (string)($payload['Type'] ?? $typeSel);
             $profile = $this->getVariableProfileByType($type);
             $basePos = $pos * 10;
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // --- letzten Teil der Caption ziehen ---
+            // letzten Teil der Caption nehmen
             $leaf = $nameVal;
             if (strpos($leaf, '›') !== false) {
                 $parts = array_map('trim', explode('›', $leaf));
                 $leaf  = end($parts) ?: $leaf;
             }
-            // --- Klammerteil am Ende (z. B. " [Load]") entfernen ---
+            // eckige Klammern am Ende entfernen (z. B. " [Load]")
             $leafClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $leaf));
 
-            // --- Typ OHNE Klammern anhängen, aber nur falls noch nicht enthalten ---
+            // Typ ohne Klammern anhängen (aber Duplikate vermeiden)
             $prettyPrefix = $leafClean;
-            if ($type !== '') {
-                // vermeidet Duplikate wie "Memory Load Load"
-                if (stripos(' ' . $leafClean . ' ', ' ' . $type . ' ') === false) {
-                    $prettyPrefix = trim($leafClean . ' ' . $type);
-                }
+            if ($type !== '' && stripos(' ' . $leafClean . ' ', ' ' . $type . ' ') === false) {
+                $prettyPrefix = trim($leafClean . ' ' . $type);
             }
 
-            // -------- Name (sichtbarer Name = "<LeafClean [ + Type ]> - Name"; Wert bleibt = $nameVal) --------
+            // ---------- Variable 1: Pfad (Ident bleibt ..._Text) ----------
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            $targetNameText = "{$prettyPrefix} - Pfad";
             if ($vText === false) {
-                $vText = $this->RegisterVariableString($idText, $targetNameText, '', $basePos + 0);
-            } else {
-                $currentName = IPS_GetObject($vText)['ObjectName'] ?? '';
-                if ($currentName !== $targetNameText) {
-                    IPS_SetName($vText, $targetNameText);
-                }
+                // Name nur beim Anlegen setzen, danach nie mehr umbenennen
+                $vText = $this->RegisterVariableString($idText, "{$prettyPrefix} - Pfad", '', $basePos + 0);
             }
-            // Wert NICHT verändern
-            if ((string)GetValue($vText) !== $nameVal) {
-                SetValue($vText, $nameVal);
+            // Wert (Pfad) schreiben
+            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $nameVal));
+            if ((string)GetValue($vText) !== $pathClean) {
+                SetValue($vText, $pathClean);
             }
             $seen[$idText] = true;
+
+            // ---------- Variablen 2–4: Min / Value / Max ----------
+            foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
+                $ident = $this->identFor($pos, $field);
+                $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+                if ($vid === false) {
+                    // Name nur beim Anlegen setzen, danach nie mehr umbenennen
+                    $vid = $this->RegisterVariableFloat($ident, "{$prettyPrefix} - {$field}", $profile, $basePos + $offset);
+                }
+                $u   = null;
+                $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
+                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
+                    SetValue($vid, $num);
+                }
+                $seen[$ident] = true;
+            }
 
             // -------- Min / Value / Max (sichtbarer Name = "<LeafClean [ + Type ]> - <Field>"; Werte bleiben) --------
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
