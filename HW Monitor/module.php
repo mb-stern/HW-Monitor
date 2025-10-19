@@ -32,17 +32,19 @@ class HWMonitor extends IPSModule
     {
         parent::ApplyChanges();
 
+        // Timer setzen
         $intervalMs = max(0, $this->ReadPropertyInteger('UpdateInterval')) * 1000;
         $this->SetTimerInterval('UpdateTimer', $intervalMs);
 
+        // Verbindung prüfen
         $ip = $this->ReadPropertyString('IPAddress');
-        if ($ip === '0.0.0.0' || $ip === '') {
+        if ($ip === '' || $ip === '0.0.0.0') {
             $this->SendDebug('Konfiguration', 'IP-Adresse ist nicht konfiguriert', 0);
             return;
         }
 
-        // Beim Laden kein Auto-Anlegen erzwingen – der Nutzer wählt zuerst im Formular.
-        // Manuelles Update per Button oder Timer.
+        // WICHTIG: Direkt nach Übernehmen Variablen anlegen/aktualisieren
+        $this->Update();
     }
 
     // ===================== RequestAction =====================
