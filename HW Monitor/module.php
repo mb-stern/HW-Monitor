@@ -190,8 +190,26 @@ class HWMonitor extends IPSModule
             }
         }
         $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
+
+        // existierende Idents sammeln (brauchen wir gleich fürs Cleanup)
+        $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
+        $existingIdents = [];
+        foreach ($existingIDs as $vid) {
+            $obj = IPS_GetObject($vid);
+            $ident = $obj['ObjectIdent'] ?? '';
+            if ($ident !== '') { $existingIdents[$ident] = true; }
+        }
+
         if (empty($activeRows)) {
-            $this->SendDebug('Update', 'Keine aktiven Zeilen -> nichts zu tun.', 0);
+            // KEINE Häkchen -> ALLE unsere Variablen entfernen
+            $removed = 0;
+            foreach (array_keys($existingIdents) as $ident) {
+                if ($this->isOurIdent($ident)) {
+                    $this->UnregisterVariable($ident);
+                    $removed++;
+                }
+            }
+            $this->SendDebug('Update', 'Keine aktiven Zeilen -> Cleanup, entfernt: '.$removed, 0);
             return true;
         }
 
