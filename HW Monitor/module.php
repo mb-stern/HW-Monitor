@@ -164,15 +164,14 @@ class HWMonitor extends IPSModule
     // ------------------------ Update ------------------------
     public function Update(): bool
     {
-        // --- Debug: Rohinhalt der Property zeigen
+        // --- Auswahl laden & debuggen
         $raw = $this->ReadPropertyString('SelectedSensors');
         $this->SendDebug('SelectedSensors.raw', $raw === '' ? '(empty)' : $raw, 0);
 
-        // Auswahl lesen & robust casten
         $rows = json_decode($raw, true);
         if (!is_array($rows)) { $rows = []; }
 
-        // aktiv = true | 1 | "1"; pos als int
+        // aktive Zeilen herausfiltern
         $activeRows = [];
         foreach ($rows as $r) {
             $uid = (string)($r['uid'] ?? '');
@@ -181,7 +180,7 @@ class HWMonitor extends IPSModule
             $active = ($activeFlag === true) || ($activeFlag === 1) || ($activeFlag === '1');
 
             if ($active && $uid !== '') {
-                if ($pos <= 0) { $pos = 0; } // wird gleich automatisch vergeben
+                if ($pos <= 0) { $pos = 0; } // wird unten automatisch vergeben
                 $activeRows[] = [
                     'uid'     => $uid,
                     'pos'     => $pos,
@@ -196,7 +195,7 @@ class HWMonitor extends IPSModule
             return true;
         }
 
-        // Auto-Pos für fehlende/0
+        // Auto-Positionen für pos==0
         $nextPos = 1;
         $usedPos = [];
         foreach ($activeRows as &$r) {
@@ -222,12 +221,12 @@ class HWMonitor extends IPSModule
             return false;
         }
 
-        // Sensoren sammeln (mit kodiert + dekodiert indexiert)
+        // Sensor-Payloads sammeln (sowohl kodiert als auch normalisiert indexieren)
         $points = [];
         $this->collectSensors($data, [], $points);
         $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
 
-        // vorhandene Idents
+        // existierende Idents der Instanz
         $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
         $existingIdents = [];
         foreach ($existingIDs as $vid) {
@@ -238,110 +237,90 @@ class HWMonitor extends IPSModule
 
         $seen = [];
 
-        // JEDE aktive Zeile → Vierergruppe
+        // Für jede aktive Zeile die Vierergruppe anlegen/aktualisieren
         foreach ($activeRows as $r) {
             $uidSel  = $r['uid'];
             $pos     = (int)$r['pos'];
             $caption = (string)$r['caption'];
             $typeSel = (string)$r['type'];
 
-            // UID-Treffer: direkt oder als (de)kodierte Variante
-            $payload = $points[$uidSel]
-                ?? $points[$this->normalizeUid($uidSel)]
-                ?? null;
+            // Payload finden (direkt oder normalisiert)
+            $payload = $points[$uidSel] ?? $points[$this->normalizeUid($uidSel)] ?? null;
 
             if ($payload === null) {
-                // trotzdem anlegen (mit Caption/Type aus Auswahl)
+                // Platzhalter-Payload, falls Quelle nicht (mehr) existiert
                 $payload = [
-                    'Text' => $caption,
-                    'Type' => $typeSel,
-                    'Min' => null, 'Value' => null, 'Max' => null
+                    'Text'  => $caption,
+                    'Type'  => $typeSel,
+                    'Min'   => null,
+                    'Value' => null,
+                    'Max'   => null
                 ];
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
-            // Profil, Pos-Basis, Caption/Leaf vorbereiten
+            // Profil, Position, Basisnamen
             $type    = (string)($payload['Type'] ?? $typeSel);
             $profile = $this->getVariableProfileByType($type);
             $basePos = $pos * 10;
-            $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // letzten Teil der Caption nehmen
-            $leaf = $nameVal;
+            // Voller Pfad (aus Caption) für den Variablen-WERT der String-Variable
+            $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal)); // [Typ]-Anhang entfernen
+
+            // Leaf ermitteln (nur letzter Teil) für die ANZEIGENAMEN beim Anlegen
+            $leaf = $pathClean;
             if (strpos($leaf, '›') !== false) {
                 $parts = array_map('trim', explode('›', $leaf));
                 $leaf  = end($parts) ?: $leaf;
             }
-            // eckige Klammern am Ende entfernen (z. B. " [Load]")
-            $leafClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $leaf));
-
-            // Typ ohne Klammern anhängen (aber Duplikate vermeiden)
-            $prettyPrefix = $leafClean;
-            if ($type !== '' && stripos(' ' . $leafClean . ' ', ' ' . $type . ' ') === false) {
-                $prettyPrefix = trim($leafClean . ' ' . $type);
+            // Typ ohne Klammern ggf. anhängen (Duplikate vermeiden)
+            $prettyPrefix = $leaf;
+            if ($type !== '' && stripos(' ' . $leaf . ' ', ' ' . $type . ' ') === false) {
+                $prettyPrefix = trim($leaf . ' ' . $type);
             }
 
-            // ---------- Variable 1: Pfad (Ident bleibt ..._Text) ----------
+            // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
             if ($vText === false) {
-                // Name nur beim Anlegen setzen, danach nie mehr umbenennen
+                // sichtbarer Name NUR beim Anlegen
                 $vText = $this->RegisterVariableString($idText, "{$prettyPrefix} - Pfad", '', $basePos + 0);
+            } else {
+                // keine Umbenennung; nur Position aktualisieren ist unkritisch
+                IPS_SetPosition($vText, $basePos + 0);
             }
-            // Wert (Pfad) schreiben
-            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $nameVal));
+            // Wert: kompletter Pfad (ohne [Typ])
             if ((string)GetValue($vText) !== $pathClean) {
                 SetValue($vText, $pathClean);
             }
             $seen[$idText] = true;
 
-            // ---------- Variablen 2–4: Min / Value / Max ----------
+            // ---------- 2–4) Float: Min / Value / Max ----------
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
 
                 if ($vid === false) {
-                    // Sichtbarer Name nur beim Anlegen vergeben
+                    // sichtbarer Name NUR beim Anlegen
                     $vid = $this->RegisterVariableFloat($ident, "{$prettyPrefix} - {$field}", $profile, $basePos + $offset);
                 } else {
-                    // NIE umbenennen; optional nur Position aktualisieren (harmlos)
+                    // keine Umbenennung/Profil-Überschreibung; Position ggf. setzen
                     IPS_SetPosition($vid, $basePos + $offset);
-                    // Profil NICHT überschreiben, sonst verliert der Nutzer seine Anpassung
-                    // (Wenn du unbedingt ein Standardprofil setzen willst, dann nur beim Anlegen!)
                 }
 
-                // Wert aktualisieren (das ist OK, Messwerte dürfen überschrieben werden)
+                // Wert setzen (Messwert darf überschrieben werden)
                 $u   = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null && (float)GetValue($vid) !== (float)$num) {
                     SetValue($vid, $num);
                 }
-                $seen[$ident] = true;
-            }
 
-            // -------- Min / Value / Max (sichtbarer Name = "<LeafClean [ + Type ]> - <Field>"; Werte bleiben) --------
-            foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
-                $ident = $this->identFor($pos, $field);
-                $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                $targetName = "{$prettyPrefix} - {$field}";
-                if ($vid === false) {
-                    $vid = $this->RegisterVariableFloat($ident, $targetName, $profile, $basePos + $offset);
-                } else {
-                    $currentName = IPS_GetObject($vid)['ObjectName'] ?? '';
-                    if ($currentName !== $targetName) {
-                        IPS_SetName($vid, $targetName);
-                    }
-                }
-                $u = null;
-                $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
-                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
-                    SetValue($vid, $num);
-                }
                 $seen[$ident] = true;
             }
         }
 
-        // Cleanup: ALLES, was nicht gesehen wurde (nur unsere Idents), löschen
+        // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
         foreach (array_keys($existingIdents) as $ident) {
             if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
                 $this->UnregisterVariable($ident);
