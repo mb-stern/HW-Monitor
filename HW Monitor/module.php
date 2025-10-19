@@ -269,22 +269,52 @@ class HWMonitor extends IPSModule
             $basePos = $pos * 10;
             $nameVal = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
 
-            // Name
+            // --- Nur den letzten Teil der Caption ohne [Klammern] für den sichtbaren Namen verwenden ---
+            $leaf = $nameVal;
+            if (strpos($leaf, '›') !== false) {
+                $parts = array_map('trim', explode('›', $leaf));
+                $leaf  = end($parts) ?: $leaf;
+            }
+            // Klammerteil am Ende wie " [Load]" entfernen
+            $leafClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $leaf));
+
+            // -------- Name (sichtbarer Name = "<LeafClean> - Name"; Wert bleibt = $nameVal) --------
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            if ($vText === false) { $vText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0); }
-            if ((string)GetValue($vText) !== $nameVal) { SetValue($vText, $nameVal); }
+            $targetNameText = "{$leafClean} - Name";
+            if ($vText === false) {
+                $vText = $this->RegisterVariableString($idText, $targetNameText, '', $basePos + 0);
+            } else {
+                $currentName = IPS_GetObject($vText)['ObjectName'] ?? '';
+                if ($currentName !== $targetNameText) {
+                    IPS_SetName($vText, $targetNameText);
+                }
+            }
+            // WICHTIG: den gespeicherten Wert NICHT ändern – so wie bisher
+            if ((string)GetValue($vText) !== $nameVal) {
+                SetValue($vText, $nameVal);
+            }
             $seen[$idText] = true;
 
-            // Min/Value/Max
+            // -------- Min / Value / Max (sichtbarer Name = "<LeafClean> - <Field>"; Werte bleiben) --------
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identFor($pos, $field);
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                if ($vid === false) { $vid = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset); }
+                $targetName = "{$leafClean} - {$field}";
+                if ($vid === false) {
+                    $vid = $this->RegisterVariableFloat($ident, $targetName, $profile, $basePos + $offset);
+                } else {
+                    $currentName = IPS_GetObject($vid)['ObjectName'] ?? '';
+                    if ($currentName !== $targetName) {
+                        IPS_SetName($vid, $targetName);
+                    }
+                }
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null) {
-                    if ((float)GetValue($vid) !== (float)$num) { SetValue($vid, $num); }
+                    if ((float)GetValue($vid) !== (float)$num) {
+                        SetValue($vid, $num);
+                    }
                 }
                 $seen[$ident] = true;
             }
