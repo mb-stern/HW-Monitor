@@ -196,27 +196,26 @@ class HWMonitor extends IPSModule
     // ===================== Update-Logik =====================
     public function Update(): bool
     {
-        // Auswahl lesen
+        // 1) Auswahl laden
         $rows = $this->loadSelectedRows();
-        // Nur aktive Zeilen berücksichtigen
+        // aktive Zeilen (UID vorhanden)
         $activeRows = array_values(array_filter($rows, fn($r) =>
             !empty($r['active']) && !empty($r['uid'])
         ));
+        $this->SendDebug('Update.Start', 'Aktive Zeilen: ' . count($activeRows), 0);
+
         if (empty($activeRows)) {
-            $this->SendDebug('Update', 'Keine aktive Auswahl – nichts zu tun.', 0);
+            $this->SendDebug('Update.Abbruch', 'Keine aktive Auswahl – nichts zu tun.', 0);
             return true;
         }
 
-        // Auto-Pos-Vergabe: fehlende/0-Positionen on-the-fly auffüllen
+        // 2) Auto-Positionen on-the-fly für pos<=0
         $nextPos = 1;
         $usedPos = [];
         foreach ($activeRows as &$r) {
             $p = (int)($r['pos'] ?? 0);
             if ($p <= 0) {
-                // freie nächste Position suchen
-                while (isset($usedPos[$nextPos])) {
-                    $nextPos++;
-                }
+                while (isset($usedPos[$nextPos])) { $nextPos++; }
                 $p = $nextPos++;
                 $r['pos'] = $p;
                 $this->SendDebug('AutoPos', "UID {$r['uid']} → pos={$p}", 0);
@@ -225,7 +224,7 @@ class HWMonitor extends IPSModule
         }
         unset($r);
 
-        // Daten holen
+        // 3) Daten holen
         try {
             $data = $this->getData();
         } catch (Exception $e) {
@@ -234,11 +233,12 @@ class HWMonitor extends IPSModule
             return false;
         }
 
-        // Sensormap (nur echte Sensor-Blätter)
+        // 4) Sensormap (nur echte Sensor-Blätter)
         $points = [];
         $this->traverseSensors($data, [], $points); // uid => payload
+        $this->SendDebug('Update.Sensors', 'Gefundene Sensoren im JSON: ' . count($points), 0);
 
-        // Bestehende Idents einsammeln
+        // 5) Bestehende Idents erfassen
         $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
         $existingIdents = [];
         foreach ($existingIDs as $vid) {
@@ -251,68 +251,75 @@ class HWMonitor extends IPSModule
 
         $seen    = [];
         $created = 0;
+        $updated = 0;
 
-        // Für jede aktive Zeile 4 Variablen anlegen/aktualisieren
+        // 6) Für jede aktive Zeile Vierergruppe anlegen/aktualisieren
         foreach ($activeRows as $r) {
             $uid     = (string)$r['uid'];
             $pos     = (int)$r['pos'];
-            if ($pos <= 0) { continue; } // failsafe
+            $caption = (string)($r['caption'] ?? '');
+            $fallbackType = (string)($r['type'] ?? '');
 
             if (!isset($points[$uid])) {
-                $this->SendDebug('Missing', "UID nicht gefunden: {$uid}", 0);
+                $this->SendDebug('Update.Skip', "UID nicht im JSON gefunden: {$uid}", 0);
                 continue;
             }
             $payload = $points[$uid]; // ['Text','Type','Min','Value','Max','SensorId']
-            $type    = (string)($payload['Type'] ?? ($r['type'] ?? ''));
+            $type    = (string)($payload['Type'] ?? $fallbackType);
             $profile = $this->getVariableProfileByType($type);
 
-            $caption = (string)($r['caption'] ?? '');
             $nameValue = $caption !== '' ? $caption : ($payload['Text'] ?? '');
-            $basePos = $pos * 10;
+            $basePos   = $pos * 10;
 
-            // Name
+            // --- Name (immer anlegen & setzen) ---
             $idText = $this->identForGroup($pos, 'Text');
             $varText = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
             if ($varText === false) {
                 $varText = $this->RegisterVariableString($idText, "Pos {$pos} - Name", '', $basePos + 0);
                 $created++;
+                $this->SendDebug('Create', "Var angelegt: {$idText}", 0);
             }
             if ((string)GetValue($varText) !== (string)$nameValue) {
                 SetValue($varText, (string)$nameValue);
+                $updated++;
             }
             $seen[$idText] = true;
 
-            // Min / Value / Max
+            // --- Min / Value / Max (nur numerisch setzen, aber Variablen werden trotzdem angelegt) ---
             foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
                 $ident = $this->identForGroup($pos, $field);
                 $var   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
                 if ($var === false) {
                     $var = $this->RegisterVariableFloat($ident, "Pos {$pos} - {$field}", $profile, $basePos + $offset);
                     $created++;
+                    $this->SendDebug('Create', "Var angelegt: {$ident}", 0);
                 }
                 $unit = null;
                 $num  = $this->parseNumberWithUnit($payload[$field] ?? null, $unit);
                 if ($num !== null) {
                     if ((float)GetValue($var) !== (float)$num) {
                         SetValue($var, $num);
+                        $updated++;
                     }
-                    $seen[$ident] = true;
-                } else {
-                    // kein numerischer Wert → Variable bleibt bestehen, wird aber nicht als gesehen markiert
                 }
+                // Wichtig: als "gesehen" markieren, damit Cleanup die Gruppe nicht wieder löscht
+                $seen[$ident] = true;
             }
         }
 
-        // Cleanup
+        // 7) Cleanup nur unsere Gruppe-Idents
         if ($this->ReadPropertyBoolean('AutoCleanup')) {
+            $removed = 0;
             foreach (array_keys($existingIdents) as $ident) {
                 if (!isset($seen[$ident]) && $this->isOurGroupIdent($ident)) {
                     $this->UnregisterVariable($ident);
+                    $removed++;
                 }
             }
+            $this->SendDebug('Cleanup', "Entfernt: {$removed}", 0);
         }
 
-        $this->SendDebug('Update', "Fertig. Neu/aktualisiert: {$created} Variablen (Vierergruppen).", 0);
+        $this->SendDebug('Update.Done', "Angelegt: {$created}, Aktualisiert: {$updated}", 0);
         return true;
     }
 
@@ -350,7 +357,7 @@ class HWMonitor extends IPSModule
     {
         $currentAnc = array_merge($ancestors, [$node]);
 
-        if ($this->isSensorLeaf($node)) {
+        if ($this->isSensorLeaf($node, $ancestors)) {
             $uid = $this->buildNodeUID($node, $ancestors);
             if (!isset($map[$uid])) {
                 $map[$uid] = [
@@ -373,7 +380,7 @@ class HWMonitor extends IPSModule
         }
     }
 
-    private function isSensorLeaf(array $node): bool
+    private function isSensorLeaf(array $node, array $ancestors = []): bool
     {
         if (!empty($node['SensorId'])) {
             return true;
@@ -382,6 +389,11 @@ class HWMonitor extends IPSModule
         if ($hasChildren) {
             return false;
         }
+        // Blatt ohne Children: akzeptiere, wenn ein Name vorhanden ist (und optional Type)
+        if (!empty($node['Text'])) {
+            return true;
+        }
+        // letzte Reserve: einer der Werte ist numerisch
         foreach (['Min','Value','Max'] as $k) {
             $u = null;
             if ($this->parseNumberWithUnit($node[$k] ?? null, $u) !== null) {
