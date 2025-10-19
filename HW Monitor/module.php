@@ -12,11 +12,12 @@ class HWMonitor extends IPSModule
         $this->RegisterPropertyInteger('Port', 8085);
         $this->RegisterPropertyInteger('UpdateInterval', 30); // Sekunden
         $this->RegisterPropertyBoolean('TrackAll', true);     // Alle Sensoren automatisch
-        $this->RegisterPropertyString('SelectedSensors', '[]'); // Array von UIDs (JSON)
-        $this->RegisterPropertyBoolean('AutoCleanup', true);    // Nicht mehr gesehene Variablen löschen
+        // Liste von Zeilen: [{uid:"...", caption:"...", active:true|false}, ...]
+        // (Altbestand: ["uid1","uid2",..."] wird automatisch konvertiert)
+        $this->RegisterPropertyString('SelectedSensors', '[]');
+        $this->RegisterPropertyBoolean('AutoCleanup', true);  // Nicht mehr gesehene Variablen löschen
 
         // ===== Timer =====
-        // per RequestAction -> DoUpdate
         $this->RegisterTimer(
             'UpdateTimer',
             0,
@@ -55,10 +56,7 @@ class HWMonitor extends IPSModule
                 break;
 
             case 'Refresh':
-                // keine Speicherung nötig – das Formular liest live
-                // (hier nur force Logik/Debug)
                 $this->SendDebug('Refresh', 'Sensorliste aktualisiert (Form wird neu aufgebaut)', 0);
-                // Force UI Refresh durch Status-Änderung (kleiner Trick)
                 $this->UpdateFormField('DummyInfo', 'caption', 'Letzte Aktualisierung: ' . date('H:i:s'));
                 break;
 
@@ -68,7 +66,7 @@ class HWMonitor extends IPSModule
     }
 
     // ------------------------------------------------------------
-    // Dynamisches Formular (kein form.json nötig)
+    // Dynamisches Formular (mit List statt CheckBoxList)
     // ------------------------------------------------------------
     public function GetConfigurationForm()
     {
@@ -76,13 +74,12 @@ class HWMonitor extends IPSModule
         $port      = $this->ReadPropertyInteger('Port');
         $trackAll  = $this->ReadPropertyBoolean('TrackAll');
 
-        // Versuch, Daten zu laden und Options zu bauen
         $options = [];
         $error   = '';
         try {
             if ($ip !== '0.0.0.0' && $ip !== '') {
                 $data = $this->getData();  // wirft Exception bei Fehlern
-                $options = $this->buildOptionsFromData($data);
+                $options = $this->buildOptionsFromData($data); // [{uid, caption, icon}]
                 if (empty($options)) {
                     $error = 'Keine Sensoren gefunden.';
                 }
@@ -93,19 +90,22 @@ class HWMonitor extends IPSModule
             $error = 'Form-Live-Scan: ' . $e->getMessage();
         }
 
-        // Aktuell gewählte UIDs
-        $selected = json_decode($this->ReadPropertyString('SelectedSensors'), true);
-        if (!is_array($selected)) {
-            $selected = [];
+        // Aktuelle Auswahl laden (Zeilenformat oder Altformat)
+        $selectedRows = $this->loadSelectedRows();
+        $byUID = [];
+        foreach ($selectedRows as $r) {
+            if (!empty($r['uid'])) {
+                $byUID[$r['uid']] = (bool)($r['active'] ?? false);
+            }
         }
 
-        // CheckBoxList-Werte inkl. “checked”
+        // Werte für die List (mit aktiv-Flag vorbelegen)
         $values = [];
         foreach ($options as $opt) {
             $values[] = [
+                'uid'     => $opt['uid'],
                 'caption' => $opt['caption'],
-                'value'   => $opt['uid'],
-                'checked' => in_array($opt['uid'], $selected, true),
+                'active'  => $byUID[$opt['uid']] ?? false,
                 'icon'    => $opt['icon'] ?? ''
             ];
         }
@@ -119,12 +119,47 @@ class HWMonitor extends IPSModule
 
                 ['type' => 'Label', 'caption' => 'Erfassung'],
                 ['type' => 'CheckBox', 'name' => 'TrackAll', 'caption' => 'Alle Sensoren automatisch übernehmen'],
+
                 [
-                    'type'    => 'CheckBoxList',
-                    'name'    => 'SelectedSensors',
+                    'type'    => 'List',
+                    'name'    => 'SensorTable',
                     'caption' => 'Manuelle Sensor-Auswahl (UID-basiert)',
-                    'values'  => $values,
-                    'visible' => !$trackAll
+                    'visible' => !$trackAll,
+                    'rowCount' => 15,
+                    'add'     => false,
+                    'delete'  => false,
+                    'sort'    => [
+                        'column' => 'caption',
+                        'direction' => 'ascending'
+                    ],
+                    'columns' => [
+                        [
+                            'caption' => 'Aktiv',
+                            'name'    => 'active',
+                            'width'   => '80px',
+                            'align'   => 'center',
+                            'edit'    => ['type' => 'CheckBox']
+                        ],
+                        [
+                            'caption' => 'Sensor',
+                            'name'    => 'caption',
+                            'width'   => 'auto',
+                            'save'    => false
+                        ],
+                        [
+                            'caption' => 'UID',
+                            'name'    => 'uid',
+                            'width'   => '450px',
+                            'save'    => false
+                        ],
+                        [
+                            'caption' => 'Icon',
+                            'name'    => 'icon',
+                            'width'   => '220px',
+                            'save'    => false
+                        ],
+                    ],
+                    'values' => $values
                 ],
 
                 ['type' => 'Label', 'caption' => 'Bereinigung'],
@@ -175,20 +210,22 @@ class HWMonitor extends IPSModule
         }
 
         $points = [];
-        $this->traverseAndCollect($data, [], $points);
+        $this->traverseAndCollect($data, [], $points); // uid => payload
 
-        // Filter: All vs Selected
         $trackAll = $this->ReadPropertyBoolean('TrackAll');
-        $selected = json_decode($this->ReadPropertyString('SelectedSensors'), true);
-        if (!is_array($selected)) {
-            $selected = [];
+        $selectedRows = $this->loadSelectedRows(); // [{uid,caption,active}]
+        $selectedActiveUIDs = [];
+        foreach ($selectedRows as $r) {
+            if (!empty($r['uid']) && !empty($r['active'])) {
+                $selectedActiveUIDs[$r['uid']] = true;
+            }
         }
 
         $seen = [];
         $count = 0;
 
         foreach ($points as $uid => $p) {
-            if (!$trackAll && !in_array($uid, $selected, true)) {
+            if (!$trackAll && empty($selectedActiveUIDs[$uid])) {
                 continue;
             }
 
@@ -218,7 +255,6 @@ class HWMonitor extends IPSModule
                 if ($num !== null) {
                     SetValue($varID, $num);
                 } else {
-                    // Kein numerischer Wert – nicht setzen
                     $this->SendDebug('Typwarnung', "Kein numerischer Wert für {$field} bei {$uid}", 0);
                 }
                 $seen[$ident] = true;
@@ -269,27 +305,13 @@ class HWMonitor extends IPSModule
         if ($data === null) {
             throw new Exception("Ungültiges JSON von {$url}");
         }
-        // Optional: Keys normalisieren, wenn nötig
-        // $data = $this->normalizeKeysRecursive($data);
-
         return $data;
-    }
-
-    private function normalizeKeysRecursive(array $arr): array
-    {
-        $out = [];
-        foreach ($arr as $k => $v) {
-            $nk = is_string($k) ? ucfirst(strtolower($k)) : $k; // z.B. type -> Type
-            $out[$nk] = is_array($v) ? $this->normalizeKeysRecursive($v) : $v;
-        }
-        return $out;
     }
 
     private function traverseAndCollect(array $node, array $ancestors, array &$points): void
     {
         $currentAnc = array_merge($ancestors, [$node]);
 
-        // Ist das ein interessanter Punkt (hat einen der Felder)?
         $hasFields = false;
         foreach (['Text','Min','Value','Max','Type','SensorId'] as $k) {
             if (isset($node[$k]) && $node[$k] !== '' && $node[$k] !== null) {
@@ -339,13 +361,11 @@ class HWMonitor extends IPSModule
             $parts[] = (string)$node['Text'];
         }
         $type = $node['Type'] ?? '';
-        $uid  = 'path:' . implode('/', $parts) . ($type ? '|' . $type : '');
-        return $uid;
+        return 'path:' . implode('/', $parts) . ($type ? '|' . $type : '');
     }
 
     private function identFromUID(string $uid, string $field): string
     {
-        // handliche, stabile Idents
         $hash = substr(sha1($uid), 0, 16);
         return 'S_' . $hash . '_' . $field; // z.B. S_ab12...cdef_Value
     }
@@ -407,7 +427,7 @@ class HWMonitor extends IPSModule
             'Level'       => '~Progress',
             'Throughput'  => 'HW.Rate',
 
-            // zusätzliche Zuordnungen (robuster)
+            // robuste Zusatz-Mappings
             'Frequency'   => 'HW.Clock',
             'Usage'       => '~Progress',
             'Memory'      => 'HW.Data',
@@ -423,11 +443,8 @@ class HWMonitor extends IPSModule
     // ------------------------------------------------------------
     private function buildOptionsFromData(array $data): array
     {
-        // Wir bauen die gleiche Punkteliste wie in Update(),
-        // erweitern aber um "caption" = schöne Pfadkette
         $points = [];
         $this->traverseAndCollectForOptions($data, [], $points);
-        // Sortieren (alphabetisch nach caption)
         usort($points, function ($a, $b) {
             return strcmp($a['caption'], $b['caption']);
         });
@@ -449,7 +466,7 @@ class HWMonitor extends IPSModule
         if ($hasFields) {
             $uid = $this->buildNodeUID($node, $ancestors);
 
-            // Pfadkette als Caption (logische Gruppierung)
+            // Pfadkette als Caption
             $parts = [];
             foreach ($ancestors as $a) {
                 if (!empty($a['Text'])) {
@@ -478,5 +495,46 @@ class HWMonitor extends IPSModule
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------
+    // Auswahl-Lader (Abwärtskompatibilität)
+    // ------------------------------------------------------------
+    private function loadSelectedRows(): array
+    {
+        $raw = json_decode($this->ReadPropertyString('SelectedSensors'), true);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        // Fall A: schon im neuen Format (Zeilen)
+        if (!empty($raw) && isset($raw[0]) && is_array($raw[0]) && array_key_exists('uid', $raw[0])) {
+            // Normieren: fehlende Keys ergänzen
+            $rows = [];
+            foreach ($raw as $r) {
+                $rows[] = [
+                    'uid'     => (string)($r['uid'] ?? ''),
+                    'caption' => (string)($r['caption'] ?? ''),
+                    'active'  => (bool)($r['active'] ?? false),
+                    'icon'    => (string)($r['icon'] ?? '')
+                ];
+            }
+            return $rows;
+        }
+
+        // Fall B: Altformat (Liste von UIDs)
+        $rows = [];
+        foreach ($raw as $uid) {
+            if (!is_string($uid)) {
+                continue;
+            }
+            $rows[] = [
+                'uid'     => $uid,
+                'caption' => '',
+                'active'  => true,
+                'icon'    => ''
+            ];
+        }
+        return $rows;
     }
 }
