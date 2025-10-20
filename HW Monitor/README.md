@@ -163,3 +163,11 @@ HW_Update(12345);
 
 **Version 1.0 (21.01.2024)**
 * Initiale Version.
+
+---
+
+### 9. Lizenz
+
+Dieses Modul steht unter der **MIT-Lizenz**.  
+© 2025 Stefan Künzli  
+[https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
