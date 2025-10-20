@@ -112,7 +112,7 @@ class HWMonitor extends IPSModule
                     'type'     => 'List',
                     'name'     => 'SelectedSensors',   // muss exakt der Property entsprechen
                     'caption'  => 'Sensoren',
-                    'rowCount' => 16,
+                    'rowCount' => 12,
                     'add'      => false,
                     'delete'   => false,
                     'sort'     => ['column' => 'pos', 'direction' => 'ascending'],
