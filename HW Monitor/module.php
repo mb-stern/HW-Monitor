@@ -177,7 +177,7 @@ class HWMonitor extends IPSModule
                         ],
                         ['type' => 'Label', 'caption' => '']
                     ]
-                ]            
+                    ],           
             'status'  => []
         ];
 
