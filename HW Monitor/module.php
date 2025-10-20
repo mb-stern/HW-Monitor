@@ -58,11 +58,18 @@ class HWMonitor extends IPSModule
         $error = '';
         $options = [];
 
+        $ip   = $this->ReadPropertyString('IPAddress');
+        $port = $this->ReadPropertyInteger('Port');
+
+        // Überschrift/Label oben: URL oder Hinweis
+        $urlCaption = ($ip !== '' && $ip !== '0.0.0.0')
+            ? "Quelle: http://{$ip}:{$port}/data.json"
+            : "Quelle: (Bitte IP-Adresse konfigurieren)";
+
         try {
-            $ip = $this->ReadPropertyString('IPAddress');
             if ($ip !== '' && $ip !== '0.0.0.0') {
-                $data = $this->getData();                   // live abrufen
-                $options = $this->buildOptions($data);      // nur echte Sensor-Blätter
+                $data    = $this->getData();              // live abrufen
+                $options = $this->buildOptions($data);    // nur echte Sensor-Blätter
             } else {
                 $error = 'Bitte IP-Adresse konfigurieren.';
             }
@@ -71,7 +78,7 @@ class HWMonitor extends IPSModule
         }
 
         // Bisherige Auswahl mergen
-        $saved = $this->loadSelectedRows(); // [{active,pos,uid,caption,type,icon}]
+        $saved = json_decode($this->ReadPropertyString('SelectedSensors'), true) ?: [];
         $byUID = [];
         foreach ($saved as $r) {
             if (!empty($r['uid'])) {
@@ -86,7 +93,7 @@ class HWMonitor extends IPSModule
             $values[] = [
                 'active'  => (bool)($prev['active'] ?? false),
                 'pos'     => isset($prev['pos']) && (int)$prev['pos'] > 0 ? (int)$prev['pos'] : $posSuggest++,
-                'caption' => $opt['caption'],
+                'caption' => $opt['caption'],   // „Pfad“ in der Tabelle
                 'type'    => $opt['type'],
                 'uid'     => $opt['uid'],
                 'icon'    => $opt['icon'] ?? ''
@@ -95,66 +102,71 @@ class HWMonitor extends IPSModule
 
         $form = [
             'elements' => [
-                ['type' => 'Label', 'caption' => 'Verbindung'],
+                ['type' => 'Label', 'caption' => $urlCaption],
+
                 ['type' => 'ValidationTextBox', 'name' => 'IPAddress', 'caption' => 'IP-Adresse'],
                 ['type' => 'NumberSpinner',     'name' => 'Port',      'caption' => 'Port', 'minimum' => 1, 'maximum' => 65535],
                 ['type' => 'NumberSpinner',     'name' => 'UpdateInterval', 'caption' => 'Updateintervall (Sek.)', 'minimum' => 0, 'suffix' => 's'],
 
+                ['type' => 'Label', 'caption' => 'Auswahl & Positionen (Übernehmen speichert die Häkchen!)'],
                 [
-                    'type'    => 'List',
-                    'name'    => 'SelectedSensors',   
-                    'caption' => 'Sensoren',
-                    'rowCount'=> 16,
-                    'add'     => false,
-                    'delete'  => false,
-                    'sort'    => ['column' => 'pos', 'direction' => 'ascending'],
-                'columns' => [
-                    [
-                        'caption' => 'Aktiv',
-                        'name'    => 'active',
-                        'width'   => '70px',
-                        'align'   => 'center',
-                        'edit'    => ['type' => 'CheckBox']
+                    'type'     => 'List',
+                    'name'     => 'SelectedSensors',   // muss exakt der Property entsprechen
+                    'caption'  => 'Sensoren',
+                    'rowCount' => 16,
+                    'add'      => false,
+                    'delete'   => false,
+                    'sort'     => ['column' => 'pos', 'direction' => 'ascending'],
+                    'columns'  => [
+                        [
+                            'caption' => 'Aktiv',
+                            'name'    => 'active',
+                            'width'   => '70px',
+                            'align'   => 'center',
+                            'edit'    => ['type' => 'CheckBox']
+                        ],
+                        [
+                            'caption' => 'Pos.',
+                            'name'    => 'pos',
+                            'width'   => '70px',
+                            'align'   => 'center',
+                            'edit'    => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]
+                        ],
+                        // Spaltenüberschrift „Pfad“ (anstatt „Name“)
+                        [
+                            'caption' => 'Pfad',
+                            'name'    => 'caption',
+                            'width'   => 'auto',
+                            'save'    => true,
+                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                        ],
+                        [
+                            'caption' => 'Type',
+                            'name'    => 'type',
+                            'width'   => '120px',
+                            'save'    => true,
+                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                        ],
+                        [
+                            'caption' => 'UID',
+                            'name'    => 'uid',
+                            'width'   => '420px',
+                            'save'    => true,
+                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                        ],
                     ],
-                    [
-                        'caption' => 'Pos.',
-                        'name'    => 'pos',
-                        'width'   => '70px',
-                        'align'   => 'center',
-                        'edit'    => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]
-                    ],
-                    [
-                        'caption' => 'Pfad',
-                        'name'    => 'caption',
-                        'width'   => 'auto',
-                        'save'    => true,
-                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
-                    ],
-                    [
-                        'caption' => 'Type',
-                        'name'    => 'type',
-                        'width'   => '120px',
-                        'save'    => true,
-                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
-                    ],
-                    [
-                        'caption' => 'UID',
-                        'name'    => 'uid',
-                        'width'   => '420px',
-                        'save'    => true,
-                        'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
-                    ],
+                    'values'   => $values
                 ],
-                    'values'  => $values
-                ]
+
+                ['type' => 'Label', 'caption' => ($error ?: 'Bereit.')]
             ],
-            'actions' => [],
-                           ['type' => 'Label', 'caption' => ($error ?: 'Bereit.')],
+            'actions' => [
                 [
                     'type'    => 'Button',
                     'caption' => 'Jetzt aktualisieren (ausgewählte Daten)',
                     'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
-                ],
+                ]
+            ],
             'status'  => []
         ];
 
