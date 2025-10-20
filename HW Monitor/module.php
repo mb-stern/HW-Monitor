@@ -288,38 +288,27 @@ class HWMonitor extends IPSModule
                 $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
             }
 
-            // Profil, Position, Basisnamen
+            // Profil & Position
             $type    = (string)($payload['Type'] ?? $typeSel);
             $profile = $this->getVariableProfileByType($type);
             $basePos = $pos * 10;
 
-            // Voller Pfad (aus Caption) für den Variablen-WERT der String-Variable
-            $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
-            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal)); // [Typ]-Anhang entfernen
-
-            // Leaf ermitteln (nur letzter Teil) für die ANZEIGENAMEN beim Anlegen
-            $leaf = $pathClean;
-            if (strpos($leaf, '›') !== false) {
-                $parts = array_map('trim', explode('›', $leaf));
-                $leaf  = end($parts) ?: $leaf;
-            }
-            // Typ ohne Klammern ggf. anhängen (Duplikate vermeiden)
-            $prettyPrefix = $leaf;
-            if ($type !== '' && stripos(' ' . $leaf . ' ', ' ' . $type . ' ') === false) {
-                $prettyPrefix = trim($leaf . ' ' . $type);
-            }
+            // Für die ANZEIGENAMEN: UID (normalisiert, damit %7B...%7D lesbar wird)
+            $uidName = $this->normalizeUid($uidSel);
 
             // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
             $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
             if ($vText === false) {
-                // sichtbarer Name NUR beim Anlegen
-                $vText = $this->RegisterVariableString($idText, "{$prettyPrefix} - Pfad", '', $basePos + 0);
+                // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
+                $vText = $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
             } else {
-                // keine Umbenennung; nur Position aktualisieren ist unkritisch
                 IPS_SetPosition($vText, $basePos + 0);
             }
-            // Wert: kompletter Pfad (ohne [Typ])
+
+            // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
+            $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal));
             if ((string)GetValue($vText) !== $pathClean) {
                 SetValue($vText, $pathClean);
             }
@@ -331,22 +320,21 @@ class HWMonitor extends IPSModule
                 $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
 
                 if ($vid === false) {
-                    // sichtbarer Name NUR beim Anlegen
-                    $vid = $this->RegisterVariableFloat($ident, "{$prettyPrefix} - {$field}", $profile, $basePos + $offset);
+                    // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
+                    $vid = $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
                 } else {
-                    // keine Umbenennung/Profil-Überschreibung; Position ggf. setzen
                     IPS_SetPosition($vid, $basePos + $offset);
+                    // kein IPS_SetName, kein Profil-Überschreiben!
                 }
 
-                // Wert setzen (Messwert darf überschrieben werden)
-                $u   = null;
+                $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
                 if ($num !== null && (float)GetValue($vid) !== (float)$num) {
                     SetValue($vid, $num);
                 }
-
                 $seen[$ident] = true;
             }
+
         }
 
         // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
