@@ -121,7 +121,7 @@ HW_Update(12345);
 ### 8. Versionen
 
 **Version 2.0 (20.10.2025)**
-* Komplette Überarbeitung mit Checkbox-basierter Auswahl.
+* Komplette Überarbeitung mit Checkbox-basierter Auswahl. Achtung, beim Update werden bestehende Variablen gelöscht.
 * Automatische Sensor-Erkennung aus JSON.
 * Variablennamen basieren nun auf der Sensor-UID.
 * Benutzer kann Variablennamen beibehalten.
