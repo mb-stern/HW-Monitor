@@ -162,7 +162,7 @@ class HWMonitor extends IPSModule
             'actions' => [
                 [
                     'type'    => 'Button',
-                    'caption' => 'Datenpunkte aktualisieren',
+                    'caption' => 'Ausgewählte Sensoren aktualisieren',
                     'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
                 ]
             ],
