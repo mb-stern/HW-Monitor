@@ -3,4 +3,9 @@
 Folgende Module beinhaltet das HW Monitor Repository:
 
 - __HW Monitor__ ([Dokumentation](HW%20Monitor))  
-Dieses Modul greift die JSON Daten des Libre Hardware Monitor ab und liefert die gewünschten Werte als Variablen in IP-Symcon. Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
+
+Dieses Modul greift die JSON-Daten des **Libre Hardware Monitor** ab und stellt ausgewählte Sensorwerte als Variablen in **IP-Symcon** bereit.
+Die Sensoren werden automatisch ausgelesen und können komfortabel über Checkboxen im Konfigurationsformular ausgewählt werden.
+
+Jeder aktivierte Sensor erzeugt **vier Variablen** in IP-Symcon:
+**Pfad**, **Minimum**, **Istwert**, **Maximum**.
