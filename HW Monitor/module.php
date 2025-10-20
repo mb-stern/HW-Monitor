@@ -164,8 +164,7 @@ class HWMonitor extends IPSModule
                     'type'    => 'Button',
                     'caption' => 'Ausgewählte Sensoren aktualisieren',
                     'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
-                ]
-            ],
+                ],
                ['type' => 'Label',  'caption' => 'Sag danke und unterstütze den Modulentwickler:'],
                 [
                     'type'  => 'RowLayout',
@@ -177,7 +176,8 @@ class HWMonitor extends IPSModule
                         ],
                         ['type' => 'Label', 'caption' => '']
                     ]
-                ]           
+                ] 
+            ],          
         ];
 
         return json_encode($form);
