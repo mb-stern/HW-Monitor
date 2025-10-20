@@ -63,7 +63,7 @@ class HWMonitor extends IPSModule
 
         // Überschrift/Label oben: URL oder Hinweis
         $urlCaption = ($ip !== '' && $ip !== '0.0.0.0')
-            ? "Quelle: http://{$ip}:{$port}/data.json"
+            ? "Quelle: http://{$ip}:{$port}"
             : "Quelle: (Bitte IP-Adresse konfigurieren)";
 
         try {
@@ -108,7 +108,6 @@ class HWMonitor extends IPSModule
                 ['type' => 'NumberSpinner',     'name' => 'Port',      'caption' => 'Port', 'minimum' => 1, 'maximum' => 65535],
                 ['type' => 'NumberSpinner',     'name' => 'UpdateInterval', 'caption' => 'Updateintervall (Sek.)', 'minimum' => 0, 'suffix' => 's'],
 
-                ['type' => 'Label', 'caption' => 'Auswahl & Positionen (Übernehmen speichert die Häkchen!)'],
                 [
                     'type'     => 'List',
                     'name'     => 'SelectedSensors',   // muss exakt der Property entsprechen
