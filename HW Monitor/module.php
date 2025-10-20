@@ -177,8 +177,7 @@ class HWMonitor extends IPSModule
                         ],
                         ['type' => 'Label', 'caption' => '']
                     ]
-                ]   
-            ]         
+                ]           
         ];
 
         return json_encode($form);
