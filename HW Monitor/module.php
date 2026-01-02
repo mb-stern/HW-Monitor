@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-class HWMonitor extends IPSModule
+class HWMonitor extends IPSModuleStrict
 {
-    public function Create()
+    public function Create(): void
     {
         parent::Create();
 
@@ -18,7 +18,7 @@ class HWMonitor extends IPSModule
         $this->createVariableProfiles();
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         parent::ApplyChanges();
 
@@ -38,7 +38,7 @@ class HWMonitor extends IPSModule
         $this->SendDebug('ApplyChanges', 'Update() -> ' . ($ok ? 'OK' : 'FEHLER'), 0);
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value): void
     {
         switch ($Ident) {
             case 'DoUpdate':       // Timer
@@ -53,7 +53,7 @@ class HWMonitor extends IPSModule
     }
 
     // ------------------------ Formular ------------------------
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $error = '';
         $options = [];
