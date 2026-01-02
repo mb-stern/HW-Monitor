@@ -195,56 +195,124 @@ class HWMonitor extends IPSModuleStrict
     // ------------------------ Update ------------------------
     public function Update(): bool
     {
-        // --- Auswahl laden (ident-Whitelist) ---
+        // --- Auswahl laden (nur aktivierte Rows) ---
         $selected = json_decode($this->ReadPropertyString('SelectedSensors'), true);
         if (!is_array($selected)) {
             $selected = [];
         }
 
-        $allowed = [];
-        foreach ($selected as $s) {
-            if (!empty($s['enabled']) && isset($s['ident'])) {
-                $allowed[(string)$s['ident']] = true;
+        $activeRows = [];
+        foreach ($selected as $r) {
+            if (!empty($r['enabled'])) {
+                $uid = (string)($r['uid'] ?? '');
+                $pos = (int)($r['pos'] ?? 0);
+                $caption = (string)($r['caption'] ?? '');
+                $type = (string)($r['type'] ?? '');
+                if ($uid !== '') {
+                    $activeRows[] = [
+                        'uid'     => $uid,
+                        'pos'     => $pos,
+                        'caption' => $caption,
+                        'type'    => $type
+                    ];
+                }
             }
+        }
+
+        $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
+
+        // Wenn nichts ausgewählt ist: nichts tun
+        if (count($activeRows) === 0) {
+            $this->SendDebug('Update.Info', 'keine aktiven Rows', 0);
+            return true;
         }
 
         $ip = $this->ReadPropertyString('IPAddress');
         $port = $this->ReadPropertyInteger('Port');
         if ($ip === '' || $ip === '0.0.0.0' || $port <= 0) {
-            $this->SendDebug('Update', 'Abbruch: IP/Port ungültig', 0);
+            $this->SendDebug('Update.Error', 'IP/Port ungültig', 0);
             return false;
         }
 
+        // JSON holen
         $url = 'http://' . $ip . ':' . $port . '/data.json';
-        $this->SendDebug('Update', 'GET ' . $url, 0);
+        $this->SendDebug('Update.URL', $url, 0);
 
-        $raw = @file_get_contents($url);
-        if ($raw === false) {
-            $this->SendDebug('Update', 'HTTP Fehler / keine Antwort', 0);
-            return false;
-        }
-
-        $rows = json_decode($raw, true);
-        if (!is_array($rows)) {
-            $this->SendDebug('Update', 'JSON ungültig', 0);
-            return false;
-        }
-
-        // Track welche Idents gesehen wurden (für optionales Aufräumen)
-        $seen = [];
-
-        foreach ($rows as $pos => $payload) {
-            if (!is_array($payload)) {
-                continue;
+        try {
+            $raw = @file_get_contents($url);
+            if ($raw === false) {
+                throw new Exception('HTTP-Fehler oder leere Antwort');
             }
 
-            $uidName = (string)($payload['Text'] ?? '');
-            $caption = (string)($payload['Caption'] ?? '');
+            $points = json_decode($raw, true);
+            if (!is_array($points)) {
+                throw new Exception('JSON ungültig');
+            }
+        } catch (Throwable $e) {
+            $this->SendDebug('Update.Error', $e->getMessage(), 0);
+            return false;
+        }
 
-            $basePos = ((int)$pos) * 10;
+        $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
 
-            // ---------- 1) Text: Pfad/Caption ----------
-            $idText = $this->identFor((int)$pos, 'Text');
+        // Index nach UID, damit wir die ausgewählten Einträge schnell finden
+        $byUid = [];
+        foreach ($points as $p) {
+            if (!is_array($p)) {
+                continue;
+            }
+            $uid = (string)($p['UID'] ?? '');
+            if ($uid !== '') {
+                $byUid[$uid] = $p;
+            }
+        }
+
+        // Track welche Idents gesehen wurden (für Cleanup)
+        $seen = [];
+
+        // Bestehende Variablen sammeln (nur direkt unter der Instanz)
+        $existingIdents = [];
+        $children = IPS_GetChildrenIDs($this->InstanceID);
+        foreach ($children as $cid) {
+            $obj = IPS_GetObject($cid);
+            if ($obj['ObjectType'] === OBJECTTYPE_VARIABLE) {
+                $ident = (string)($obj['ObjectIdent'] ?? '');
+                if ($ident !== '') {
+                    $existingIdents[$ident] = $cid;
+                }
+            }
+        }
+
+        foreach ($activeRows as $row) {
+            $uidSel   = (string)$row['uid'];
+            $pos      = (int)$row['pos'];
+            $caption  = (string)$row['caption'];
+            $typeSel  = (string)$row['type'];
+
+            $payload = $byUid[$uidSel] ?? null;
+
+            if ($payload === null) {
+                // Platzhalter-Payload, falls Quelle nicht (mehr) existiert
+                $payload = [
+                    'Text'  => $caption,
+                    'Type'  => $typeSel,
+                    'Min'   => null,
+                    'Value' => null,
+                    'Max'   => null
+                ];
+                $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
+            }
+
+            // Profil & Position
+            $type    = (string)($payload['Type'] ?? $typeSel);
+            $profile = $this->getVariableProfileByType($type);
+            $basePos = $pos * 10;
+
+            // Für die ANZEIGENAMEN: UID (normalisiert, damit %7B...%7D lesbar wird)
+            $uidName = $this->normalizeUid($uidSel);
+
+            // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
+            $idText = $this->identFor($pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
             if ($vText === false) {
                 // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
@@ -254,34 +322,17 @@ class HWMonitor extends IPSModuleStrict
                 IPS_SetPosition($vText, $basePos + 0);
             }
 
-            // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
-            $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+            $pathVal   = (string)($payload['Text'] ?? $caption);
             $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal));
-            if ((string)$this->GetValue($idText) !== $pathClean) {
+            if ((string)GetValue($vText) !== $pathClean) {
                 $this->SetValue($idText, $pathClean);
             }
             $seen[$idText] = true;
 
             // ---------- 2–4) Float: Min / Value / Max ----------
-            foreach ([['Min', 1], ['Value', 2], ['Max', 3]] as [$field, $offset]) {
-                $ident = $this->identFor((int)$pos, $field);
-
-                if (!empty($allowed)) {
-                    // Nur Value-Ident wird in der Liste geführt
-                    if ($field === 'Value' && !isset($allowed[$ident])) {
-                        continue;
-                    }
-                    // Min/Max werden nur angelegt/gesetzt, wenn Value erlaubt ist
-                    if ($field !== 'Value') {
-                        $valueIdent = $this->identFor((int)$pos, 'Value');
-                        if (!isset($allowed[$valueIdent])) {
-                            continue;
-                        }
-                    }
-                }
-
-                $vid = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                $profile = ''; // dein Profil-Handling bleibt wie bisher (unten über parseNumberWithUnit)
+            foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
+                $ident = $this->identFor($pos, $field);
+                $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
 
                 if ($vid === false) {
                     // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
@@ -294,29 +345,22 @@ class HWMonitor extends IPSModuleStrict
 
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
-
-                // Profil je nach Unit (wie in deinem Code vorgesehen)
-                $profile = $this->mapProfileByUnit($u);
-
-                // Profil nur setzen, wenn existiert und du es willst (wie bisher)
-                if ($profile !== '') {
-                    IPS_SetVariableCustomProfile($vid, $profile);
+                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
+                    $this->SetValue($ident, $num);
                 }
-
-                if ($num !== null) {
-                    // Strict: Werte über Ident setzen
-                    if ((float)$this->GetValue($ident) !== (float)$num) {
-                        $this->SetValue($ident, (float)$num);
-                    }
-                    $seen[$ident] = true;
-                }
+                $seen[$ident] = true;
             }
         }
 
-        // Cleanup: alle Variablen entfernen, die diesmal nicht gesehen wurden
+        // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
         foreach (array_keys($existingIdents) as $ident) {
-            if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
-                $this->UnregisterVariable($ident);
+            if (!isset($seen[$ident])) {
+                $vid = $existingIdents[$ident];
+                // nur Variablen löschen, die zu unserem Muster gehören
+                // (dein Originalverhalten beibehalten)
+                if (preg_match('/^S\d+_(Text|Min|Value|Max)$/', $ident)) {
+                    IPS_DeleteVariable($vid);
+                }
             }
         }
 
