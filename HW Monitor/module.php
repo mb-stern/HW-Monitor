@@ -185,179 +185,183 @@ class HWMonitor extends IPSModuleStrict
 
     // ------------------------ Update ------------------------
     public function Update(): bool
-    {
-        // --- Auswahl laden & debuggen
-        $raw = $this->ReadPropertyString('SelectedSensors');
-        $this->SendDebug('SelectedSensors.raw', $raw === '' ? '(empty)' : $raw, 0);
+{
+    // --- Auswahl laden & debuggen
+    $raw = $this->ReadPropertyString('SelectedSensors');
+    $this->SendDebug('SelectedSensors.raw', $raw === '' ? '(empty)' : $raw, 0);
 
-        $rows = json_decode($raw, true);
-        if (!is_array($rows)) { $rows = []; }
+    $rows = json_decode($raw, true);
+    if (!is_array($rows)) { $rows = []; }
 
-        // aktive Zeilen herausfiltern
-        $activeRows = [];
-        foreach ($rows as $r) {
-            $uid = (string)($r['uid'] ?? '');
-            $pos = (int)($r['pos'] ?? 0);
-            $activeFlag = $r['active'] ?? false;
-            $active = ($activeFlag === true) || ($activeFlag === 1) || ($activeFlag === '1');
+    // aktive Zeilen herausfiltern
+    $activeRows = [];
+    foreach ($rows as $r) {
+        $uid = (string)($r['uid'] ?? '');
+        $pos = (int)($r['pos'] ?? 0);
+        $activeFlag = $r['active'] ?? false;
+        $active = ($activeFlag === true) || ($activeFlag === 1) || ($activeFlag === '1');
 
-            if ($active && $uid !== '') {
-                if ($pos <= 0) { $pos = 0; } // wird unten automatisch vergeben
-                $activeRows[] = [
-                    'uid'     => $uid,
-                    'pos'     => $pos,
-                    'caption' => (string)($r['caption'] ?? ''),
-                    'type'    => (string)($r['type'] ?? '')
-                ];
-            }
+        if ($active && $uid !== '') {
+            if ($pos <= 0) { $pos = 0; } // wird unten automatisch vergeben
+            $activeRows[] = [
+                'uid'     => $uid,
+                'pos'     => $pos,
+                'caption' => (string)($r['caption'] ?? ''),
+                'type'    => (string)($r['type'] ?? '')
+            ];
         }
-        $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
+    }
+    $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
 
-        // existierende Idents sammeln (brauchen wir gleich fürs Cleanup)
-        $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
-        $existingIdents = [];
-        foreach ($existingIDs as $vid) {
-            $obj = IPS_GetObject($vid);
-            $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') { $existingIdents[$ident] = true; }
-        }
+    // existierende Idents sammeln (brauchen wir gleich fürs Cleanup)
+    $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
+    $existingIdents = [];
+    foreach ($existingIDs as $vid) {
+        $obj = IPS_GetObject($vid);
+        $ident = $obj['ObjectIdent'] ?? '';
+        if ($ident !== '') { $existingIdents[$ident] = true; }
+    }
 
-        if (empty($activeRows)) {
-            // KEINE Häkchen -> ALLE unsere Variablen entfernen
-            $removed = 0;
-            foreach (array_keys($existingIdents) as $ident) {
-                if ($this->isOurIdent($ident)) {
-                    $this->UnregisterVariable($ident);
-                    $removed++;
-                }
-            }
-            $this->SendDebug('Update', 'Keine aktiven Zeilen -> Cleanup, entfernt: '.$removed, 0);
-            return true;
-        }
-
-        // Auto-Positionen für pos==0
-        $nextPos = 1;
-        $usedPos = [];
-        foreach ($activeRows as &$r) {
-            $p = (int)$r['pos'];
-            if ($p <= 0) {
-                while (isset($usedPos[$nextPos])) { $nextPos++; }
-                $r['pos'] = $nextPos;
-                $this->SendDebug('AutoPos', $r['uid'] . ' -> pos=' . $nextPos, 0);
-                $usedPos[$nextPos] = true;
-                $nextPos++;
-            } else {
-                $usedPos[$p] = true;
-            }
-        }
-        unset($r);
-
-        // Daten holen
-        try {
-            $data = $this->getData();
-        } catch (Exception $e) {
-            $this->SendDebug('Update.Error', $e->getMessage(), 0);
-            $this->LogMessage($e->getMessage(), KL_ERROR);
-            return false;
-        }
-
-        // Sensor-Payloads sammeln (sowohl kodiert als auch normalisiert indexieren)
-        $points = [];
-        $this->collectSensors($data, [], $points);
-        $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
-
-        // existierende Idents der Instanz
-        $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
-        $existingIdents = [];
-        foreach ($existingIDs as $vid) {
-            $obj = IPS_GetObject($vid);
-            $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') { $existingIdents[$ident] = true; }
-        }
-
-        $seen = [];
-
-        // Für jede aktive Zeile die Vierergruppe anlegen/aktualisieren
-        foreach ($activeRows as $r) {
-            $uidSel  = $r['uid'];
-            $pos     = (int)$r['pos'];
-            $caption = (string)$r['caption'];
-            $typeSel = (string)$r['type'];
-
-            // Payload finden (direkt oder normalisiert)
-            $payload = $points[$uidSel] ?? $points[$this->normalizeUid($uidSel)] ?? null;
-
-            if ($payload === null) {
-                // Platzhalter-Payload, falls Quelle nicht (mehr) existiert
-                $payload = [
-                    'Text'  => $caption,
-                    'Type'  => $typeSel,
-                    'Min'   => null,
-                    'Value' => null,
-                    'Max'   => null
-                ];
-                $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
-            }
-
-            // Profil & Position
-            $type    = (string)($payload['Type'] ?? $typeSel);
-            $profile = $this->getVariableProfileByType($type);
-            $basePos = $pos * 10;
-
-            // Für die ANZEIGENAMEN: UID (normalisiert, damit %7B...%7D lesbar wird)
-            $uidName = $this->normalizeUid($uidSel);
-
-            // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
-            $idText = $this->identFor($pos, 'Text');
-            $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
-            if ($vText === false) {
-                // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
-                $vText = $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
-            } else {
-                IPS_SetPosition($vText, $basePos + 0);
-            }
-
-            // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
-            $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
-            $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal));
-            if ((string)GetValue($vText) !== $pathClean) {
-                SetValue($vText, $pathClean);
-            }
-            $seen[$idText] = true;
-
-            // ---------- 2–4) Float: Min / Value / Max ----------
-            foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
-                $ident = $this->identFor($pos, $field);
-                $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-
-                if ($vid === false) {
-                    // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
-                    $vid = $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
-                } else {
-                    IPS_SetPosition($vid, $basePos + $offset);
-                    // kein IPS_SetName, kein Profil-Überschreiben!
-                }
-
-                $u = null;
-                $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
-                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
-                    SetValue($vid, $num);
-                }
-                $seen[$ident] = true;
-            }
-
-        }
-
-        // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
+    if (empty($activeRows)) {
+        // KEINE Häkchen -> ALLE unsere Variablen entfernen
+        $removed = 0;
         foreach (array_keys($existingIdents) as $ident) {
-            if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
+            if ($this->isOurIdent($ident)) {
                 $this->UnregisterVariable($ident);
+                $removed++;
             }
         }
-
-        $this->SendDebug('Update.Done', 'ok', 0);
+        $this->SendDebug('Update', 'Keine aktiven Zeilen -> Cleanup, entfernt: '.$removed, 0);
         return true;
     }
+
+    // Auto-Positionen für pos==0
+    $nextPos = 1;
+    $usedPos = [];
+    foreach ($activeRows as &$r) {
+        $p = (int)$r['pos'];
+        if ($p <= 0) {
+            while (isset($usedPos[$nextPos])) { $nextPos++; }
+            $r['pos'] = $nextPos;
+            $this->SendDebug('AutoPos', $r['uid'] . ' -> pos=' . $nextPos, 0);
+            $usedPos[$nextPos] = true;
+            $nextPos++;
+        } else {
+            $usedPos[$p] = true;
+        }
+    }
+    unset($r);
+
+    // Daten holen
+    try {
+        $data = $this->getData();
+    } catch (Exception $e) {
+        $this->SendDebug('Update.Error', $e->getMessage(), 0);
+        $this->LogMessage($e->getMessage(), KL_ERROR);
+        return false;
+    }
+
+    // Sensor-Payloads sammeln (sowohl kodiert als auch normalisiert indexieren)
+    $points = [];
+    $this->collectSensors($data, [], $points);
+    $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
+
+    // existierende Idents der Instanz
+    $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
+    $existingIdents = [];
+    foreach ($existingIDs as $vid) {
+        $obj = IPS_GetObject($vid);
+        $ident = $obj['ObjectIdent'] ?? '';
+        if ($ident !== '') { $existingIdents[$ident] = true; }
+    }
+
+    $seen = [];
+
+    // Für jede aktive Zeile die Vierergruppe anlegen/aktualisieren
+    foreach ($activeRows as $r) {
+        $uidSel  = $r['uid'];
+        $pos     = (int)$r['pos'];
+        $caption = (string)$r['caption'];
+        $typeSel = (string)$r['type'];
+
+        // Payload finden (direkt oder normalisiert)
+        $payload = $points[$uidSel] ?? $points[$this->normalizeUid($uidSel)] ?? null;
+
+        if ($payload === null) {
+            // Platzhalter-Payload, falls Quelle nicht (mehr) existiert
+            $payload = [
+                'Text'  => $caption,
+                'Type'  => $typeSel,
+                'Min'   => null,
+                'Value' => null,
+                'Max'   => null
+            ];
+            $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
+        }
+
+        // Profil & Position
+        $type    = (string)($payload['Type'] ?? $typeSel);
+        $profile = $this->getVariableProfileByType($type);
+        $basePos = $pos * 10;
+
+        // Für die ANZEIGENAMEN: UID (normalisiert, damit %7B...%7D lesbar wird)
+        $uidName = $this->normalizeUid($uidSel);
+
+        // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
+        $idText = $this->identFor($pos, 'Text');
+        $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
+        if ($vText === false) {
+            // IPSModuleStrict: RegisterVariable* gibt bool zurück -> danach ID holen!
+            $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
+            $vText = $this->GetIDForIdent($idText);
+        } else {
+            IPS_SetPosition($vText, $basePos + 0);
+        }
+
+        // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
+        $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
+        $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal));
+
+        if ((string)GetValue($vText) !== $pathClean) {
+            // IPSModuleStrict: Statusvariablen sind ReadOnly -> über $this->SetValue(Ident,...)
+            $this->SetValue($idText, $pathClean);
+        }
+        $seen[$idText] = true;
+
+        // ---------- 2–4) Float: Min / Value / Max ----------
+        foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
+            $ident = $this->identFor($pos, $field);
+            $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+
+            if ($vid === false) {
+                // IPSModuleStrict: RegisterVariable* gibt bool zurück -> danach ID holen!
+                $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
+                $vid = $this->GetIDForIdent($ident);
+            } else {
+                IPS_SetPosition($vid, $basePos + $offset);
+                // kein IPS_SetName, kein Profil-Überschreiben!
+            }
+
+            $u = null;
+            $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
+            if ($num !== null && (float)GetValue($vid) !== (float)$num) {
+                // IPSModuleStrict: setzen über $this->SetValue(Ident,...)
+                $this->SetValue($ident, (float)$num);
+            }
+            $seen[$ident] = true;
+        }
+    }
+
+    // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
+    foreach (array_keys($existingIdents) as $ident) {
+        if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
+            $this->UnregisterVariable($ident);
+        }
+    }
+
+    $this->SendDebug('Update.Done', 'ok', 0);
+    return true;
+}
 
     // ------------------------ Datenerfassung ------------------------
     private function getData(): array
