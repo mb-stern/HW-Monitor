@@ -55,130 +55,139 @@ class HWMonitor extends IPSModuleStrict
     // ------------------------ Formular ------------------------
     public function GetConfigurationForm(): string
     {
-        $error = '';
-        $options = [];
-
-        $ip   = $this->ReadPropertyString('IPAddress');
-        $port = $this->ReadPropertyInteger('Port');
-
-        // Überschrift/Label oben: URL oder Hinweis
-        $urlCaption = ($ip !== '' && $ip !== '0.0.0.0')
-            ? "Quelle: http://{$ip}:{$port}"
-            : "Quelle: (Bitte IP-Adresse konfigurieren)";
-
-        try {
-            if ($ip !== '' && $ip !== '0.0.0.0') {
-                $data    = $this->getData();              // live abrufen
-                $options = $this->buildOptions($data);    // nur echte Sensor-Blätter
-            } else {
-                $error = 'Bitte IP-Adresse konfigurieren.';
-            }
-        } catch (Exception $e) {
-            $error = 'Scan: ' . $e->getMessage();
-        }
-
-        // Bisherige Auswahl mergen
-        $saved = json_decode($this->ReadPropertyString('SelectedSensors'), true) ?: [];
-        $byUID = [];
-        foreach ($saved as $r) {
-            if (!empty($r['uid'])) {
-                $byUID[$r['uid']] = $r;
-            }
-        }
-
-        $values = [];
-        $posSuggest = 1;
-        foreach ($options as $opt) {
-            $prev = $byUID[$opt['uid']] ?? null;
-            $values[] = [
-                'active'  => (bool)($prev['active'] ?? false),
-                'pos'     => isset($prev['pos']) && (int)$prev['pos'] > 0 ? (int)$prev['pos'] : $posSuggest++,
-                'caption' => $opt['caption'],   // „Pfad“ in der Tabelle
-                'type'    => $opt['type'],
-                'uid'     => $opt['uid'],
-                'icon'    => $opt['icon'] ?? ''
-            ];
-        }
-
+        // Form (symcon)
         $form = [
             'elements' => [
-                ['type' => 'Label', 'caption' => $urlCaption],
-
-                ['type' => 'ValidationTextBox', 'name' => 'IPAddress', 'caption' => 'IP-Adresse'],
-                ['type' => 'NumberSpinner',     'name' => 'Port',      'caption' => 'Port', 'minimum' => 1, 'maximum' => 65535],
-                ['type' => 'NumberSpinner',     'name' => 'UpdateInterval', 'caption' => 'Updateintervall (Sek.)', 'minimum' => 0, 'suffix' => 's'],
-
                 [
-                    'type'     => 'List',
-                    'name'     => 'SelectedSensors',   // muss exakt der Property entsprechen
-                    'caption'  => 'Sensoren',
-                    'rowCount' => 16,
-                    'add'      => false,
-                    'delete'   => false,
-                    'sort'     => ['column' => 'pos', 'direction' => 'ascending'],
-                    'columns'  => [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'IPAddress',
+                    'caption' => 'IP-Adresse',
+                    'width'   => '200px'
+                ],
+                [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'Port',
+                    'caption' => 'Port',
+                    'minimum' => 1,
+                    'maximum' => 65535,
+                    'width'   => '120px'
+                ],
+                [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'UpdateInterval',
+                    'caption' => 'Update-Intervall (Sek.)',
+                    'minimum' => 0,
+                    'maximum' => 3600,
+                    'width'   => '120px'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => ' '
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Sensor-Auswahl:'
+                ],
+                [
+                    'type'  => 'List',
+                    'name'  => 'SelectedSensors',
+                    'caption' => '',
+                    'rowCount' => 12,
+                    'add'   => false,
+                    'delete'=> false,
+                    'columns' => [
                         [
                             'caption' => 'Aktiv',
-                            'name'    => 'active',
-                            'width'   => '70px',
-                            'align'   => 'center',
-                            'edit'    => ['type' => 'CheckBox']
+                            'name'    => 'enabled',
+                            'width'   => '60px',
+                            'add'     => false,
+                            'edit'    => true,
+                            'delete'  => false
                         ],
                         [
-                            'caption' => 'Pos.',
-                            'name'    => 'pos',
-                            'width'   => '70px',
-                            'align'   => 'center',
-                            'edit'    => ['type' => 'NumberSpinner', 'minimum' => 1, 'maximum' => 9999]
-                        ],
-                        // Spaltenüberschrift „Pfad“ (anstatt „Name“)
-                        [
-                            'caption' => 'Pfad',
-                            'name'    => 'caption',
-                            'width'   => 'auto',
-                            'save'    => true,
-                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                            'caption' => 'Name',
+                            'name'    => 'name',
+                            'width'   => '240px',
+                            'add'     => false,
+                            'edit'    => false,
+                            'delete'  => false
                         ],
                         [
-                            'caption' => 'Type',
-                            'name'    => 'type',
-                            'width'   => '120px',
-                            'save'    => true,
-                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
+                            'caption' => 'Unit',
+                            'name'    => 'unit',
+                            'width'   => '90px',
+                            'add'     => false,
+                            'edit'    => false,
+                            'delete'  => false
                         ],
                         [
-                            'caption' => 'UID',
-                            'name'    => 'uid',
-                            'width'   => '420px',
-                            'save'    => true,
-                            'edit'    => ['type' => 'ValidationTextBox', 'enabled' => false]
-                        ],
-                    ],
-                    'values'   => $values
-                ],
-
-                ['type' => 'Label', 'caption' => ($error ?: 'Bereit.')]
+                            'caption' => 'Ident',
+                            'name'    => 'ident',
+                            'width'   => '220px',
+                            'add'     => false,
+                            'edit'    => false,
+                            'delete'  => false
+                        ]
+                    ]
+                ]
             ],
             'actions' => [
                 [
                     'type'    => 'Button',
-                    'caption' => 'Ausgewählte Sensoren aktualisieren',
-                    'onClick' => 'IPS_RequestAction($id, "ManualUpdate", 0);'
-                ],
-                ['type' => 'Label',  'caption' => 'Sag danke und unterstütze den Modulentwickler:'],
-                [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'   => 'Image',
-                            'onClick'=> "echo 'https://paypal.me/mbstern';",
-                             "image"=> "data:image/jpeg;base64,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"
-                        ],
-                        ['type' => 'Label', 'caption' => '']
-                    ]
-                ] 
-            ],          
+                    'caption' => 'Jetzt aktualisieren',
+                    'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "ManualUpdate", 0);'
+                ]
+            ]
         ];
+
+        // Versuche Live-Sensorliste (optional)
+        $ip = $this->ReadPropertyString('IPAddress');
+        $port = $this->ReadPropertyInteger('Port');
+
+        if ($ip !== '' && $ip !== '0.0.0.0' && $port > 0) {
+            $url = 'http://' . $ip . ':' . $port . '/data.json';
+
+            $raw = @file_get_contents($url);
+            if ($raw !== false) {
+                $rows = json_decode($raw, true);
+                if (is_array($rows)) {
+                    $selected = json_decode($this->ReadPropertyString('SelectedSensors'), true);
+                    if (!is_array($selected)) {
+                        $selected = [];
+                    }
+
+                    // Map: ident -> enabled
+                    $selMap = [];
+                    foreach ($selected as $s) {
+                        if (isset($s['ident'])) {
+                            $selMap[(string)$s['ident']] = (bool)($s['enabled'] ?? false);
+                        }
+                    }
+
+                    // Liste bauen
+                    $list = [];
+                    foreach ($rows as $idx => $payload) {
+                        $name = (string)($payload['Text'] ?? '');
+                        $unit = (string)($payload['Unit'] ?? '');
+                        $ident = $this->identFor((int)$idx, 'Value'); // default ident für Value
+                        $list[] = [
+                            'enabled' => $selMap[$ident] ?? false,
+                            'name'    => $name,
+                            'unit'    => $unit,
+                            'ident'   => $ident
+                        ];
+                    }
+
+                    // In Form einfügen
+                    foreach ($form['elements'] as &$el) {
+                        if (($el['type'] ?? '') === 'List' && ($el['name'] ?? '') === 'SelectedSensors') {
+                            $el['values'] = $list;
+                        }
+                    }
+                    unset($el);
+                }
+            }
+        }
 
         return json_encode($form);
     }
@@ -186,133 +195,61 @@ class HWMonitor extends IPSModuleStrict
     // ------------------------ Update ------------------------
     public function Update(): bool
     {
-        // --- Auswahl laden & debuggen
-        $raw = $this->ReadPropertyString('SelectedSensors');
-        $this->SendDebug('SelectedSensors.raw', $raw === '' ? '(empty)' : $raw, 0);
+        // --- Auswahl laden (ident-Whitelist) ---
+        $selected = json_decode($this->ReadPropertyString('SelectedSensors'), true);
+        if (!is_array($selected)) {
+            $selected = [];
+        }
 
-        $rows = json_decode($raw, true);
-        if (!is_array($rows)) { $rows = []; }
-
-        // aktive Zeilen herausfiltern
-        $activeRows = [];
-        foreach ($rows as $r) {
-            $uid = (string)($r['uid'] ?? '');
-            $pos = (int)($r['pos'] ?? 0);
-            $activeFlag = $r['active'] ?? false;
-            $active = ($activeFlag === true) || ($activeFlag === 1) || ($activeFlag === '1');
-
-            if ($active && $uid !== '') {
-                if ($pos <= 0) { $pos = 0; } // wird unten automatisch vergeben
-                $activeRows[] = [
-                    'uid'     => $uid,
-                    'pos'     => $pos,
-                    'caption' => (string)($r['caption'] ?? ''),
-                    'type'    => (string)($r['type'] ?? '')
-                ];
+        $allowed = [];
+        foreach ($selected as $s) {
+            if (!empty($s['enabled']) && isset($s['ident'])) {
+                $allowed[(string)$s['ident']] = true;
             }
         }
-        $this->SendDebug('Update.ActiveRows', 'count=' . count($activeRows), 0);
 
-        // existierende Idents sammeln (brauchen wir gleich fürs Cleanup)
-        $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
-        $existingIdents = [];
-        foreach ($existingIDs as $vid) {
-            $obj = IPS_GetObject($vid);
-            $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') { $existingIdents[$ident] = true; }
-        }
-
-        if (empty($activeRows)) {
-            // KEINE Häkchen -> ALLE unsere Variablen entfernen
-            $removed = 0;
-            foreach (array_keys($existingIdents) as $ident) {
-                if ($this->isOurIdent($ident)) {
-                    $this->UnregisterVariable($ident);
-                    $removed++;
-                }
-            }
-            $this->SendDebug('Update', 'Keine aktiven Zeilen -> Cleanup, entfernt: '.$removed, 0);
-            return true;
-        }
-
-        // Auto-Positionen für pos==0
-        $nextPos = 1;
-        $usedPos = [];
-        foreach ($activeRows as &$r) {
-            $p = (int)$r['pos'];
-            if ($p <= 0) {
-                while (isset($usedPos[$nextPos])) { $nextPos++; }
-                $r['pos'] = $nextPos;
-                $this->SendDebug('AutoPos', $r['uid'] . ' -> pos=' . $nextPos, 0);
-                $usedPos[$nextPos] = true;
-                $nextPos++;
-            } else {
-                $usedPos[$p] = true;
-            }
-        }
-        unset($r);
-
-        // Daten holen
-        try {
-            $data = $this->getData();
-        } catch (Exception $e) {
-            $this->SendDebug('Update.Error', $e->getMessage(), 0);
-            $this->LogMessage($e->getMessage(), KL_ERROR);
+        $ip = $this->ReadPropertyString('IPAddress');
+        $port = $this->ReadPropertyInteger('Port');
+        if ($ip === '' || $ip === '0.0.0.0' || $port <= 0) {
+            $this->SendDebug('Update', 'Abbruch: IP/Port ungültig', 0);
             return false;
         }
 
-        // Sensor-Payloads sammeln (sowohl kodiert als auch normalisiert indexieren)
-        $points = [];
-        $this->collectSensors($data, [], $points);
-        $this->SendDebug('Update.Sensors', 'im JSON: ' . count($points), 0);
+        $url = 'http://' . $ip . ':' . $port . '/data.json';
+        $this->SendDebug('Update', 'GET ' . $url, 0);
 
-        // existierende Idents der Instanz
-        $existingIDs = IPS_GetChildrenIDs($this->InstanceID);
-        $existingIdents = [];
-        foreach ($existingIDs as $vid) {
-            $obj = IPS_GetObject($vid);
-            $ident = $obj['ObjectIdent'] ?? '';
-            if ($ident !== '') { $existingIdents[$ident] = true; }
+        $raw = @file_get_contents($url);
+        if ($raw === false) {
+            $this->SendDebug('Update', 'HTTP Fehler / keine Antwort', 0);
+            return false;
         }
 
+        $rows = json_decode($raw, true);
+        if (!is_array($rows)) {
+            $this->SendDebug('Update', 'JSON ungültig', 0);
+            return false;
+        }
+
+        // Track welche Idents gesehen wurden (für optionales Aufräumen)
         $seen = [];
 
-        // Für jede aktive Zeile die Vierergruppe anlegen/aktualisieren
-        foreach ($activeRows as $r) {
-            $uidSel  = $r['uid'];
-            $pos     = (int)$r['pos'];
-            $caption = (string)$r['caption'];
-            $typeSel = (string)$r['type'];
-
-            // Payload finden (direkt oder normalisiert)
-            $payload = $points[$uidSel] ?? $points[$this->normalizeUid($uidSel)] ?? null;
-
-            if ($payload === null) {
-                // Platzhalter-Payload, falls Quelle nicht (mehr) existiert
-                $payload = [
-                    'Text'  => $caption,
-                    'Type'  => $typeSel,
-                    'Min'   => null,
-                    'Value' => null,
-                    'Max'   => null
-                ];
-                $this->SendDebug('Update.Warn', 'UID nicht im JSON gefunden: ' . $uidSel, 0);
+        foreach ($rows as $pos => $payload) {
+            if (!is_array($payload)) {
+                continue;
             }
 
-            // Profil & Position
-            $type    = (string)($payload['Type'] ?? $typeSel);
-            $profile = $this->getVariableProfileByType($type);
-            $basePos = $pos * 10;
+            $uidName = (string)($payload['Text'] ?? '');
+            $caption = (string)($payload['Caption'] ?? '');
 
-            // Für die ANZEIGENAMEN: UID (normalisiert, damit %7B...%7D lesbar wird)
-            $uidName = $this->normalizeUid($uidSel);
+            $basePos = ((int)$pos) * 10;
 
-            // ---------- 1) String: Pfad (Ident bleibt _Text) ----------
-            $idText = $this->identFor($pos, 'Text');
+            // ---------- 1) Text: Pfad/Caption ----------
+            $idText = $this->identFor((int)$pos, 'Text');
             $vText  = @IPS_GetObjectIDByIdent($idText, $this->InstanceID);
             if ($vText === false) {
                 // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
-                $vText = $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
+                $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
+                $vText = $this->GetIDForIdent($idText);
             } else {
                 IPS_SetPosition($vText, $basePos + 0);
             }
@@ -320,19 +257,36 @@ class HWMonitor extends IPSModuleStrict
             // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
             $pathVal   = $caption !== '' ? $caption : (string)($payload['Text'] ?? '');
             $pathClean = trim(preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pathVal));
-            if ((string)GetValue($vText) !== $pathClean) {
-                SetValue($vText, $pathClean);
+            if ((string)$this->GetValue($idText) !== $pathClean) {
+                $this->SetValue($idText, $pathClean);
             }
             $seen[$idText] = true;
 
             // ---------- 2–4) Float: Min / Value / Max ----------
-            foreach ([['Min',1], ['Value',2], ['Max',3]] as [$field, $offset]) {
-                $ident = $this->identFor($pos, $field);
-                $vid   = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+            foreach ([['Min', 1], ['Value', 2], ['Max', 3]] as [$field, $offset]) {
+                $ident = $this->identFor((int)$pos, $field);
+
+                if (!empty($allowed)) {
+                    // Nur Value-Ident wird in der Liste geführt
+                    if ($field === 'Value' && !isset($allowed[$ident])) {
+                        continue;
+                    }
+                    // Min/Max werden nur angelegt/gesetzt, wenn Value erlaubt ist
+                    if ($field !== 'Value') {
+                        $valueIdent = $this->identFor((int)$pos, 'Value');
+                        if (!isset($allowed[$valueIdent])) {
+                            continue;
+                        }
+                    }
+                }
+
+                $vid = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+                $profile = ''; // dein Profil-Handling bleibt wie bisher (unten über parseNumberWithUnit)
 
                 if ($vid === false) {
                     // Name nur beim Anlegen setzen – danach nicht mehr umbenennen
-                    $vid = $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
+                    $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
+                    $vid = $this->GetIDForIdent($ident);
                 } else {
                     IPS_SetPosition($vid, $basePos + $offset);
                     // kein IPS_SetName, kein Profil-Überschreiben!
@@ -340,15 +294,26 @@ class HWMonitor extends IPSModuleStrict
 
                 $u = null;
                 $num = $this->parseNumberWithUnit($payload[$field] ?? null, $u);
-                if ($num !== null && (float)GetValue($vid) !== (float)$num) {
-                    SetValue($vid, $num);
-                }
-                $seen[$ident] = true;
-            }
 
+                // Profil je nach Unit (wie in deinem Code vorgesehen)
+                $profile = $this->mapProfileByUnit($u);
+
+                // Profil nur setzen, wenn existiert und du es willst (wie bisher)
+                if ($profile !== '') {
+                    IPS_SetVariableCustomProfile($vid, $profile);
+                }
+
+                if ($num !== null) {
+                    // Strict: Werte über Ident setzen
+                    if ((float)$this->GetValue($ident) !== (float)$num) {
+                        $this->SetValue($ident, (float)$num);
+                    }
+                    $seen[$ident] = true;
+                }
+            }
         }
 
-        // Cleanup: alle „unsere“ Variablen entfernen, die diesmal nicht gesehen wurden
+        // Cleanup: alle Variablen entfernen, die diesmal nicht gesehen wurden
         foreach (array_keys($existingIdents) as $ident) {
             if (!isset($seen[$ident]) && $this->isOurIdent($ident)) {
                 $this->UnregisterVariable($ident);
