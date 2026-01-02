@@ -31,13 +31,12 @@ Jeder aktivierte Sensor erzeugt **vier Variablen** in IP-Symcon:
   - **UID – Max** (Float)
 * Automatische Aktualisierung über ein einstellbares Intervall oder manuell über einen Button.
 * Automatische Löschung nicht mehr aktivierter Variablen.
-* Benutzer kann Variablennamen und Profile nachträglich ändern – das Modul überschreibt diese nicht mehr.
 
 ---
 
 ### 2. Voraussetzungen
 
-- IP-Symcon ab Version 7.0
+- IP-Symcon ab Version 8.1
 - Installierter [Libre Hardware Monitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
 - Netzwerkzugriff auf den HTTP-Port (Standard 8085)
 
