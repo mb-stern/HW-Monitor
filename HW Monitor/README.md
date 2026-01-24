@@ -1,7 +1,11 @@
 # Libre Hardware Monitor Modul für IP-Symcon
-Dieses Modul greift die JSON Daten des Libre Hardware Monitor ab und liefert die gewünschten Werte als Variablen in IP-Symcon.
-Die gewünschten Werte können im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json lokalisiert und dann im Modul mit der id-Nummer eingetragen werden.
-Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt werden. Diese führt zu unkontrollierter Erstellung von Variablen. Es werden vier Variablen pro gewählter ID erstellt
+Dieses Modul greift die JSON-Daten des **Libre Hardware Monitor** ab und stellt ausgewählte Sensorwerte als Variablen in **IP-Symcon** bereit.
+Die Sensoren werden automatisch ausgelesen und können komfortabel über Checkboxen im Konfigurationsformular ausgewählt werden.
+
+Jeder aktivierte Sensor erzeugt **vier Variablen** in IP-Symcon:
+**Pfad**, **Minimum**, **Istwert**, **Maximum**.
+
+---
 
 ### Inhaltsverzeichnis
 
@@ -14,111 +18,159 @@ Es muss darauf geachtet werden, dass keine ID's von ganzen Gruppen hinzugefügt 
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 8. [Versionen](#8-versionen)
 
+---
+
 ### 1. Funktionsumfang
 
-* Abfrage des Libre Hardware Monitors mit der id-Nummer und Ausgabe der gewünschten Werte in Variablen.
-* Die IDs der Werte werden im Objektbaum Faktor 10 als Objektnummer angezeigt, um eine Sortierung zu erreichen. Ebenfalls ist über den Präfix ID XX eine übersichtliche Strukturierung vorhanden
+* Automatische Erkennung aller Sensoren aus dem Libre Hardware Monitor über die JSON-Schnittstelle (`http://<IP>:<Port>/data.json`).
+* Auswahl der gewünschten Sensoren im Konfigurationsformular per Checkbox.
+* Erstellung von vier Variablen pro Sensor:
+  - **UID – Pfad** (String)
+  - **UID – Min** (Float)
+  - **UID – Value** (Float)
+  - **UID – Max** (Float)
+* Automatische Aktualisierung über ein einstellbares Intervall oder manuell über einen Button.
+* Automatische Löschung nicht mehr aktivierter Variablen.
+* Benutzer kann Variablennamen und Profile nachträglich ändern – das Modul überschreibt diese nicht mehr.
+
+---
 
 ### 2. Voraussetzungen
 
 - IP-Symcon ab Version 7.0
-- Installierter Libre Hardware Monitor https://github.com/LibreHardwareMonitor/LibreHardwareMonitor.
+- Installierter [Libre Hardware Monitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
+- Netzwerkzugriff auf den HTTP-Port (Standard 8085)
+
+---
 
 ### 3. Software-Installation
 
-* Über den Module Store kann das 'Hardware Monitor'-Modul installiert werden.
-* Download des Moduls auch über den Module Control https://github.com/mb-stern/HW-Monitor
+* Über den **Module Store** kann das *Hardware Monitor*-Modul direkt installiert werden.
+* Alternativ über den **Module Control**:
+  ```
+  https://github.com/mb-stern/HW-Monitor
+  ```
+
+---
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' kann das 'Hardware Monitor'-Modul mithilfe des Schnellfilters gefunden werden.  
-	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
+Unter *Instanz hinzufügen* kann das Modul **Hardware Monitor** gefunden werden.
+Weitere Informationen: [IP-Symcon Dokumentation](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
 
-__Konfigurationsseite__:
+**Konfigurationsseite:**
 
-Name     | Beschreibung
--------- | ------------------
-IP-Adresse 		|  IP-Adresse des Rechners auf dem der Libre Hardware Monitor läuft
-Port       		|  Port des Rechners (Standard ist 8085). Der Port muss in der Firewall geöffnet sein
-Intervall  		|  Intervall für das Update der Werte
-Überwachte ID's	|  Hier die gewünschten ID's der Werte. Diese Wert sind ersichtlich im JSON im Browser unter diesem (Beispiel)-Pfad http://192.168.178.76:8085/data.json
+| Name | Beschreibung |
+|------|---------------|
+| **IP-Adresse** | Adresse des Rechners, auf dem der Libre Hardware Monitor läuft |
+| **Port** | HTTP-Port (Standard 8085) |
+| **Updateintervall (Sek.)** | Aktualisierungsintervall für die Daten |
+| **Sensoren-Auswahl** | Liste aller Sensoren mit Checkboxen zur Auswahl |
 
-![2024-03-18 18_46_24-IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/c8472a43-d642-40ff-8edf-531ed633da82)
+Nach Klick auf **Übernehmen** werden die gewählten Sensoren gespeichert und ihre Variablen automatisch angelegt.
+Ein Button *„Jetzt aktualisieren (ausgewählte Daten)“* kann jederzeit manuell ein Update auslösen.
 
-![2024-03-18 18_38_21-Entwicklung — IP-Symcon Verwaltungskonsole](https://github.com/mb-stern/HW-Monitor/assets/95777848/90f3d0f4-7684-4b4c-ac52-76152d864dbf)
+---
 
 ### 5. Statusvariablen und Profile
 
-Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
-
 #### Statusvariablen
 
-Name   | Typ     | Beschreibung
------- | ------- | ------------
-ID XX - Name    |   String   |	Name des Wertes
-ID XX - Minimum |   Float    |	Minimum des Wertes
-ID XX - Maximum |   Float    |	Aktueller Wert
-ID XX - Istwert |   Float    |	Maximum des Wertes
+| Name | Typ | Beschreibung |
+|------|-----|--------------|
+| UID – Pfad | String | Anzeigename oder Hierarchiepfad des Sensors |
+| UID – Min | Float | Minimaler Messwert |
+| UID – Value | Float | Aktueller Messwert |
+| UID – Max | Float | Maximaler Messwert |
 
+Nicht mehr aktivierte Sensoren werden automatisch gelöscht.
 
 #### Profile
 
-Name   | Typ
------- | -------
-HW.Fan    | Float
-HW.Clock  | Float
-HW.Temp   | Float
-HW.Data   | Float
-HW.Rate   | Float
+| Name | Typ |
+|------|-----|
+| HW.Fan | Float |
+| HW.Clock | Float |
+| HW.Temp | Float |
+| HW.Data | Float |
+| HW.Rate | Float |
+
+---
 
 ### 6. WebFront
 
-Anzeige der gewünschten Variablen oder Grafiken in der Visualisierung.
+Die ausgewählten Sensorwerte können direkt im WebFront angezeigt oder für Diagramme genutzt werden.
+
+---
 
 ### 7. PHP-Befehlsreferenz
 
-`boolean HW_Update(integer $InstanzID);`
-Aktualisierung der Daten. Gibt bei erfolgreichem Einlesen der JSON-Daten `true`
-zurück, andernfalls `false`.
+```php
+boolean HW_Update(integer $InstanzID);
+```
+Aktualisiert alle ausgewählten Sensorwerte.
+Gibt `true` zurück bei erfolgreichem Abruf der JSON-Daten, andernfalls `false`.
 
-Beispiel:
-`HW_Update(12345);`
+**Beispiel:**
+```php
+HW_Update(12345);
+```
+
+---
 
 ### 8. Versionen
 
-Version 1.9 (15.06.2025)
+**Version 2.1 (02.01.2026)**
+* Umbau auf IPOSModuleStrict und hochsetzen der Kompatibilität auf 8.1.
+
+**Version 2.0 (20.10.2025)**
+* Komplette Überarbeitung mit Checkbox-basierter Auswahl. Achtung, beim Update werden bestehende Variablen gelöscht.
+* Automatische Sensor-Erkennung aus JSON.
+* Variablennamen basieren nun auf der Sensor-UID.
+* Benutzer kann Variablennamen beibehalten.
+* Automatische Bereinigung nicht aktivierter Sensoren.
+
+**Version 1.9 (15.06.2025)**
 * Variablen bleiben erhalten, wenn keine Daten vom Hardware Monitor verfügbar sind.
 * Einige Codeoptimierungen
 
-Version 1.8 (22.12.2024)
+**Version 1.8 (22.12.2024)**
 * Anpassung Modulname
 * Anpassung Readme mit geänderter URL
 
-Version 1.7 (19.12.2024)
+**Version 1.7 (19.12.2024)**
 * Der Name des Wertes wird wieder angezeigt.
 
-Version 1.6 (07.07.2024)
+**Version 1.6 (07.07.2024)**
 * Spenden-Button hinzugefügt.
 * Dokumentationslink hinzugefügt.
 
-Version 1.5 (05.05.2024)
-* Der Fehler wurde behoben, dass alle Variablen gelöscht wurden, wenn die Verbindung zum Hardwaremonitor unterbrochen wurde. So bleiben nun auch die aufgezeichneten Variablen erhalten.
+**Version 1.5 (05.05.2024)**
+* Fehler behoben, dass alle Variablen gelöscht wurden, wenn die Verbindung unterbrochen war.
 
-Version 1.4 (18.03.2024)
-* Die Variablen werden nun mit dem Präfix (ID XX) übersichtlicher dargestellt. Die ID muss dazu entfernt und wieder hinzugefügt werden, um durchgehend die neue Struktur zu erhalten
-* Es werden nur noch vier Variablen pro ID angelegt (vorher sechs)
+**Version 1.4 (18.03.2024)**
+* Variablen mit Präfix (ID XX) übersichtlicher dargestellt.
+* Nur noch vier Variablen pro ID (vorher sechs).
 
-Version 1.3 (17.02.2024)
-* Anpassung des Codes um die Store Kompatibilität zu erlangen
-* Anpassung von Debug und Fehlermeldung
+**Version 1.3 (17.02.2024)**
+* Codeanpassung für Store-Kompatibilität.
+* Debug und Fehlermeldungen verbessert.
 
-Version 1.2 (05.02.2024)
-* Debug hinzugefügt
-* Muster IP-Adresse wird nicht mehr standardmässig geladen bei Installation des Moduls. Dies führte bei der Installation zu Fehlermeldungen.
-* Fenster für ID's im Konfigurationsformular vergrössert.
+**Version 1.2 (05.02.2024)**
+* Debug hinzugefügt.
+* Muster-IP-Adresse entfernt.
+* Fenstergröße für ID-Liste im Formular angepasst.
 
-Version 1.1 (23.01.2024)
-* Variablenprofile werden erstellt und zugeordnet
+**Version 1.1 (23.01.2024)**
+* Variablenprofile erstellt und zugeordnet.
 
-Version 1.0 (21.1.2024)
-* Initiale Version
+**Version 1.0 (21.01.2024)**
+* Initiale Version.
+
+---
+
+### 9. Lizenz
+
+Dieses Modul steht unter der **MIT-Lizenz**.  
+© 2025 Stefan Künzli  
+[https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
