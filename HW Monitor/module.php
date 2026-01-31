@@ -313,8 +313,6 @@ class HWMonitor extends IPSModuleStrict
             // IPSModuleStrict: RegisterVariable* gibt bool zurück -> danach ID holen!
             $this->RegisterVariableString($idText, "{$uidName} - Pfad", '', $basePos + 0);
             $vText = $this->GetIDForIdent($idText);
-        } else {
-            IPS_SetPosition($vText, $basePos + 0);
         }
 
         // Wert für die Pfad-Variable: dein bisheriger Pfad ohne [Typ]
@@ -336,9 +334,6 @@ class HWMonitor extends IPSModuleStrict
                 // IPSModuleStrict: RegisterVariable* gibt bool zurück -> danach ID holen!
                 $this->RegisterVariableFloat($ident, "{$uidName} - {$field}", $profile, $basePos + $offset);
                 $vid = $this->GetIDForIdent($ident);
-            } else {
-                IPS_SetPosition($vid, $basePos + $offset);
-                // kein IPS_SetName, kein Profil-Überschreiben!
             }
 
             $u = null;
