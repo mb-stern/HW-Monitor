@@ -119,6 +119,9 @@ HW_Update(12345);
 
 ### 8. Versionen
 
+**Version 2.2 (31.01.2026)**
+* Anpassungen zur Storekompatibilität.
+
 **Version 2.1 (02.01.2026)**
 * Umbau auf IPOSModuleStrict und hochsetzen der Kompatibilität auf 8.1.
 
